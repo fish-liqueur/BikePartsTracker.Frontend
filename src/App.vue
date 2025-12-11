@@ -1,19 +1,18 @@
 <template>
-  <div id="app">
-    <nav v-if="isAuthenticated" class="navbar">
-      <div class="nav-brand">
-        <h1>🚲 Bike Parts Tracker</h1>
-      </div>
-      <div class="nav-links">
-        <router-link to="/dashboard" class="nav-link">Dashboard</router-link>
-        <button @click="logout" class="nav-link logout-btn">Logout</button>
-      </div>
-    </nav>
+  <q-layout view="hHh lpR fFf">
+    <q-header v-if="isAuthenticated" elevated>
+      <q-toolbar>
+        <q-toolbar-title>🚲 Bike Parts Tracker</q-toolbar-title>
+        <q-space />
+        <q-btn flat label="Dashboard" to="/dashboard" />
+        <q-btn flat label="Logout" @click="logout" />
+      </q-toolbar>
+    </q-header>
 
-    <main class="main-content">
+    <q-page-container>
       <router-view />
-    </main>
-  </div>
+    </q-page-container>
+  </q-layout>
 </template>
 
 <script setup lang="ts">
