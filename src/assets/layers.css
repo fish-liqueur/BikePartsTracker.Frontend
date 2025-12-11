@@ -1,0 +1,12 @@
+/* CSS Cascade Layers Declaration
+ * 
+ * Layer order (from lowest to highest priority):
+ * - reset: CSS resets and base element styles
+ * - quasar: Quasar framework styles
+ * - components: Custom component styles
+ * - utilities: Utility classes
+ * - overrides: Custom overrides (highest priority)
+ */
+
+@layer reset, quasar, components, utilities, overrides;
+

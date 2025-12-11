@@ -138,11 +138,13 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
 import { useBikesStore } from '@/stores/bikesStore';
+import { useLayout } from '@/composables/useLayout';
 import type { Bike, CreateBikeDto } from '@/types';
 
 const router = useRouter();
 const authStore = useAuthStore();
 const bikesStore = useBikesStore();
+const { showSuccess, showError, withAjaxBar, startAjaxBar, stopAjaxBar } = useLayout();
 
 // Reactive state
 const showAddBikeModal = ref(false);
@@ -184,23 +186,31 @@ const selectBike = (bike: Bike) => {
 };
 
 const editBike = (bike: Bike) => {
-  bikesStore.setCurrentBike(bike);
-  router.push(`/bikes/${bike.id}/edit`);
+  startAjaxBar();
+  setTimeout(() => {
+    stopAjaxBar();
+  }, 2000);
+  // bikesStore.setCurrentBike(bike);
+  // router.push(`/bikes/${bike.id}/edit`);
 };
 
 const deleteBike = async (bikeId: string) => {
   if (confirm('Are you sure you want to delete this bike? This action cannot be undone.')) {
     try {
-      await bikesStore.deleteBike(bikeId);
-    } catch (err) {
+      // Example: Wrap async operation with ajax-bar (loading indicator)
+      await withAjaxBar(bikesStore.deleteBike(bikeId));
+      showSuccess('Bike deleted successfully');
+    } catch (err: any) {
       console.error('Failed to delete bike:', err);
+      showError(err.message || 'Failed to delete bike');
     }
   }
 };
 
 const handleAddBike = async () => {
   try {
-    await bikesStore.createBike(newBike.value);
+    // Example: Wrap async operation with ajax-bar
+    await withAjaxBar(bikesStore.createBike(newBike.value));
     showAddBikeModal.value = false;
     // Reset form
     newBike.value = {
@@ -209,8 +219,10 @@ const handleAddBike = async () => {
       model: '',
       year: new Date().getFullYear()
     };
-  } catch (err) {
+    showSuccess('Bike added successfully');
+  } catch (err: any) {
     console.error('Failed to create bike:', err);
+    showError(err.message || 'Failed to create bike');
   }
 };
 
@@ -231,7 +243,7 @@ onMounted(async () => {
 
 <style scoped>
 .dashboard-container {
-  min-height: 100vh;
+  min-height: 100%;
   background-color: #f8fafc;
 }
 

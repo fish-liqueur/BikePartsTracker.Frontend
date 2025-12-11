@@ -1,0 +1,42 @@
+/* Overrides layer - Custom overrides for Quasar components and other styles
+ * 
+ * This layer has the highest priority and can be used to override:
+ * - Quasar component styles
+ * - Third-party library styles
+ * - Base component styles
+ * 
+ * Example usage:
+ * 
+ * @layer overrides {
+ *   /* Override Quasar button styles *\/
+ *   .q-btn {
+ *     border-radius: 8px;
+ *   }
+ *   
+ *   /* Override Quasar card padding *\/
+ *   .q-card {
+ *     padding: 2rem;
+ *   }
+ *   
+ *   /* Override utility classes *\/
+ *   .container {
+ *     max-width: 1400px;
+ *   }
+ * }
+ * 
+ * Because this is in the "overrides" layer, it will automatically
+ * take precedence over styles in lower layers (quasar, components, utilities)
+ * even without increasing specificity!
+ */
+
+@layer overrides {
+  /* Add your custom overrides here */
+  
+  /* Example: Override Quasar primary color */
+  /* 
+  :root {
+    --q-primary: #667eea;
+  }
+  */
+}
+

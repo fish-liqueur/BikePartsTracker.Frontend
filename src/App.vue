@@ -1,39 +1,27 @@
 <template>
-  <q-layout view="hHh lpR fFf">
-    <q-header v-if="isAuthenticated" elevated>
-      <q-toolbar>
-        <q-toolbar-title>🚲 Bike Parts Tracker</q-toolbar-title>
-        <q-space />
-        <q-btn flat label="Dashboard" to="/dashboard" />
-        <q-btn flat label="Logout" @click="logout" />
-      </q-toolbar>
-    </q-header>
-
-    <q-page-container>
-      <router-view />
-    </q-page-container>
-  </q-layout>
+  <LayoutBase />
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/authStore'
+import { computed } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { useAuthStore } from '@/stores/authStore';
+import LayoutBase from '@/components/layouts/LayoutBase.vue';
 
-const router = useRouter()
-const authStore = useAuthStore()
-
-const isAuthenticated = computed(() => authStore.isAuthenticated)
+const router = useRouter();
+const authStore = useAuthStore(); 
+const route = useRoute();
+const isAuthenticated = computed(() => authStore.isAuthenticated);
 
 const logout = async () => {
-  await authStore.logout()
+  await authStore.logout();
   router.push('/login')
 }
 </script>
 
 <style scoped>
 #app {
-  min-height: 100vh;
+  min-height: 100dvh;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -91,6 +79,11 @@ const logout = async () => {
 
 .main-content {
   padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.max-width-1200 {
   max-width: 1200px;
   margin: 0 auto;
 }
