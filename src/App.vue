@@ -4,19 +4,12 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
 import LayoutBase from '@/components/layouts/LayoutBase.vue';
 
-const router = useRouter();
 const authStore = useAuthStore(); 
-const route = useRoute();
 const isAuthenticated = computed(() => authStore.isAuthenticated);
 
-const logout = async () => {
-  await authStore.logout();
-  router.push('/login')
-}
 </script>
 
 <style scoped>
