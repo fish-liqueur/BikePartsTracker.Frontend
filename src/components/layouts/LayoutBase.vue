@@ -20,7 +20,7 @@ provide('ajaxBar', ajaxBarRef)
 </script>
 
 <template>
-<q-layout view="hHh lpR fFf">
+<q-layout view="hHh lpR fFf" class="layout-base">
 
 <q-ajax-bar
   ref="ajaxBarRef"
@@ -38,10 +38,8 @@ provide('ajaxBar', ajaxBarRef)
 
 <Header />
 
-<q-page-container>
-  <div class="max-width-1200">
-    <router-view />
-  </div>
+<q-page-container class="layout-base-content max-width-1200">
+  <router-view />
 </q-page-container>
 
 <q-footer elevated class="bg-grey-8 text-white">
@@ -53,9 +51,19 @@ provide('ajaxBar', ajaxBarRef)
 </template>
 
 <style scoped>
-:deep .max-width-1200 {
+:deep(.max-width-1200) {
   max-width: 1200px;
   margin: 0 auto;
 }
 
+.layout-base {
+  display: flex;
+  flex-direction: column;
+}
+
+:deep(.layout-base-content) {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
 </style>

@@ -33,6 +33,11 @@ const menuItems = ref([
         path: '/parts'
     },
     {
+        label: 'Rides',
+        icon: 'toc',
+        path: '/rides'
+    },
+    {
         label: 'Maintenance',
         icon: 'calendar_today',
         path: '/maintenance'

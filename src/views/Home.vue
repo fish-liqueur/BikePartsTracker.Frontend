@@ -1,13 +1,5 @@
 <template>
   <div class="dashboard-container">
-    <header class="dashboard-header">
-      <h1 class="dashboard-title">Bike Parts Tracker</h1>
-      <div class="user-info">
-        <span class="username">{{ currentUser?.username }}</span>
-        <button @click="handleLogout" class="logout-button">Logout</button>
-      </div>
-    </header>
-
     <main class="dashboard-main">
       <div class="dashboard-stats">
         <div class="stat-card">

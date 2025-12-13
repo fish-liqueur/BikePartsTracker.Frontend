@@ -10,19 +10,49 @@ const router = createRouter({
     {
       path: '/login',
       name: 'login',
-      component: () => import('../views/LoginView.vue'),
+      component: () => import('@/views/LoginView.vue'),
       meta: { requiresGuest: true }
     },
     {
       path: '/register',
       name: 'register',
-      component: () => import('../views/RegisterView.vue'),
+      component: () => import('@/views/RegisterView.vue'),
       meta: { requiresGuest: true }
     },
     {
-      path: '/dashboard',
-      name: 'dashboard',
-      component: () => import('../views/DashboardView.vue'),
+      path: '/home',
+      name: 'home',
+      component: () => import('@/views/Home.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/bikes',
+      name: 'bikes',
+      component: () => import('@/views/Bikes.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/parts',
+      name: 'parts',
+      component: () => import('@/views/Parts.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/rides',
+      name: 'rides',
+      component: () => import('@/views/Rides.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/maintenance',
+      name: 'maintenance',
+      component: () => import('@/views/Maintenance.vue'),
+      meta: { requiresAuth: true }
+    },    
+    {
+      path: '/settings',
+      name: 'settings',
+      component: () => import('@/views/Settings.vue'),
       meta: { requiresAuth: true }
     },
     // {
@@ -36,7 +66,12 @@ const router = createRouter({
     //   name: 'bike-edit',
     //   component: () => import('../views/BikeEditView.vue'), // We'll create this later
     //   meta: { requiresAuth: true }
-    // }
+    // },
+    {
+      path: '/:pathMatch(.*)*',
+      name: '404',
+      component: () => import('@/views/NotFound.vue')
+    }
   ],
 })
 
@@ -48,8 +83,8 @@ router.beforeEach((to, from, next) => {
     // Redirect to login if trying to access protected route
     next('/login');
   } else if (to.meta.requiresGuest && isAuthenticated) {
-    // Redirect to dashboard if trying to access guest-only route while authenticated
-    next('/dashboard');
+    // Redirect to HOME if trying to access guest-only route while authenticated
+    next('/home');
   } else {
     next();
   }
