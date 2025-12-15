@@ -52,6 +52,7 @@ provide('ajaxBar', ajaxBarRef)
 
 <style scoped>
 :deep(.max-width-1200) {
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
 }
