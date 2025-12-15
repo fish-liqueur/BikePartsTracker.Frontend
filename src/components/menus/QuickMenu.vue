@@ -38,9 +38,9 @@ const menuItems = ref([
         path: '/rides'
     },
     {
-        label: 'Maintenance',
+        label: 'Works',
         icon: 'calendar_today',
-        path: '/maintenance'
+        path: '/works'
     }
 ]);
 </script>

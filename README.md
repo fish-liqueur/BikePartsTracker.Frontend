@@ -56,8 +56,10 @@ A modern Vue 3 frontend application for managing bike parts and maintenance, bui
 - **TypeScript** - Type-safe JavaScript
 - **Pinia** - State management for Vue
 - **Vue Router** - Official router for Vue.js
+- **Quasar** - Vue.js based framework for building responsive apps
 - **Axios** - HTTP client for API communication
 - **Vite** - Fast build tool and dev server
+- **Vitest** - Fast unit test framework powered by Vite
 
 ## 📋 Prerequisites
 
@@ -176,16 +178,151 @@ The application is built with mobile-first design principles and includes:
 
 ## 🧪 Testing
 
+This project uses [Vitest](https://vitest.dev/) for unit testing
+
+### Test Commands
+
 ```bash
-# Run unit tests
-npm run test:unit
-
-# Run e2e tests
-npm run test:e2e
-
-# Run all tests
+# Run tests in watch mode (recommended for development)
 npm run test
+
+# Run tests with interactive UI
+npm run test:ui
+
+# Run tests once (for CI/CD)
+npm run test:run
+
+# Run tests with coverage report
+npm run test:coverage
 ```
+
+### Test Structure
+
+Tests are organized alongside the code they test:
+
+```
+src/
+├── components/
+│   ├── layouts/
+│   │   ├── LayoutBase.vue
+│   │   └── __tests__/
+│   │       └── LayoutBase.test.ts
+│  
+├── services/
+│   ├── authService.ts
+│   └── __tests__/
+│       └── authService.test.ts
+├── stores/
+│   ├── authStore.ts
+│   └── __tests__/
+│       └── authStore.test.ts
+└── test/
+    └── setup.ts          # Test configuration and mocks
+```
+
+### Writing Tests
+
+#### Component Tests
+
+```typescript
+import { describe, it, expect } from 'vitest'
+import { mount } from '@vue/test-utils'
+import { createRouter, createWebHistory } from 'vue-router'
+import { createPinia } from 'pinia'
+import { Quasar } from 'quasar'
+import MyComponent from '../MyComponent.vue'
+
+describe('MyComponent', () => {
+  it('renders correctly', () => {
+    const router = createRouter({
+      history: createWebHistory(),
+      routes: [{ path: '/', component: { template: '<div>Home</div>' } }]
+    })
+    
+    const wrapper = mount(MyComponent, {
+      global: {
+        plugins: [Quasar, router, createPinia()]
+      }
+    })
+    
+    expect(wrapper.exists()).toBe(true)
+  })
+})
+```
+
+#### Service Tests
+
+```typescript
+import { describe, it, expect, vi } from 'vitest'
+import { myService } from '../myService'
+
+vi.mock('../api', () => ({
+  default: {
+    get: vi.fn(),
+    post: vi.fn()
+  }
+}))
+
+describe('myService', () => {
+  it('should perform action', async () => {
+    // Test implementation
+  })
+})
+```
+
+#### Store Tests
+
+```typescript
+import { describe, it, expect, beforeEach } from 'vitest'
+import { setActivePinia, createPinia } from 'pinia'
+import { useMyStore } from '../myStore'
+
+describe('myStore', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
+  
+  it('should update state', () => {
+    const store = useMyStore()
+    store.updateValue('test')
+    expect(store.value).toBe('test')
+  })
+})
+```
+
+### Test Coverage
+
+Run tests with coverage to see which parts of your code are tested:
+
+```bash
+npm run test:coverage
+```
+
+Coverage reports are generated in the `coverage/` directory. Open `coverage/index.html` in your browser to view a detailed coverage report.
+
+### Test Configuration
+
+Test configuration is in `vite.config.ts`:
+
+- **Environment**: `happy-dom` (lightweight DOM implementation)
+- **Setup File**: `src/test/setup.ts` (mocks and global test configuration)
+- **Coverage Provider**: `v8` (fast and accurate)
+
+### Mocking
+
+The test setup includes mocks for:
+- **localStorage**: In-memory storage for tests
+- **window.location**: Mocked for navigation tests
+- **Quasar plugins**: Notify, Loading, etc.
+
+### Best Practices
+
+1. **Test Behavior, Not Implementation**: Focus on what the component/service does, not how it does it
+2. **Keep Tests Isolated**: Each test should be independent and not rely on other tests
+3. **Use Descriptive Names**: Test names should clearly describe what they're testing
+4. **Mock External Dependencies**: Mock API calls, localStorage, and other external services
+5. **Test Edge Cases**: Include tests for error conditions and edge cases
+6. **Maintain Test Coverage**: Aim for high coverage, especially for critical business logic
 
 ## 📦 Build & Deployment
 
