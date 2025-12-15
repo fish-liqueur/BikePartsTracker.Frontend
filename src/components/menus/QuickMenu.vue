@@ -6,7 +6,8 @@
     :icon="item.icon" 
     :label="item.label" 
     :to="item.path"
-    size="xl" />
+    size="2.5rem"
+    class="quick-menu-button" />
   </q-btn-group>
 </template>
 
@@ -44,3 +45,9 @@ const menuItems = ref([
     }
 ]);
 </script>
+
+<style lang="css" scoped>
+    .quick-menu-button {
+        font-weight: 300;
+    }
+</style>

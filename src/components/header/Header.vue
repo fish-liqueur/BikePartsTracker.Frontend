@@ -34,19 +34,22 @@
       v-if="route.name !== 'home'"
       flat
       round
+      size="1.8rem"
       icon="home"
       to="/home"
       class="q-mr-sm"
     />
     <q-toolbar-title class="header">
-      {{ route.name }}
+      <h1>{{ route.name }}</h1>
     </q-toolbar-title>
     <!-- Userpic and its menu -->
     <q-btn-dropdown flat round class="dropdown-no-icon">
       <template v-slot:label>
-        <q-avatar size="2.4em" color="accent">
+        <q-btn size="1.8rem" flat round icon="language">
+          <q-avatar size="2.9rem" color="accent">
           {{ userInitials }}
         </q-avatar>
+        </q-btn>
       </template>
       <q-list>
         <q-item clickable v-close-popup >
@@ -71,8 +74,8 @@
         </q-item>
       </q-list>
     </q-btn-dropdown>
-    <q-btn dense flat round icon="language" @click="drawerToggle" />
-    <q-btn dense flat round icon="notifications" @click="drawerToggle" />
+    <q-btn size="1.8rem" flat round icon="language" @click="drawerToggle" />
+    <q-btn size="1.8rem" flat round icon="notifications" @click="drawerToggle" />
   </q-toolbar>
 </q-header>
 </template>
@@ -84,5 +87,10 @@
 
   :deep(.dropdown-no-icon.q-btn-dropdown .q-icon) {
     display: none;
+  }
+
+  :deep(h1) {
+    font-size: 4rem;
+    line-height: 1;
   }
 </style>
