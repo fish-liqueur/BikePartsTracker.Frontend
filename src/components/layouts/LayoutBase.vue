@@ -60,11 +60,13 @@ provide('ajaxBar', ajaxBarRef)
 .layout-base {
   display: flex;
   flex-direction: column;
+  height: 100dvh;
 }
 
 :deep(.layout-base-content) {
   display: flex;
   flex-direction: column;
-  flex-grow: 1;
+  flex: 1 1 auto;
+  overflow-y: auto;
 }
 </style>
