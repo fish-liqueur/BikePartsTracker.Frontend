@@ -1,13 +1,11 @@
 <template>
   <div class="view-container">
-    <div class="view-content">
-      <p>Manage your bike collection here.</p>
-    </div>
+    <BikesWidget title="Bikes Management" />
   </div>
 </template>
 
 <script setup lang="ts">
-// Bikes view - placeholder for bike management
+import BikesWidget from '@/components/bikes/BikesWidget.vue';
 </script>
 
 <style scoped>
