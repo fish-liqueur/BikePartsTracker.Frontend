@@ -6,10 +6,9 @@
         <h2 v-if="title" class="widget-title">{{ title }}</h2>
       </div>
       <div class="header-right">
-        <!-- Show Installed to Other Bikes Toggle -->
         <q-toggle
           v-model="showInstalledToOtherBikes"
-          label="Show installed to other bikes"
+          label="Show parts used now"
           color="primary"
           class="toggle-filter"
         />
@@ -85,7 +84,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, provide } from 'vue';
 import { useRouter } from 'vue-router';
 import { usePartsStore } from '@/stores/partsStore';
 import { useLayout } from '@/composables/useLayout';
@@ -93,6 +92,7 @@ import PartsDragContainer from './PartsDragContainer.vue';
 import PartsTableContainer from './PartsTableContainer.vue';
 import type { Bike, BikePart } from '@/types';
 import type { TableColumn } from './PartsTableContainer.vue';
+import { BIKE_CONTEXT_KEY, type BikeContextValue } from './bikeContextKey';
 
 export interface ContainerConfig {
   id: string;
@@ -223,12 +223,16 @@ const router = useRouter();
 const partsStore = usePartsStore();
 const { showSuccess, showError, withAjaxBar } = useLayout();
 
+// Provide bikeContext for child components
+provide(BIKE_CONTEXT_KEY, computed<BikeContextValue>(() => props.bikeContext));
+
 const localViewMode = ref<'cards' | 'table'>(props.viewMode);
 // Default: true if no bikeContext, false if bikeContext is set
 const showInstalledToOtherBikes = ref<boolean>(props.bikeContext === null);
 
 const viewModeOptions = [
-  { label: 'Cards', value: 'cards', icon: 'view_module' },
+  { label: 'Detailed', value: 'cards', icon: 'grid_view' },
+  { label: 'Dense', value: 'cards-dense', icon: 'grid_on' },
   { label: 'Table', value: 'table', icon: 'table_view' }
 ];
 
@@ -448,6 +452,8 @@ const handleConfigure = (partId: string) => {
 
 <style scoped lang="css">
 .parts-widget {
+  display: flex;
+  flex-direction: column;
   width: 100%;
   height: 100%;
 }
@@ -503,6 +509,8 @@ const handleConfigure = (partId: string) => {
 }
 
 .table-view {
+  flex: 1 1 auto;
+  overflow-y: auto;
   width: 100%;
 }
 

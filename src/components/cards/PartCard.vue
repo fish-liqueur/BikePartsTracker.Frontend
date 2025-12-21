@@ -2,7 +2,7 @@
   <q-card class="part-card">
     <q-card-section>
       <div class="part-header">
-        <div>
+        <div class="part-type-chip-wrapper">
           <q-chip
             :label="part.partType"
             color="primary"
@@ -10,11 +10,23 @@
             size="sm"
             class="part-type-chip"
           />
+        </div>
+        <div class="bike-name-chip-wrapper">
+          <q-chip
+          v-if="part.bikeId"
+            :label="part.bikeId"
+            color="secondary"
+            text-color="white"
+            size="sm"
+            class="bike-name-chip"
+          />
+        </div>
+
+
           <h3 class="part-name">{{ part.name }}</h3>
           <div v-if="part.brand || part.model" class="part-brand-model">
             {{ part.brand }} {{ part.model }}
           </div>
-        </div>
       </div>
     </q-card-section>
 
@@ -48,39 +60,44 @@
         size="sm"
         @click="handleFullDetails"
       />
-      <q-btn
-        flat
-        label="Rides History"
-        color="primary"
-        icon="history"
-        size="sm"
-        @click="handleRidesHistory"
-      />
-      
-      <!-- Bike Submenu -->
-      <q-btn-dropdown
-        flat
-        label="Bike"
-        color="primary"
-        icon="pedal_bike"
-        size="sm"
-      >
-        <q-list>
-          <q-item
+      <q-btn-dropdown color="primary" icon="menu">
+      <q-list>
+        <q-item clickable v-close-popup @click="handleFullDetails">
+          <q-item-section avatar>
+            <q-icon name="dashboard_2_gear" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>To Part page</q-item-label>
+            <!-- <q-item-label caption>February 22, 2016</q-item-label> -->
+          </q-item-section>
+        </q-item>
+        <q-item
+            v-if="part.bike"
+            clickable
+            v-close-popup
+          >
+            <q-item-section avatar>
+              <q-icon name="build" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Do maintenance!</q-item-label>
+            </q-item-section>
+          </q-item>
+        <q-item
             v-if="part.bike"
             clickable
             v-close-popup
             @click="handleShowBike"
           >
             <q-item-section avatar>
-              <q-icon name="visibility" />
+              <q-icon name="pedal_bike" />
             </q-item-section>
             <q-item-section>
-              <q-item-label>Show Bike</q-item-label>
+              <q-item-label>To Bike page</q-item-label>
               <q-item-label caption>{{ part.bike.name }}</q-item-label>
             </q-item-section>
           </q-item>
-          
+   
           <q-item
             v-if="part.bike"
             clickable
@@ -88,10 +105,11 @@
             @click="handleRemoveFromBike"
           >
             <q-item-section avatar>
-              <q-icon name="remove_circle" />
+              <q-icon name="archive" />
             </q-item-section>
             <q-item-section>
               <q-item-label>Remove from Bike</q-item-label>
+              <q-item-label caption>and keep in the box</q-item-label>
             </q-item-section>
           </q-item>
           
@@ -107,10 +125,8 @@
               <q-item-label>Put on Other Bike</q-item-label>
             </q-item-section>
           </q-item>
-          
-          <q-item
-            clickable
-            v-close-popup
+          <!-- <q-item
+            disable
             @click="handlePassToOtherUser"
           >
             <q-item-section avatar>
@@ -119,34 +135,31 @@
             <q-item-section>
               <q-item-label>Pass Part to Other User</q-item-label>
             </q-item-section>
+          </q-item> -->
+          <q-item
+            clickable
+            v-close-popup
+            @click="handlePassToOtherUser"
+          >
+            <q-item-section avatar>
+              <q-icon name="delete" color="negative"/>
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Delete part</q-item-label>
+              <q-item-label caption>delete part and all its history</q-item-label>
+            </q-item-section>
           </q-item>
-        </q-list>
-      </q-btn-dropdown>
-
-      <q-btn
-        flat
-        label="Delete"
-        color="negative"
-        icon="delete"
-        size="sm"
-        @click="handleDelete"
-      />
-      <q-btn
-        flat
-        label="Configure"
-        color="primary"
-        icon="settings"
-        size="sm"
-        @click="handleConfigure"
-      />
+      </q-list>
+    </q-btn-dropdown>
     </q-card-actions>
   </q-card>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, inject, type ComputedRef } from 'vue';
 import { useRouter } from 'vue-router';
-import type { BikePart } from '@/types';
+import type { Bike, BikePart } from '@/types';
+import { BIKE_CONTEXT_KEY, type BikeContextValue } from '@/components/parts/bikeContextKey';
 
 interface Props {
   part: BikePart;
@@ -169,6 +182,9 @@ const emit = defineEmits<{
 }>();
 
 const router = useRouter();
+
+// Inject bikeContext from PartsWidget
+const bikeContext = inject<ComputedRef<BikeContextValue>>(BIKE_CONTEXT_KEY, computed<BikeContextValue>(() => null));
 
 // Calculate total mileage
 const totalMileage = computed((): number => {
@@ -282,16 +298,31 @@ const handleConfigure = () => {
 }
 
 .part-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: auto auto;
+  /* justify-content: space-between;
+  align-items: flex-start; */
+}
+
+.part-type-chip-wrapper {
+  grid-area: 1 / 1 / 2 / 2;
 }
 
 .part-type-chip {
   margin-bottom: 8px;
 }
 
+.bike-name-chip-wrapper {
+  grid-area: 1 / 2 / 2 / 3;
+  text-align: right;
+}
+
+.bike-name-chip {
+  
+}
+
 .part-name {
+  grid-area: 2 / 1 / 3 / -1;
   margin: 0 0 4px 0;
   font-size: 1.25rem;
   font-weight: 600;
@@ -299,6 +330,7 @@ const handleConfigure = () => {
 }
 
 .part-brand-model {
+  grid-area: 3 / 1 / 4 / -1;
   color: #718096;
   font-size: 0.875rem;
   margin-top: 4px;
