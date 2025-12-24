@@ -79,10 +79,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useBikesStore } from '@/stores/bikesStore';
 import { useLayout } from '@/composables/useLayout';
+import { useQuerySync } from '@/composables/useQuerySync';
 import BikeCard from '@/components/cards/BikeCard.vue';
 import BikesTableContainer from '@/components/bikes/BikesTableContainer.vue';
 import AddBikeDialog from '@/components/bikes/AddBikeDialog.vue';
@@ -157,7 +158,16 @@ const router = useRouter();
 const bikesStore = useBikesStore();
 const { showSuccess, showError, withAjaxBar } = useLayout();
 
-const localViewMode = ref<'cards' | 'table'>('cards');
+const { state: queryState, setParam: setQueryParam } = useQuerySync({
+  viewMode: {
+    key: 'viewmode',
+    defaultValue: 'cards' as 'cards' | 'table',
+    parse: (raw) => (raw === 'table' ? 'table' : 'cards'),
+    serialize: (value) => value,
+  },
+});
+
+const localViewMode = queryState.viewMode;
 const showAddBikeDialog = ref(false);
 
 const viewModeOptions = [
@@ -170,7 +180,7 @@ const bikes = computed(() => bikesStore.bikes);
 const tableColumns = computed(() => props.tableColumns);
 
 const handleViewModeChange = (mode: 'cards' | 'table') => {
-  localViewMode.value = mode;
+  void setQueryParam('viewMode', mode, { replace: true });
 };
 
 const handleAddBike = async (bikeData: CreateBikeDto) => {
