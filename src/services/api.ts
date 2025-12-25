@@ -2,9 +2,17 @@ import axios from 'axios';
 import type { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
 import type { ApiResponse } from '@/types';
 
+// Get base URL from environment variable with fallback
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+
+// Log the base URL in development to help debug
+if (import.meta.env.DEV) {
+  console.log('API Base URL:', API_BASE_URL);
+}
+
 // Create axios instance with default config
 const api: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5192',
+  baseURL: API_BASE_URL,
   timeout: parseInt(import.meta.env.VITE_API_TIMEOUT || '10000'),
   headers: {
     'Content-Type': 'application/json',
@@ -18,6 +26,13 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Log request URL in development to help debug
+    if (import.meta.env.DEV) {
+      const fullUrl = config.baseURL ? `${config.baseURL}${config.url}` : config.url;
+      console.log('API Request:', config.method?.toUpperCase(), fullUrl);
+    }
+    
     return config;
   },
   (error) => {
@@ -31,6 +46,20 @@ api.interceptors.response.use(
     return response;
   },
   (error: AxiosError) => {
+    // Log connection errors in development for debugging
+    if (import.meta.env.DEV && !error.response) {
+      const baseUrl = API_BASE_URL;
+      console.error(`API Connection Error to ${baseUrl}:`, {
+        message: error.message,
+        code: (error as any).code,
+        config: {
+          url: error.config?.url,
+          method: error.config?.method,
+          baseURL: error.config?.baseURL,
+        }
+      });
+    }
+    
     if (error.response?.status === 401) {
       // Unauthorized - clear token and redirect to login
       localStorage.removeItem('authToken');

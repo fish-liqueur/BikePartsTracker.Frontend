@@ -80,12 +80,26 @@ npm install
 Create a `.env` file in the root directory:
 
 ```env
-VITE_API_BASE_URL=http://localhost:5192
+VITE_API_BASE_URL=http://localhost:8080
 VITE_API_TIMEOUT=10000
 NODE_ENV=development
+
+# Strava OAuth Configuration
+VITE_STRAVA_CLIENT_ID=your_strava_client_id
+VITE_STRAVA_REDIRECT_URI=http://localhost:5173/strava/callback
 ```
 
-**Note**: The backend should be running on `http://localhost:5192` (or update the URL to match your backend configuration).
+**Note**: To find your backend port:
+
+**For .NET Backend:**
+- Check `Properties/launchSettings.json` in your backend project
+- Look for the `applicationUrl` or `launchUrl` property
+- Common ports: `http://localhost:8080` or `https://localhost:5001` (HTTPS) or `http://localhost:5192`
+- You can also check the console output when starting your backend - it will show the listening URL
+
+**Quick check:**
+- When your backend starts, it will print something like: `Now listening on: http://localhost:8080`
+- Or visit `http://localhost:8080/swagger` (or your backend's Swagger URL) to verify
 
 ### 3. Start Development Server
 
@@ -152,6 +166,7 @@ The frontend communicates with your .NET backend through RESTful API endpoints:
 - **Bikes**: `/api/bikes`
 - **Parts**: `/api/parts`
 - **Maintenance**: `/api/maintenance`
+- **Strava**: `/api/strava/authorize`, `/api/strava/disconnect`
 
 ### Adding New Features
 
@@ -347,8 +362,13 @@ npm run preview
 
 1. **API Connection Failed**
    - Ensure backend is running on correct port
-   - Check `.env` file configuration
+   - Check `.env` file configuration - verify `VITE_API_BASE_URL` matches your backend port
+   - To find your backend port:
+     - Check backend console output when starting (shows "Now listening on: http://localhost:XXXX")
+     - Check `Properties/launchSettings.json` in your .NET backend project
+     - Try accessing `http://localhost:XXXX/swagger` where XXXX is the port
    - Verify CORS settings in backend
+   - **Important**: Restart your frontend dev server after changing `.env` file
 
 2. **Authentication Issues**
    - Clear localStorage and try logging in again
@@ -382,7 +402,7 @@ This project is licensed under the MIT License.
 ## 🔗 Related
 
 - [Backend Repository](../BikePartsTracker.Backend) - .NET Web API
-- [API Documentation](http://localhost:5192/swagger) - Swagger UI (when backend is running)
+- [API Documentation](http://localhost:8080/swagger) - Swagger UI (when backend is running, check your backend port)
 
 ## 📞 Support
 

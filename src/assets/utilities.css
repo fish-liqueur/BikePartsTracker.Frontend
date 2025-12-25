@@ -37,5 +37,25 @@
       padding: 0 0.5rem;
     }
   }
+
+    /* 'color' utility classes based on quasar variables */
+    .color-positive {
+      color: var(--q-positive);
+    }
+    .color-primary {
+      color: var(--q-primary);
+    }
+    .color-secondary {
+      color: var(--q-secondary);
+    }
+    .color-accent {
+      color: var(--q-accent);
+    }
+    .color-dark {
+      color: var(--q-dark);
+    }
+    .color-negative {
+      color: var(--q-negative);
+    }
 }
 

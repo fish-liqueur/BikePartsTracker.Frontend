@@ -55,6 +55,12 @@ const router = createRouter({
       component: () => import('@/views/Settings.vue'),
       meta: { requiresAuth: true }
     },
+    {
+      path: '/strava/integration',
+      name: 'strava integration',
+      component: () => import('@/views/StravaIntegration.vue'),
+      meta: { requiresAuth: true }
+    },
     // {
     //   path: '/bikes/:id',
     //   name: 'bike-detail',

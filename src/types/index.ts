@@ -169,3 +169,14 @@ export interface AuthResponse {
   user?: User;
 }
 
+// Strava Types
+export interface StravaAthleteDto {
+  id: number;
+  username?: string;
+  firstname?: string;
+  lastname?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+}
+
