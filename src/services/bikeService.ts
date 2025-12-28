@@ -70,7 +70,7 @@ export const bikeService = {
   // Sync bikes (import from Strava)
   async syncBikes(bikes: SyncBikeDto[]): Promise<void> {
     try {
-      await apiService.post('/api/bikes/sync', bikes);
+      await apiService.post('/api/bikes/sync', { bikes });
     } catch (error) {
       console.error('Failed to sync bikes:', error);
       throw error;

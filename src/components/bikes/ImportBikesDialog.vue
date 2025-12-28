@@ -74,6 +74,7 @@
             :columns="tableColumns"
             row-key="stravaBike.id"
             :loading="isSyncing"
+            :table-row-style-fn="rowStyleFn"
             flat
             class="bikes-import-table"
           >
@@ -90,12 +91,25 @@
             <!-- Name (editable) -->
             <template v-slot:body-cell-name="props">
               <q-td :props="props">
-                <div v-if="props.row.matchedExisting && props.row.matchedExisting.name !== props.row.editedName" class="text-body2 saved-name">
+                <div v-if="props.row.mergeWith 
+                && props.row.matchedExisting 
+                && props.row.matchedExisting.name !== props.row.editedName" 
+                class="text-body2 saved-name">
                     Strava name: <span class="text-primary" @click="props.row.matchedExisting.name = props.row.editedName">
                         <q-tooltip>
                             Click to use Strava name
                         </q-tooltip>
                         {{ props.row.editedName }}
+                    </span>
+                </div>
+                <div v-if="props.row.matchedExisting 
+                && props.row.matchedExisting!.name !== props.row.matchedExisting.storedName" 
+                class="text-body2 saved-name">
+                    Existing name: <span class="text-primary" @click="props.row.matchedExisting.name = props.row.matchedExisting.storedName">
+                        <q-tooltip>
+                            Click to use existing bike name
+                        </q-tooltip>
+                        {{ props.row.matchedExisting.storedName }}
                     </span>
                 </div>
                 <q-input
@@ -105,6 +119,7 @@
                   outlined
                   hide-bottom-space
                   :rules="[val => !!val || 'Name is required']"
+                  :bg-color="props.row.selected ? 'white' : 'transparent'"
                 />
                 <template v-else>
                  
@@ -114,6 +129,7 @@
                   outlined
                   hide-bottom-space
                   :rules="[val => !!val || 'Name is required']"
+                  :bg-color="props.row.selected ? 'white' : 'transparent'"
                 />
                 </template>
             
@@ -131,8 +147,9 @@
                   outlined
                   emit-value
                   map-options
-                  clearable
+                  :clearable="props.row.editedType !== null"
                   placeholder="Select type"
+                  :bg-color="props.row.selected ? 'white' : 'transparent'"
                 />
                 <div v-else class="text-body2">
                   {{ (props.row.matchedExisting as any)?.type || (existingBikes.find(b => b.id === props.row.mergeWith) as any)?.type || 'N/A' }}
@@ -161,13 +178,14 @@
                   map-options
                   @update:model-value="handleMergeChange(props.row)"
                   label="Action"
+                  :bg-color="props.row.selected ? 'white' : 'transparent'"
                 >
                   <template v-slot:option="scope">
                     <q-item v-bind="scope.itemProps">
                       <q-item-section>
                         <q-item-label>{{ scope.opt.label }}</q-item-label>
-                        <q-item-label v-if="scope.opt.bike" caption>
-                          {{ scope.opt.bike.name }}
+                        <q-item-label v-if="scope.opt.storedName" caption>
+                          {{ scope.opt.storedName }}
                         </q-item-label>
                       </q-item-section>
                     </q-item>
@@ -227,16 +245,19 @@ interface ImportBikeState {
   selected: boolean;
   mergeWith: string | null;
   editedName: string;
+  storedName: string | null;
   editedType: BikeType | null;
   matchedExisting: Bike | null;
 }
+
+type BikeWithStoredName = Bike & { storedName: string };
 
 const localShow = ref(props.modelValue);
 const isFetchingAthlete = ref(false);
 const isSyncing = ref(false);
 const fetchError = ref<string | null>(null);
 const importBikes = ref<ImportBikeState[]>([]);
-const existingBikes = ref<Bike[]>([]);
+const existingBikes = ref<BikeWithStoredName[]>([]);
 
 const bikesStore = useBikesStore();
 const { showSuccess, showError, withAjaxBar } = useLayout();
@@ -318,9 +339,8 @@ const mergeOptions = computed(() => {
 
   existingBikes.value.forEach(bike => {
     options.push({
-      label: `Merge with: ${bike.name}`,
+      label: `Merge with: ${bike.storedName}`,
       value: bike.id,
-      bike,
     });
   });
 
@@ -349,6 +369,7 @@ const handleDialogUpdate = (value: boolean) => {
 
 const resetState = () => {
   importBikes.value = [];
+  existingBikes.value = [];
   fetchError.value = null;
   isFetchingAthlete.value = false;
   isSyncing.value = false;
@@ -365,7 +386,7 @@ const fetchAthleteData = async () => {
     }
 
     // Fetch existing bikes
-    existingBikes.value = await bikesStore.fetchBikes();
+    existingBikes.value = (await bikesStore.fetchBikes()).map(bike => ({ ...bike, storedName: bike.name }));
 
     // Fetch athlete data from Strava
     const athleteData = await withAjaxBar(stravaService.getAthlete());
@@ -383,6 +404,7 @@ const fetchAthleteData = async () => {
         editedName: stravaBike.name,
         editedType: null,
         matchedExisting: existingBike || null,
+        storedName: existingBike ? existingBike.name : null,
       };
     });
   } catch (err: any) {
@@ -411,6 +433,9 @@ const deselectAll = () => {
 };
 
 const handleMergeChange = (bikeState: ImportBikeState) => {
+    // Do not allow to merge more than one strava bike to the same existing bike
+    clearOtherBikesMergeWith(bikeState);
+
   // When merging, preserve existing bike's name and type
   if (bikeState.mergeWith) {
     const existingBike = existingBikes.value.find(b => b.id === bikeState.mergeWith);
@@ -420,6 +445,15 @@ const handleMergeChange = (bikeState: ImportBikeState) => {
   } else {
     bikeState.matchedExisting = null;
   }
+};
+
+const clearOtherBikesMergeWith = (bikeState: ImportBikeState) => {
+  importBikes.value.forEach(bike => {
+    if (bike.matchedExisting && bike.matchedExisting.id !== bikeState.matchedExisting?.id && bike.mergeWith === bikeState.mergeWith) {
+      bike.mergeWith = null;
+      bike.matchedExisting = null;
+    }
+  });
 };
 
 const formatDistance = (distanceInMeters: number): string => {
@@ -507,6 +541,16 @@ const handleSave = async () => {
     isSyncing.value = false;
   }
 };
+
+const rowStyleFn = (row: ImportBikeState) => {
+        if (!row.selected) {
+            return 'background-color: rgba(193, 0, 21, 0.1)';
+        } else if (row.mergeWith) {
+            return 'background-color: rgba(49, 204, 236, 0.1)';
+        } else {
+            return 'background-color: rgba(33, 186, 69, 0.1)';
+        }
+      }
 </script>
 
 <style scoped lang="css">
@@ -542,11 +586,29 @@ const handleSave = async () => {
     font-weight: 400;
     line-height: 1.25rem;
     letter-spacing: 0.01786em;
+    padding: .4rem;
+    background-color: rgba(255, 255, 255, 0.4);
+    border-radius: .5rem;
+    margin-bottom: .2rem;
 }
 
 .saved-name span {
+    position: relative;
     cursor: pointer;
-    text-decoration: dashed;
+    
+}
+
+.saved-name span::after {
+    content: '';
+    position: absolute;
+    bottom: -.1rem;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-image: radial-gradient(circle, var(--q-primary) 1px, transparent 1px);
+    background-size: 4px 1px;
+    background-position: 0 bottom;
+    background-repeat: repeat-x;
 }
 </style>
 
