@@ -73,8 +73,8 @@ const handleLogin = async () => {
       password: password.value
     });
     
-    // Redirect to dashboard on successful login
-    router.push('/dashboard');
+    // Redirect to home on successful login
+    router.push('/home');
   } catch (err) {
     // Error is already handled in the store
     console.error('Login failed:', err);

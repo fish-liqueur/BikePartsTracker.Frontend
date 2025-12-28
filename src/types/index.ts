@@ -20,6 +20,8 @@ export interface Bike {
   parts: BikePart[];
   createdAt: Date;
   updatedAt: Date;
+  stravaId?: string;
+  isActive?: boolean;
 }
 
 export interface CreateBikeDto {
@@ -133,6 +135,19 @@ export enum PartType {
   Other = 'Other'
 }
 
+export enum BikeType {
+  Road = 'Road',
+  Mountain = 'Mountain',
+  Gravel = 'Gravel',
+  EBike = 'E-Bike',
+  City = 'City',
+  Touring = 'Touring',
+  Cargo = 'Cargo',
+  Fixed = 'Fixed',
+  Rat = 'Rat',
+  Other = 'Other',
+}
+
 // API Response Types
 export interface ApiResponse<T> {
   data: T;
@@ -170,13 +185,52 @@ export interface AuthResponse {
 }
 
 // Strava Types
+export interface StravaBike {
+  id: string;
+  primary?: boolean;
+  name: string;
+  resource_state?: number;
+  distance?: number;
+}
+
 export interface StravaAthleteDto {
   id: number;
   username?: string;
+  resource_state?: number;
   firstname?: string;
   lastname?: string;
   city?: string;
   state?: string;
   country?: string;
+  sex?: string;
+  premium?: boolean;
+  created_at?: string;
+  updated_at?: string;
+  badge_type_id?: number;
+  profile_medium?: string;
+  profile?: string;
+  friend?: any;
+  follower?: any;
+  follower_count?: number;
+  friend_count?: number;
+  mutual_friend_count?: number;
+  athlete_type?: number;
+  date_preference?: string;
+  measurement_preference?: string;
+  clubs?: any[];
+  ftp?: number | null;
+  weight?: number;
+  bikes?: StravaBike[];
+  shoes?: any[];
+}
+
+export interface SyncBikeDto {
+  id?: string | null;
+  stravaBikeId?: string | null;
+  name: string;
+  type: string | null;
+  totalDistance: number;
+  stravaDistance: number;
+  isActive: boolean;
 }
 

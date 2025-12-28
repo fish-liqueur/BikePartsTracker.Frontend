@@ -1,5 +1,5 @@
 import { apiService } from './api';
-import type { Bike, CreateBikeDto, ApiResponse, PaginatedResponse } from '@/types';
+import type { Bike, CreateBikeDto, ApiResponse, PaginatedResponse, SyncBikeDto } from '@/types';
 
 export const bikeService = {
   // Get all bikes for current user
@@ -65,5 +65,15 @@ export const bikeService = {
   async searchBikes(query: string): Promise<Bike[]> {
     const response = await apiService.get<Bike[]>('/api/bikes/search', { q: query });
     return response.data || [];
+  },
+
+  // Sync bikes (import from Strava)
+  async syncBikes(bikes: SyncBikeDto[]): Promise<void> {
+    try {
+      await apiService.post('/api/bikes/sync', bikes);
+    } catch (error) {
+      console.error('Failed to sync bikes:', error);
+      throw error;
+    }
   }
 };

@@ -1,10 +1,10 @@
 import { apiService } from './api';
-import type { ApiResponse, StravaAthleteDto } from '@/types';
+import type { ApiResponse, StravaAthleteDto, StravaBike } from '@/types';
 
 // Strava OAuth configuration
 const STRAVA_CLIENT_ID = import.meta.env.VITE_STRAVA_CLIENT_ID || '';
 const STRAVA_REDIRECT_URI = import.meta.env.VITE_STRAVA_REDIRECT_URI || `${window.location.origin}/strava/integration`;
-const STRAVA_SCOPE = 'read,activity:read'; // Adjust based on your needs
+const STRAVA_SCOPE = 'profile:read_all';
 const STRAVA_AUTH_URL = 'https://www.strava.com/oauth/authorize';
 
 export interface StravaAuthResponse {
@@ -101,7 +101,7 @@ export const stravaService = {
       });
 
       if (response.data && response.data.success && response.data.accessToken) {
-        // Store Strava connection status (you might want to store token on backend only)
+        // Store Strava connection status 
         localStorage.setItem('strava_connected', 'true');
       }
 
@@ -129,6 +129,32 @@ export const stravaService = {
       return response.data?.success || false;
     } catch (error) {
       console.error('Failed to disconnect Strava:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Fetch bikes from Strava
+   */
+  async getBikes(): Promise<StravaBike[]> {
+    try {
+      const response = await apiService.get<StravaBike[]>('/api/strava/bikes');
+      return response.data || [];
+    } catch (error) {
+      console.error('Failed to fetch Strava bikes:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Fetch athlete data from Strava (includes bikes)
+   */
+  async getAthlete(): Promise<StravaAthleteDto> {
+    try {
+      const response = await apiService.get<StravaAthleteDto>('/api/strava/athlete');
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch Strava athlete data:', error);
       throw error;
     }
   },

@@ -3,7 +3,6 @@
     <!-- View Mode Toggle -->
     <div class="widget-header">
       <div class="header-left">
-        <h2 v-if="title" class="widget-title">{{ title }}</h2>
       </div>
       <div class="header-right">
         <q-btn
@@ -75,6 +74,10 @@
       v-model="showAddBikeDialog"
       @submit="handleAddBike"
     />
+
+    <ImportBikesDialog
+      v-model="showImportBikesDialog"
+    />
   </div>
 </template>
 
@@ -87,6 +90,7 @@ import { useQuerySync } from '@/composables/useQuerySync';
 import BikeCard from '@/components/cards/BikeCard.vue';
 import BikesTableContainer from '@/components/bikes/BikesTableContainer.vue';
 import AddBikeDialog from '@/components/bikes/AddBikeDialog.vue';
+import ImportBikesDialog from '@/components/bikes/ImportBikesDialog.vue';
 import type { Bike, CreateBikeDto } from '@/types';
 
 export interface TableColumn {
@@ -169,6 +173,7 @@ const { state: queryState, setParam: setQueryParam } = useQuerySync({
 
 const localViewMode = queryState.viewMode;
 const showAddBikeDialog = ref(false);
+const showImportBikesDialog = ref(false);
 
 const viewModeOptions = [
   { label: 'Cards', value: 'cards', icon: 'grid_view' },
@@ -204,8 +209,7 @@ const handleAddBike = async (bikeData: CreateBikeDto) => {
 };
 
 const handleImportBikes = () => {
-  // TODO: Implement bike import functionality
-  showError('Import bikes functionality coming soon');
+  showImportBikesDialog.value = true;
 };
 
 const handleBikeSelected = (bike: Bike) => {
