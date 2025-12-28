@@ -139,7 +139,7 @@
           <q-item
             clickable
             v-close-popup
-            @click="handlePassToOtherUser"
+            @click="handleDelete"
           >
             <q-item-section avatar>
               <q-icon name="delete" color="negative"/>

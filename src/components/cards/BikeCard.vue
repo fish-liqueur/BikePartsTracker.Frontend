@@ -73,34 +73,82 @@
 
     <!-- Action Buttons -->
     <q-card-actions align="right">
-      <q-btn
+    <q-btn
         flat
         label="Full Details"
         color="primary"
         icon="info"
+        size="sm"
         @click="handleFullDetails"
       />
-      <q-btn
-        flat
-        label="Rides"
-        color="primary"
-        icon="directions_bike"
-        @click="handleRides"
-      />
-      <q-btn
-        flat
-        label="Parts"
-        color="primary"
-        icon="hardware"
-        @click="handleParts"
-      />
-      <q-btn
-        flat
-        label="Configure"
-        color="primary"
-        icon="settings"
-        @click="handleConfigure"
-      />
+      <q-btn-dropdown color="primary" icon="menu">
+      <q-list>
+        <q-item
+            clickable
+            v-close-popup
+            @click="handleParts"
+          >
+            <q-item-section avatar>
+              <q-icon name="pedal_bike" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Manage Parts</q-item-label>
+              <q-item-label caption>{{ bike.parts.length }} parts installed</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item
+            clickable
+            v-close-popup
+            @click="handleRides"
+          >
+            <q-item-section avatar>
+              <q-icon name="build" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Rides history</q-item-label>
+            </q-item-section>
+          </q-item>
+
+        <q-item clickable v-close-popup @click="handleFullDetails">
+          <q-item-section avatar>
+            <q-icon name="dashboard_2_gear" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>To detailed page</q-item-label>
+            <!-- <q-item-label caption>February 22, 2016</q-item-label> -->
+          </q-item-section>
+        </q-item>
+
+          <q-item
+            clickable
+            v-close-popup
+            @click="handleRetire"
+          >
+            <q-item-section avatar>
+              <q-icon name="archive" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Retire Bike</q-item-label>
+              <q-item-label caption>for the bikes you won't use anymore</q-item-label>
+            </q-item-section>
+          </q-item>
+          
+          <q-item
+            clickable
+            v-close-popup
+            @click="handleDelete"
+          >
+            <q-item-section avatar>
+              <q-icon name="delete" color="negative"/>
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Delete part</q-item-label>
+              <q-item-label caption>for the bikes created by mistake</q-item-label>
+            </q-item-section>
+          </q-item>
+      </q-list>
+    </q-btn-dropdown>
     </q-card-actions>
   </q-card>
 </template>
@@ -137,6 +185,8 @@ const emit = defineEmits<{
   rides: [bikeId: string];
   parts: [bikeId: string];
   configure: [bikeId: string];
+  delete: [bikeId: string];
+  retire: [bikeId: string];
 }>();
 
 const router = useRouter();
@@ -206,6 +256,14 @@ const handleParts = () => {
 const handleConfigure = () => {
   emit('configure', props.bike.id);
   router.push(`/bikes/${props.bike.id}/configure`);
+};
+
+const handleDelete = () => {
+  emit('delete', props.bike.id);
+};
+
+const handleRetire = () => {
+  emit('retire', props.bike.id);
 };
 </script>
 
