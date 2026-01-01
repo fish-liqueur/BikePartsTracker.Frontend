@@ -293,7 +293,7 @@ const handleConfigure = () => {
 
 <style scoped lang="css">
 .part-card {
-  min-width: 300px;
+  min-width: 200px;
   max-width: 100%;
 }
 

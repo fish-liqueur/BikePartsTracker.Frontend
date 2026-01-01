@@ -9,7 +9,7 @@
         <q-btn
         label="Add part"
         color="primary"
-        icon="info"
+        icon="add"
         
         @click="addPart"
       />
@@ -251,14 +251,11 @@ const allParts = computed(() => partsStore.parts);
 const computedContainers = computed<ContainerConfig[]>(() => {
   if (props.bikeContext) {
     // Two containers: parts on this bike, and parts not on this bike
-    // Parts on bike: always show all parts installed on this bike (not affected by toggle)
+    // Parts on bike: always show all parts installed on this bike
     const partsOnBike = allParts.value.filter(
       part => part.bikeId === props.bikeContext?.id
     );
     
-    // Available parts: parts not on this bike
-    // If toggle is off, filter to show only uninstalled parts (no bikeId)
-    // If toggle is on, show all parts not on this bike (including those on other bikes)
     let partsNotOnBike = allParts.value.filter(
       part => part.bikeId !== props.bikeContext?.id
     );
