@@ -51,10 +51,9 @@
           >
             <div class="bike-header">
               <h3 class="bike-name">{{ bike.name }}</h3>
-              <span class="bike-year">{{ bike.year }}</span>
+              <span class="bike-type">{{ bike.type }}</span>
             </div>
             <div class="bike-details">
-              <p class="bike-brand">{{ bike.brand }} {{ bike.model }}</p>
               <p class="bike-parts">{{ bike.parts?.length || 0 }} parts</p>
             </div>
             <div class="bike-actions">
@@ -82,36 +81,23 @@
             />
           </div>
           <div class="form-group">
-            <label for="bikeBrand">Brand</label>
-            <input
-              id="bikeBrand"
-              v-model="newBike.brand"
-              type="text"
+            <label for="bikeType">Bike Type</label>
+            <select
+              id="bikeType"
+              v-model="newBike.type"
               required
-              placeholder="e.g., Trek, Specialized"
-            />
-          </div>
-          <div class="form-group">
-            <label for="bikeModel">Model</label>
-            <input
-              id="bikeModel"
-              v-model="newBike.model"
-              type="text"
-              required
-              placeholder="e.g., Domane, Stumpjumper"
-            />
-          </div>
-          <div class="form-group">
-            <label for="bikeYear">Year</label>
-            <input
-              id="bikeYear"
-              v-model="newBike.year"
-              type="number"
-              required
-              min="1900"
-              max="2030"
-              placeholder="2024"
-            />
+            >
+              <option :value="BikeType.Road">Road</option>
+              <option :value="BikeType.Mountain">Mountain</option>
+              <option :value="BikeType.Gravel">Gravel</option>
+              <option :value="BikeType.EBike">E-Bike</option>
+              <option :value="BikeType.City">City</option>
+              <option :value="BikeType.Touring">Touring</option>
+              <option :value="BikeType.Cargo">Cargo</option>
+              <option :value="BikeType.Fixed">Fixed</option>
+              <option :value="BikeType.Rat">Rat</option>
+              <option :value="BikeType.Other">Other</option>
+            </select>
           </div>
           <div class="modal-actions">
             <button type="button" @click="showAddBikeModal = false" class="cancel-button">
@@ -132,6 +118,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useBikesStore } from '@/stores/bikesStore';
 import { useLayout } from '@/composables/useLayout';
 import type { Bike, CreateBikeDto } from '@/types';
+import { BikeType } from '@/types';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -144,9 +131,7 @@ const showAddPartModal = ref(false);
 const showMaintenanceModal = ref(false);
 const newBike = ref<CreateBikeDto>({
   name: '',
-  brand: '',
-  model: '',
-  year: new Date().getFullYear()
+  type: BikeType.Other
 });
 
 // Computed properties
@@ -207,9 +192,7 @@ const handleAddBike = async () => {
     // Reset form
     newBike.value = {
       name: '',
-      brand: '',
-      model: '',
-      year: new Date().getFullYear()
+      type: BikeType.Other
     };
     showSuccess('Bike added successfully');
   } catch (err: any) {
@@ -416,7 +399,7 @@ onMounted(async () => {
   margin: 0;
 }
 
-.bike-year {
+.bike-type {
   background: #edf2f7;
   color: #4a5568;
   padding: 4px 8px;
@@ -427,12 +410,6 @@ onMounted(async () => {
 
 .bike-details {
   margin-bottom: 20px;
-}
-
-.bike-brand {
-  color: #4a5568;
-  font-size: 0.875rem;
-  margin: 0 0 8px 0;
 }
 
 .bike-parts {
@@ -522,7 +499,8 @@ onMounted(async () => {
   font-size: 0.875rem;
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
   padding: 12px 16px;
   border: 2px solid #e5e7eb;
   border-radius: 8px;
@@ -530,7 +508,8 @@ onMounted(async () => {
   transition: border-color 0.2s;
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group select:focus {
   outline: none;
   border-color: #667eea;
 }

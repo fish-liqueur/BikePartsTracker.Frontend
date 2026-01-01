@@ -3,10 +3,7 @@
     <q-card-section>
       <div class="bike-header">
         <h3 class="bike-name">{{ bike.name }}</h3>
-        <q-chip v-if="bike.year" :label="bike.year.toString()" color="primary" text-color="white" size="sm" />
-      </div>
-      <div v-if="bike.brand || bike.model" class="bike-brand-model">
-        {{ bike.brand }} {{ bike.model }}
+        <q-chip :label="bike.type" color="primary" text-color="white" size="sm" />
       </div>
     </q-card-section>
 
@@ -319,12 +316,6 @@ const bikeCardClass = computed(() => {
   font-size: 1.25rem;
   font-weight: 600;
   color: #1a202c;
-}
-
-.bike-brand-model {
-  color: #718096;
-  font-size: 0.875rem;
-  margin-top: 4px;
 }
 
 .part-item {

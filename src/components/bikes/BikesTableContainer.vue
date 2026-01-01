@@ -41,15 +41,9 @@
               <div class="name">{{ props.row.name }}</div>
             </div>
           </q-td>
-          <q-td key="brand" :props="props">
-            {{ props.row.brand }}
-          </q-td>
-          <q-td key="model" :props="props">
-            {{ props.row.model }}
-          </q-td>
-          <q-td key="year" :props="props">
+          <q-td key="type" :props="props">
             <q-chip
-              :label="props.row.year?.toString()"
+              :label="props.row.type"
               color="primary"
               text-color="white"
               size="sm"
@@ -170,23 +164,9 @@ const props = withDefaults(defineProps<Props>(), {
       sortable: true,
     },
     {
-      name: 'brand',
-      label: 'Brand',
-      field: 'brand',
-      align: 'left' as const,
-      sortable: true,
-    },
-    {
-      name: 'model',
-      label: 'Model',
-      field: 'model',
-      align: 'left' as const,
-      sortable: true,
-    },
-    {
-      name: 'year',
-      label: 'Year',
-      field: 'year',
+      name: 'type',
+      label: 'Type',
+      field: 'type',
       align: 'center' as const,
       sortable: true,
     },

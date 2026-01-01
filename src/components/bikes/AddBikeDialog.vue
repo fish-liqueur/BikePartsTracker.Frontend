@@ -15,29 +15,13 @@
             outlined
             dense
           />
-          <q-input
-            v-model="newBike.brand"
-            label="Brand *"
-            placeholder="e.g., Trek, Specialized"
-            :rules="[val => !!val || 'Brand is required']"
-            outlined
-            dense
-          />
-          <q-input
-            v-model="newBike.model"
-            label="Model *"
-            placeholder="e.g., Domane, Stumpjumper"
-            :rules="[val => !!val || 'Model is required']"
-            outlined
-            dense
-          />
-          <q-input
-            v-model.number="newBike.year"
-            label="Year *"
-            type="number"
-            :min="1900"
-            :max="2030"
-            :rules="[val => !!val || 'Year is required']"
+          <q-select
+            v-model="newBike.type"
+            :options="bikeTypeOptions"
+            label="Bike Type *"
+            emit-value
+            map-options
+            :rules="[val => !!val || 'Bike type is required']"
             outlined
             dense
           />
@@ -55,6 +39,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import type { CreateBikeDto } from '@/types';
+import { BikeType } from '@/types';
 
 interface Props {
   modelValue: boolean;
@@ -70,10 +55,21 @@ const emit = defineEmits<{
 const localShow = ref(props.modelValue);
 const newBike = ref<CreateBikeDto>({
   name: '',
-  brand: '',
-  model: '',
-  year: new Date().getFullYear()
+  type: BikeType.Other
 });
+
+const bikeTypeOptions = [
+  { label: 'Road', value: BikeType.Road },
+  { label: 'Mountain', value: BikeType.Mountain },
+  { label: 'Gravel', value: BikeType.Gravel },
+  { label: 'E-Bike', value: BikeType.EBike },
+  { label: 'City', value: BikeType.City },
+  { label: 'Touring', value: BikeType.Touring },
+  { label: 'Cargo', value: BikeType.Cargo },
+  { label: 'Fixed', value: BikeType.Fixed },
+  { label: 'Rat', value: BikeType.Rat },
+  { label: 'Other', value: BikeType.Other },
+];
 
 // Watch for external changes to modelValue
 watch(() => props.modelValue, (newValue) => {
@@ -99,9 +95,7 @@ const handleDialogUpdate = (value: boolean) => {
 const resetForm = () => {
   newBike.value = {
     name: '',
-    brand: '',
-    model: '',
-    year: new Date().getFullYear()
+    type: BikeType.Other
   };
 };
 
@@ -112,7 +106,7 @@ const handleCancel = () => {
 
 const handleSubmit = () => {
   // Validate form
-  if (!newBike.value.name || !newBike.value.brand || !newBike.value.model || !newBike.value.year) {
+  if (!newBike.value.name || !newBike.value.type) {
     return;
   }
 

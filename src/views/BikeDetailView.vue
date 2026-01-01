@@ -8,7 +8,7 @@
       <!-- Bike Header -->
       <div class="bike-header">
         <h1 class="bike-name">{{ bike.name }}</h1>
-        <q-chip v-if="bike.year" :label="bike.year.toString()" color="primary" text-color="white" size="md" />
+        <q-chip :label="bike.type" color="primary" text-color="white" size="md" />
         <q-select
                   v-if="bikes.length"
                   :model-value="selectedBikeId"
@@ -23,13 +23,6 @@
                   style="min-width: 200px;"
                 />
       </div>
-      
-      <!-- Bike Details -->
-      <!-- <div class="bike-details">
-        <div v-if="bike.brand || bike.model" class="bike-brand-model">
-          {{ bike.brand }} {{ bike.model }}
-        </div>
-      </div> -->
 
       <!-- Tabs -->
       <q-tabs
@@ -85,27 +78,15 @@
                   :rules="[val => !!val || 'Bike name is required']"
                 />
                 
-                <q-input
-                  v-model="formData.brand"
-                  label="Brand"
+                <q-select
+                  v-model="formData.type"
+                  :options="bikeTypeOptions"
+                  label="Bike Type"
+                  emit-value
+                  map-options
                   outlined
                   dense
-                />
-                
-                <q-input
-                  v-model="formData.model"
-                  label="Model"
-                  outlined
-                  dense
-                />
-                
-                <q-input
-                  v-model.number="formData.year"
-                  label="Year"
-                  type="number"
-                  outlined
-                  dense
-                  :rules="[val => val === null || val === undefined || (val >= 1900 && val <= new Date().getFullYear() + 1) || 'Please enter a valid year']"
+                  :rules="[val => !!val || 'Bike type is required']"
                 />
               </div>
 
@@ -157,6 +138,7 @@ import { useLayout } from '@/composables/useLayout';
 import { useQuerySync } from '@/composables/useQuerySync';
 import PartsWidget from '@/components/parts/PartsWidget.vue';
 import type { CreateBikeDto } from '@/types';
+import { BikeType } from '@/types';
 
 const route = useRoute();
 const router = useRouter();
@@ -190,19 +172,28 @@ const activeTab = computed({
 // Form data
 const formData = ref<CreateBikeDto>({
   name: '',
-  brand: '',
-  model: '',
-  year: new Date().getFullYear()
+  type: BikeType.Other
 });
+
+const bikeTypeOptions = [
+  { label: 'Road', value: BikeType.Road },
+  { label: 'Mountain', value: BikeType.Mountain },
+  { label: 'Gravel', value: BikeType.Gravel },
+  { label: 'E-Bike', value: BikeType.EBike },
+  { label: 'City', value: BikeType.City },
+  { label: 'Touring', value: BikeType.Touring },
+  { label: 'Cargo', value: BikeType.Cargo },
+  { label: 'Fixed', value: BikeType.Fixed },
+  { label: 'Rat', value: BikeType.Rat },
+  { label: 'Other', value: BikeType.Other },
+];
 
 // Initialize form data when bike loads
 watch(bike, (newBike) => {
   if (newBike) {
     formData.value = {
       name: newBike.name || '',
-      brand: newBike.brand || '',
-      model: newBike.model || '',
-      year: newBike.year || new Date().getFullYear()
+      type: newBike.type || BikeType.Other
     };
   }
 }, { immediate: true });
@@ -369,10 +360,6 @@ height: 100%;
   border-bottom: 1px solid #e2e8f0;
 }
 
-.bike-brand-model {
-  color: #718096;
-  font-size: 1rem;
-}
 
 .tab-panels {
   min-height: 400px;

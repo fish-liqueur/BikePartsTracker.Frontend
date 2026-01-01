@@ -12,12 +12,12 @@ export interface User {
 export interface Bike {
   id: string;
   name: string;
-  brand: string;
-  model: string;
-  year: number;
-  userId: string;
+  type: BikeType;
   user: User;
   parts: BikePart[];
+  totalDistance: number;
+  stravaDistance: number;
+  chainsCycle: number;
   createdAt: Date;
   updatedAt: Date;
   stravaId?: string;
@@ -26,9 +26,7 @@ export interface Bike {
 
 export interface CreateBikeDto {
   name: string;
-  brand: string;
-  model: string;
-  year: number;
+  type: BikeType;
 }
 
 // Part Types
@@ -228,7 +226,7 @@ export interface SyncBikeDto {
   id?: string | null;
   stravaBikeId?: string | null;
   name: string;
-  type: string | null;
+  type: BikeType | null;
   totalDistance: number;
   stravaDistance: number;
   isActive: boolean;
