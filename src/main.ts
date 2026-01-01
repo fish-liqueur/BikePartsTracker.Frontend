@@ -4,10 +4,8 @@ import './assets/layers.css'
 // Import reset styles
 import './assets/reset.css'
 
-// Import icon libraries (before Quasar layer)
-import '@quasar/extras/material-icons/material-icons.css'
-// Uncomment if you need FontAwesome icons:
-// import '@quasar/extras/fontawesome-v6/fontawesome-v6.css'
+// Import icon libraries within icons layer
+import './assets/icons.css'
 
 // Import Quasar CSS within quasar layer
 import './assets/quasar-layer.sass'

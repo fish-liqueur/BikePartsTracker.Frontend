@@ -1,5 +1,5 @@
 <template>
-  <q-card class="bike-card">
+  <q-card :class="bikeCardClass">
     <q-card-section>
       <div class="bike-header">
         <h3 class="bike-name">{{ bike.name }}</h3>
@@ -121,6 +121,7 @@
         </q-item>
 
           <q-item
+          v-if="props.bike.isActive"
             clickable
             v-close-popup
             @click="handleRetire"
@@ -133,6 +134,22 @@
               <q-item-label caption>for the bikes you won't use anymore</q-item-label>
             </q-item-section>
           </q-item>
+
+          <q-item
+            v-if="!props.bike.isActive"
+            clickable
+            v-close-popup
+            @click="handleActivate"
+            color="positive"
+          >
+            <q-item-section avatar>
+              <q-icon name="archive" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Activate Bike</q-item-label>
+              <q-item-label caption>If you changed your mind and want it back</q-item-label>
+            </q-item-section>
+          </q-item>
           
           <q-item
             clickable
@@ -143,7 +160,7 @@
               <q-icon name="delete" color="negative"/>
             </q-item-section>
             <q-item-section>
-              <q-item-label>Delete part</q-item-label>
+              <q-item-label>Delete Bike</q-item-label>
               <q-item-label caption>for the bikes created by mistake</q-item-label>
             </q-item-section>
           </q-item>
@@ -187,6 +204,7 @@ const emit = defineEmits<{
   configure: [bikeId: string];
   delete: [bikeId: string];
   retire: [bikeId: string];
+  activate: [bikeId: string];
 }>();
 
 const router = useRouter();
@@ -265,12 +283,28 @@ const handleDelete = () => {
 const handleRetire = () => {
   emit('retire', props.bike.id);
 };
+
+const handleActivate = () => {
+  emit('activate', props.bike.id);
+};
+
+const bikeCardClass = computed(() => {
+  return {
+    'bike-card': true,
+    'bike-card--retired': !props.bike.isActive
+  } satisfies Record<string, boolean>;
+});
 </script>
 
 <style scoped lang="css">
 .bike-card {
   min-width: 300px;
   max-width: 100%;
+}
+
+.bike-card--retired {
+  opacity: 0.8;
+  filter: grayscale(100%);
 }
 
 .bike-header {

@@ -57,5 +57,55 @@
     .color-negative {
       color: var(--q-negative);
     }
+
+    /* flex */
+    .display-flex {
+      display: flex;
+    }
+    .flex-1 {
+      flex: 1 1 auto;
+    }
+    .flex-column {
+      flex-direction: column;
+    }
+    .flex-row {
+      flex-direction: row;
+    }
+    .flex-wrap {
+      flex-wrap: wrap;
+    }
+    .flex-nowrap {
+      flex-wrap: nowrap;
+    }
+    .flex-grow {
+      flex-grow: 1;
+    }
+    .flex-shrink {
+      flex-shrink: 1;
+    }
+    .flex-basis {
+      flex-basis: 0;
+    }
+    .flex-align-center {
+      align-items: center;
+    }
+    .flex-justify-center {
+      justify-content: center;
+    }
+    .flex-justify-end {
+      justify-content: flex-end;
+    }
+    .flex-justify-start {
+      justify-content: flex-start;
+    } 
+    .flex-align-start {
+      align-items: flex-start;
+    }
+    .flex-align-end {
+      align-items: flex-end;
+    }
+    .flex-align-stretch {
+      align-items: stretch;
+    }
 }
 

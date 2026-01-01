@@ -127,6 +127,60 @@ export const useBikesStore = defineStore('bikes', () => {
     }
   };
 
+  const retireBike = async (id: string) => {
+    try {
+      isLoading.value = true;
+      error.value = null;
+      
+      // Use updateBike with isActive set to false
+      // Cast to any to allow isActive field which may not be in CreateBikeDto type
+      const updatedBike = await bikeService.updateBike(id, { isActive: false } as any);
+      if (updatedBike) {
+        const index = bikes.value.findIndex(bike => bike.id === id);
+        if (index !== -1) {
+          bikes.value[index] = updatedBike;
+        }
+        
+        if (currentBike.value?.id === id) {
+          currentBike.value = updatedBike;
+        }
+      }
+      
+      return updatedBike;
+    } catch (err: any) {
+      error.value = err.message || 'Failed to retire bike';
+      throw err;
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  const activateBike = async (id: string) => {
+    try {
+      isLoading.value = true;
+      error.value = null;
+      
+      const updatedBike = await bikeService.updateBike(id, { isActive: true } as any);
+      if (updatedBike) {
+        const index = bikes.value.findIndex(bike => bike.id === id);
+        if (index !== -1) {
+          bikes.value[index] = updatedBike;
+        }
+        
+        if (currentBike.value?.id === id) {
+          currentBike.value = updatedBike;
+        }
+      }
+      
+      return updatedBike;
+    } catch (err: any) {
+      error.value = err.message || 'Failed to activate bike';
+      throw err;
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
   const setCurrentBike = (bike: Bike | null) => {
     currentBike.value = bike;
   };
@@ -159,6 +213,8 @@ export const useBikesStore = defineStore('bikes', () => {
     createBike,
     updateBike,
     deleteBike,
+    retireBike,
+    activateBike,
     setCurrentBike,
     clearError,
     reset

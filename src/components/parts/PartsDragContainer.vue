@@ -3,7 +3,7 @@
     class="parts-drag-container"
     :class="{
       'is-drag-over': isDragOver,
-      'is-empty': parts.length === 0
+      'is-empty': parts.length === 0,
     }"
     @dragover="handleDragOver"
     @dragleave="handleDragLeave"
@@ -139,6 +139,7 @@ const handleCardDragEnd = () => {
 
 <style scoped lang="css">
 .parts-drag-container {
+  /* flex: 1 1 auto; */
   min-height: 200px;
   padding: 16px;
   border: 2px dashed #e2e8f0;
@@ -157,7 +158,6 @@ const handleCardDragEnd = () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   min-height: 300px;
 }
 
@@ -165,6 +165,8 @@ const handleCardDragEnd = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
+  gap: 1rem;
   margin-bottom: 16px;
   padding-bottom: 12px;
   border-bottom: 1px solid #e2e8f0;

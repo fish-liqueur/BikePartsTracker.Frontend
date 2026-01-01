@@ -32,6 +32,12 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/bikes/:id',
+      name: 'bike-detail',
+      component: () => import('@/views/BikeDetailView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/parts',
       name: 'parts',
       component: () => import('@/views/Parts.vue'),
@@ -61,18 +67,6 @@ const router = createRouter({
       component: () => import('@/views/StravaIntegration.vue'),
       meta: { requiresAuth: true }
     },
-    // {
-    //   path: '/bikes/:id',
-    //   name: 'bike-detail',
-    //   component: () => import('../views/BikeDetailView.vue'), // We'll create this later
-    //   meta: { requiresAuth: true }
-    // },
-    // {
-    //   path: '/bikes/:id/edit',
-    //   name: 'bike-edit',
-    //   component: () => import('../views/BikeEditView.vue'), // We'll create this later
-    //   meta: { requiresAuth: true }
-    // },
     {
       path: '/:pathMatch(.*)*',
       name: '404',

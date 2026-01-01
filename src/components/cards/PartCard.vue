@@ -300,8 +300,6 @@ const handleConfigure = () => {
 .part-header {
   display: grid;
   grid-template-columns: auto auto;
-  /* justify-content: space-between;
-  align-items: flex-start; */
 }
 
 .part-type-chip-wrapper {

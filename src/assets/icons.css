@@ -1,0 +1,8 @@
+/* Icons layer - Icon library styles (Material Icons, FontAwesome, etc.) */
+
+/* Material Icons */
+@import '@quasar/extras/material-icons/material-icons.css' layer(icons);
+
+/* FontAwesome icons - uncomment if needed */
+/* @import '@quasar/extras/fontawesome-v6/fontawesome-v6.css' layer(icons); */
+

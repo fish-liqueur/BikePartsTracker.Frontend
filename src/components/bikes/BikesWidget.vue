@@ -25,6 +25,11 @@
           toggle-color="primary"
           @update:model-value="handleViewModeChange"
         />
+        <q-toggle
+          v-model="showRetiredBikes"
+          label="Show retired bikes"
+          @update:model-value="handleShowRetiredBikesChange"
+        />
       </div>
     </div>
 
@@ -39,7 +44,10 @@
           @rides="handleRides"
           @parts="handleParts"
           @configure="handleConfigure"
-        />
+          @delete="handleDelete"
+          @retire="handleRetire"
+          @activate="handleActivate"
+          />
       </div>
       <div v-else class="no-bikes">
         <q-icon name="directions_bike" size="64px" color="grey-5" />
@@ -84,6 +92,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useQuasar } from 'quasar';
 import { useBikesStore } from '@/stores/bikesStore';
 import { useLayout } from '@/composables/useLayout';
 import { useQuerySync } from '@/composables/useQuerySync';
@@ -162,6 +171,8 @@ const router = useRouter();
 const bikesStore = useBikesStore();
 const { showSuccess, showError, withAjaxBar } = useLayout();
 
+const $q = useQuasar();
+
 const { state: queryState, setParam: setQueryParam } = useQuerySync({
   viewMode: {
     key: 'viewmode',
@@ -169,9 +180,16 @@ const { state: queryState, setParam: setQueryParam } = useQuerySync({
     parse: (raw) => (raw === 'table' ? 'table' : 'cards'),
     serialize: (value) => value,
   },
+  showRetiredBikes: {
+    key: 'showretiredbikes',
+    defaultValue: false,
+    parse: (raw) => (raw === 'true' ? true : false),
+    serialize: (value) => value ? 'true' : 'false',
+  },
 });
 
 const localViewMode = queryState.viewMode;
+const showRetiredBikes = queryState.showRetiredBikes;
 const showAddBikeDialog = ref(false);
 const showImportBikesDialog = ref(false);
 
@@ -181,11 +199,15 @@ const viewModeOptions = [
 ];
 
 const isLoading = computed(() => bikesStore.isLoading);
-const bikes = computed(() => bikesStore.bikes);
+const bikes = computed(() => bikesStore.bikes.filter(bike => bike.isActive || showRetiredBikes.value));
 const tableColumns = computed(() => props.tableColumns);
 
 const handleViewModeChange = (mode: 'cards' | 'table') => {
   void setQueryParam('viewMode', mode, { replace: true });
+};
+
+const handleShowRetiredBikesChange = (value: boolean) => {
+  void setQueryParam('showRetiredBikes', value, { replace: true });
 };
 
 const handleAddBike = async (bikeData: CreateBikeDto) => {
@@ -253,26 +275,55 @@ const handleConfigure = (bikeId: string) => {
 };
 
 const handleDelete = async (bikeId: string) => {
-  if (!confirm('Are you sure you want to delete this bike? This action cannot be undone.')) {
-    return;
-  }
-
   try {
-    await withAjaxBar(
-      bikesStore.deleteBike(bikeId)
-    );
-    showSuccess('Bike deleted successfully');
-    emit('bikesChanged', {
-      type: 'deleted',
-      bikeId
-    });
+    $q.dialog({
+        title: 'Do you want to delete this bike?',
+        message: 'This action cannot be undone. All data will be lost for good.',
+        cancel: true,
+        persistent: false
+      }).onOk(async () => {
+        await withAjaxBar(
+          bikesStore.deleteBike(bikeId)
+        );
+        showSuccess('Bike deleted successfully');
+      })
   } catch (err: any) {
-    console.error('Failed to delete bike:', err);
-    showError(err.message || 'Failed to delete bike');
+    console.error('Failed to delete the bike:', err);
+    showError(err.message || 'Failed to delete the bike');
   }
 };
 
-// Fetch bikes when component mounts
+const handleRetire = async (bikeId: string) => {
+  try {
+    $q.dialog({
+        title: 'Do you want to retire this bike?',
+        message: 'This action CAN be undone. Think of it like about putting the bike to the farthest part of your garage, with no intention to ride it anymore.',
+        cancel: true,
+        persistent: false
+      }).onOk(async () => {
+        await withAjaxBar(
+          bikesStore.retireBike(bikeId)
+        );
+        showSuccess('Bike retired successfully');
+      })
+  } catch (err: any) {
+    console.error('Failed to retire the bike:', err);
+    showError(err.message || 'Failed to retire the bike');
+  }
+};
+
+const handleActivate = async (bikeId: string) => {
+  try {
+    await withAjaxBar(
+      bikesStore.activateBike(bikeId)
+    );
+    showSuccess('Bike activated successfully');
+  } catch (err: any) {
+    console.error('Failed to activate the bike:', err);
+    showError(err.message || 'Failed to activate the bike');
+  }
+};
+
 onMounted(async () => {
   try {
     await bikesStore.fetchBikes();

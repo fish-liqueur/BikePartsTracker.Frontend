@@ -6,9 +6,16 @@
         <h2 v-if="title" class="widget-title">{{ title }}</h2>
       </div>
       <div class="header-right">
+        <q-btn
+        label="Add part"
+        color="primary"
+        icon="info"
+        
+        @click="addPart"
+      />
         <q-toggle
           v-model="showInstalledToOtherBikes"
-          label="Show parts used now"
+          label="Show parts equipped to other bikes"
           color="primary"
           class="toggle-filter"
         />
@@ -231,8 +238,7 @@ const localViewMode = ref<'cards' | 'table'>(props.viewMode);
 const showInstalledToOtherBikes = ref<boolean>(props.bikeContext === null);
 
 const viewModeOptions = [
-  { label: 'Detailed', value: 'cards', icon: 'grid_view' },
-  { label: 'Dense', value: 'cards-dense', icon: 'grid_on' },
+  { label: 'Cards', value: 'cards', icon: 'grid_view' },
   { label: 'Table', value: 'table', icon: 'table_view' }
 ];
 
@@ -448,6 +454,10 @@ const handleConfigure = (partId: string) => {
   });
   router.push(`/parts/${partId}/configure`);
 };
+
+const addPart = () => {
+  // TODO: Implement add part dialog/modal
+};
 </script>
 
 <style scoped lang="css">
@@ -502,6 +512,38 @@ const handleConfigure = (partId: string) => {
 
 .containers-wrapper.containers-multiple {
   flex-direction: row;
+  height: 100%;
+}
+
+.containers-wrapper.containers-multiple .parts-drag-container {
+  display: flex;
+  flex-direction: column;
+  width: calc(50% - 12px);
+  height: 100%;
+  overflow-y: auto;
+}
+
+.containers-wrapper.containers-multiple .parts-drag-container:first-child {
+  background-color: rgba(33, 186, 69, 0.1);
+}
+
+.containers-wrapper.containers-multiple .parts-drag-container:first-child :deep(.part-card) {
+    box-shadow:
+    2px 1px .5rem rgba(33, 186, 69, 0.4), 
+    2px 2px .4rem rgba(49, 204, 236, 0.3), 
+    0 3px 1px -2px rgba(33, 186, 69, 0.3);
+    transition: 0.3s;
+}
+
+.containers-wrapper.containers-multiple .parts-drag-container:first-child :deep(.part-card):hover {
+    box-shadow:
+    2px 1px .5rem rgba(33, 186, 69, 0.8), 
+    2px 2px .4rem rgba(49, 204, 236, 0.6), 
+    0 3px 1px -2px rgba(33, 186, 69, 0.6);
+}
+
+.containers-wrapper.containers-multiple .parts-drag-container:last-child {
+  background-color: rgba(49, 204, 236, 0.1);
 }
 
 .containers-wrapper.containers-single {
