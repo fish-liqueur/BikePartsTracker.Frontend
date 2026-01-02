@@ -1,7 +1,7 @@
 <template>
   <q-card class="part-card" 
   :class="{ 
-    'part-card--on-other-bike': bikeContext?.id !== null && bikeContext?.id !== part.bikeId
+    'part-card--on-other-bike': isInstalledOnOtherBike
     }">
     <q-card-section>
       <div class="part-header">
@@ -301,6 +301,12 @@ const handleConfigure = () => {
   emit('configure', props.part.id);
   router.push(`/parts/${props.part.id}/configure`);
 };
+
+const isInstalledOnOtherBike = computed(() => {
+  return props.part.bikeId 
+  && bikeContext?.value?.id
+  && bikeContext?.value?.id !== props.part.bikeId;
+});
 </script>
 
 <style scoped lang="css">

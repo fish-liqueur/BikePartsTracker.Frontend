@@ -539,6 +539,10 @@ const addPart = () => {
   background-color: rgba(49, 204, 236, 0.1);
 }
 
+.containers-wrapper.containers-multiple .parts-drag-container:last-child :deep(.part-card.part-card--on-other-bike) {
+  filter: grayscale(60%);
+}
+
 .containers-wrapper.containers-single {
   max-width: 100%;
 }
