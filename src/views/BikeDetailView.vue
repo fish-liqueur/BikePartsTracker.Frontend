@@ -130,7 +130,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useBikesStore } from '@/stores/bikesStore';
@@ -199,6 +199,16 @@ watch(bike, (newBike) => {
     };
   }
 }, { immediate: true });
+
+// Set parts context bike in store when bike changes
+watch(bike, (newBike) => {
+  partsStore.setPartsContextBike(newBike ?? null);
+}, { immediate: true });
+
+// Clear parts context bike when component unmounts
+onUnmounted(() => {
+  partsStore.setPartsContextBike(null);
+});
 
 // Fetch parts when parts tab is accessed, but only if store is empty
 watch(activeTab, async (newTab) => {

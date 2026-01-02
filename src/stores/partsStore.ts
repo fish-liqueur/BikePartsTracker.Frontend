@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { partService } from '@/services/partService';
-import type { BikePart, CreatePartDto } from '@/types';
+import type { BikePart, CreatePartDto, Bike } from '@/types';
 import { PartType } from '@/types';
 
 // Mock data generator for development
@@ -49,6 +49,7 @@ export const usePartsStore = defineStore('parts', () => {
   // State
   const parts = ref<BikePart[]>([]);
   const currentPart = ref<BikePart | null>(null);
+  const partsContextBike = ref<Bike | null>(null);
   const isLoading = ref(false);
   const error = ref<string | null>(null);
 
@@ -226,6 +227,10 @@ export const usePartsStore = defineStore('parts', () => {
     currentPart.value = part;
   };
 
+  const setPartsContextBike = (bike: Bike | null) => {
+    partsContextBike.value = bike;
+  };
+
   const clearError = () => {
     error.value = null;
   };
@@ -233,6 +238,7 @@ export const usePartsStore = defineStore('parts', () => {
   const reset = () => {
     parts.value = [];
     currentPart.value = null;
+    partsContextBike.value = null;
     isLoading.value = false;
     error.value = null;
   };
@@ -241,6 +247,7 @@ export const usePartsStore = defineStore('parts', () => {
     // State
     parts,
     currentPart,
+    partsContextBike,
     isLoading,
     error,
     
@@ -259,6 +266,7 @@ export const usePartsStore = defineStore('parts', () => {
     movePartToBike,
     deletePart,
     setCurrentPart,
+    setPartsContextBike,
     clearError,
     reset
   };

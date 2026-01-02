@@ -91,7 +91,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, provide } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { usePartsStore } from '@/stores/partsStore';
 import { useLayout } from '@/composables/useLayout';
@@ -99,7 +99,6 @@ import PartsDragContainer from './PartsDragContainer.vue';
 import PartsTableContainer from './PartsTableContainer.vue';
 import type { Bike, BikePart } from '@/types';
 import type { TableColumn } from './PartsTableContainer.vue';
-import { BIKE_CONTEXT_KEY, type BikeContextValue } from './bikeContextKey';
 
 export interface ContainerConfig {
   id: string;
@@ -229,9 +228,6 @@ const emit = defineEmits<{
 const router = useRouter();
 const partsStore = usePartsStore();
 const { showSuccess, showError, withAjaxBar } = useLayout();
-
-// Provide bikeContext for child components
-provide(BIKE_CONTEXT_KEY, computed<BikeContextValue>(() => props.bikeContext));
 
 const localViewMode = ref<'cards' | 'table'>(props.viewMode);
 // Default: true if no bikeContext, false if bikeContext is set

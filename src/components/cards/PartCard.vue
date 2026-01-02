@@ -1,5 +1,8 @@
 <template>
-  <q-card class="part-card">
+  <q-card class="part-card" 
+  :class="{ 
+    'part-card--on-other-bike': bikeContext?.id !== null && bikeContext?.id !== part.bikeId
+    }">
     <q-card-section>
       <div class="part-header">
         <div class="part-type-chip-wrapper">
@@ -156,10 +159,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, type ComputedRef } from 'vue';
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
-import type { Bike, BikePart } from '@/types';
-import { BIKE_CONTEXT_KEY, type BikeContextValue } from '@/components/parts/bikeContextKey';
+import { usePartsStore } from '@/stores/partsStore';
+import type { BikePart } from '@/types';
 
 interface Props {
   part: BikePart;
@@ -182,9 +185,10 @@ const emit = defineEmits<{
 }>();
 
 const router = useRouter();
+const partsStore = usePartsStore();
 
-// Inject bikeContext from PartsWidget
-const bikeContext = inject<ComputedRef<BikeContextValue>>(BIKE_CONTEXT_KEY, computed<BikeContextValue>(() => null));
+// Get bike context from store
+const bikeContext = computed(() => partsStore.partsContextBike);
 
 // Calculate total mileage
 const totalMileage = computed((): number => {

@@ -288,7 +288,7 @@ const handleActivate = () => {
 const bikeCardClass = computed(() => {
   return {
     'bike-card': true,
-    'bike-card--retired': !props.bike.isActive
+    'bike-card--retired': !props.bike.isActive,
   } satisfies Record<string, boolean>;
 });
 </script>
