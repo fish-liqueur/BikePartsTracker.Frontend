@@ -254,6 +254,10 @@ const getRemainingKms = (part: BikePart): number | null => {
     return null;
   }
   
+  if (!part.expectedLifespan) {
+    return null;
+  }
+  
   const currentMileage = getTotalMileage(part);
   const remaining = part.expectedLifespan - currentMileage;
   
@@ -279,6 +283,10 @@ const getRemainingClass = (part: BikePart): string => {
   
   if (kms === null || kms === 0) {
     return 'remaining-due';
+  }
+  
+  if (!part.expectedLifespan) {
+    return '';
   }
   
   const percentage = kms / part.expectedLifespan * 100;

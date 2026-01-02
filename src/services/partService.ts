@@ -2,6 +2,13 @@ import { apiService } from './api';
 import type { BikePart, PartDto, CreatePartDto, PartUsageHistory, ApiResponse, PaginatedResponse } from '@/types';
 
 export const partService = {
+  // Get all parts for the current user (all bikes)
+  // TODO: Implement backend!
+  async getParts(): Promise<BikePart[]> {
+    const response = await apiService.get<BikePart[]>('/api/parts');
+    return response.data || [];
+  },
+
   // Get all parts for a bike
   async getPartsByBike(bikeId: string): Promise<BikePart[]> {
     const response = await apiService.get<BikePart[]>(`/api/parts/bike/${bikeId}`);

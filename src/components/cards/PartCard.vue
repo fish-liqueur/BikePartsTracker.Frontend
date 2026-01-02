@@ -200,6 +200,10 @@ const remainingKms = computed((): number | null => {
     return null;
   }
   
+  if (!props.part.expectedLifespan) {
+    return null;
+  }
+  
   const currentMileage = totalMileage.value;
   const remaining = props.part.expectedLifespan - currentMileage;
   
@@ -240,6 +244,10 @@ const remainingClass = computed((): string => {
   
   if (kms === null || kms === 0) {
     return 'remaining-due';
+  }
+  
+  if (!props.part.expectedLifespan) {
+    return '';
   }
   
   // Warning if less than 20% of expected lifespan remaining

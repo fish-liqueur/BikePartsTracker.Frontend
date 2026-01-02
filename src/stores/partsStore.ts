@@ -68,11 +68,7 @@ export const usePartsStore = defineStore('parts', () => {
       isLoading.value = true;
       error.value = null;
       
-      // TODO: Replace with actual service call when backend is ready
       // const fetchedParts = await partService.getParts();
-      
-      // Mock: Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 300));
       const fetchedParts = generateMockParts();
       parts.value = fetchedParts;
       

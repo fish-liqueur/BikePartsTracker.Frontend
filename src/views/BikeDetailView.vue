@@ -134,6 +134,7 @@ import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useBikesStore } from '@/stores/bikesStore';
+import { usePartsStore } from '@/stores/partsStore';
 import { useLayout } from '@/composables/useLayout';
 import { useQuerySync } from '@/composables/useQuerySync';
 import PartsWidget from '@/components/parts/PartsWidget.vue';
@@ -143,6 +144,7 @@ import { BikeType } from '@/types';
 const route = useRoute();
 const router = useRouter();
 const bikesStore = useBikesStore();
+const partsStore = usePartsStore();
 const { showSuccess, showError, withAjaxBar } = useLayout();
 const $q = useQuasar();
 const bikeId = computed(() => route.params.id as string);
@@ -195,6 +197,18 @@ watch(bike, (newBike) => {
       name: newBike.name || '',
       type: newBike.type || BikeType.Other
     };
+  }
+}, { immediate: true });
+
+// Fetch parts when parts tab is accessed, but only if store is empty
+watch(activeTab, async (newTab) => {
+  if (newTab === 'parts' && partsStore.parts.length === 0) {
+    try {
+      await withAjaxBar(partsStore.fetchParts());
+    } catch (error) {
+      console.error('Failed to fetch parts:', error);
+      showError('Failed to load parts');
+    }
   }
 }, { immediate: true });
 

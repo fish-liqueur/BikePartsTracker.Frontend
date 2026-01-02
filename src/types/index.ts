@@ -61,12 +61,13 @@ export interface PartDto {
 export interface CreatePartDto {
   name: string;
   partType: PartType;
-  brand: string;
-  model: string;
-  installationDate: Date;
+  brand?: string;
+  model?: string;
+  installationDate?: Date;
   mileageAtInstallation: number;
-  expectedLifespan: number;
-  bikeId: string;
+  expectedLifespan?: number;
+  isActive?: boolean;
+  bikeId?: string;
 }
 
 // Maintenance Types
