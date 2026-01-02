@@ -321,10 +321,19 @@ const handleConfigure = () => {
 .bike-name-chip-wrapper {
   grid-area: 1 / 2 / 2 / 3;
   text-align: right;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .bike-name-chip {
-  
+  max-width: 100%;
+}
+
+.bike-name-chip :deep(.q-chip__content) {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .part-name {
