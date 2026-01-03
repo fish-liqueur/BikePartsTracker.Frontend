@@ -207,6 +207,7 @@ const handleCardDragEnd = () => {
   gap: 16px;
   flex: 1 1 auto;
   overflow-y: auto;
+  padding: .4rem;
 }
 
 @media (max-width: 768px) {

@@ -537,10 +537,19 @@ const addPart = () => {
 
 .containers-wrapper.containers-multiple .parts-drag-container:last-child {
   background-color: rgba(49, 204, 236, 0.1);
+  box-shadow:
+    2px 1px .5rem rgba(49, 204, 236, 0.6), 
+    2px 2px .4rem rgba(49, 204, 236, 0.5), 
+    0 3px 1px -2px rgba(49, 204, 236, 0.5);
 }
 
 .containers-wrapper.containers-multiple .parts-drag-container:last-child :deep(.part-card.part-card--on-other-bike) {
   filter: grayscale(60%);
+  /* background-color: rgba(193, 0, 21, 0.1); */
+  box-shadow:
+    2px 1px .5rem rgba(193, 0, 21, 0.4), 
+    2px 2px .4rem rgba(193, 0, 21, 0.3), 
+    0 3px 1px -2px rgba(193, 0, 21, 0.3);
 }
 
 .containers-wrapper.containers-single {
