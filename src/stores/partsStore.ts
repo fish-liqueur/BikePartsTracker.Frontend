@@ -181,13 +181,31 @@ export const usePartsStore = defineStore('parts', () => {
     }
   };
 
-  const movePartToBike = async (partId: string, bikeId: string | null) => {
+  const movePartToBike = async (
+    partId: string,
+    bikeId: string | null,
+    installationDate?: Date | null,
+    mileageAtInstallation?: number | null
+  ) => {
     try {
       isLoading.value = true;
       error.value = null;
       
-      // Update part's bikeId
-      const updatedPart = await updatePart(partId, { bikeId: bikeId || '' });
+      // Prepare update data
+      const updateData: Partial<CreatePartDto> = {
+        bikeId: bikeId || ''
+      };
+      
+      // Add installation date and mileage if provided
+      if (installationDate !== undefined && installationDate !== null) {
+        updateData.installationDate = installationDate;
+      }
+      if (mileageAtInstallation !== undefined && mileageAtInstallation !== null) {
+        updateData.mileageAtInstallation = mileageAtInstallation;
+      }
+      
+      // Update part
+      const updatedPart = await updatePart(partId, updateData);
       return updatedPart;
     } catch (err: any) {
       error.value = err.message || 'Failed to move part to bike';

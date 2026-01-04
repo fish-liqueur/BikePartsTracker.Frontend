@@ -118,7 +118,7 @@
                   dense
                   outlined
                   hide-bottom-space
-                  :rules="[val => !!val || 'Name is required']"
+                  :rules="[(val: string) => !!val || 'Name is required']"
                   :bg-color="props.row.selected ? 'white' : 'transparent'"
                 />
                 <template v-else>
@@ -128,7 +128,7 @@
                   dense
                   outlined
                   hide-bottom-space
-                  :rules="[val => !!val || 'Name is required']"
+                  :rules="[(val: string) => !!val || 'Name is required']"
                   :bg-color="props.row.selected ? 'white' : 'transparent'"
                 />
                 </template>
@@ -152,7 +152,7 @@
                   :bg-color="props.row.selected ? 'white' : 'transparent'"
                 />
                 <div v-else class="text-body2">
-                  {{ (props.row.matchedExisting as any)?.type || (existingBikes.find(b => b.id === props.row.mergeWith) as any)?.type || 'N/A' }}
+                  {{ (props.row.matchedExisting as any)?.type || (existingBikes.find((b: Bike) => b.id === props.row.mergeWith) as any)?.type || 'N/A' }}
                 </div>
               </q-td>
             </template>

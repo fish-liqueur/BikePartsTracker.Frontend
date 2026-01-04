@@ -75,7 +75,7 @@
                   label="Bike Name"
                   outlined
                   dense
-                  :rules="[val => !!val || 'Bike name is required']"
+                  :rules="[(val: string) => !!val || 'Bike name is required']"
                 />
                 
                 <q-select
@@ -86,7 +86,7 @@
                   map-options
                   outlined
                   dense
-                  :rules="[val => !!val || 'Bike type is required']"
+                  :rules="[(val: BikeType | null) => !!val || 'Bike type is required']"
                 />
               </div>
 

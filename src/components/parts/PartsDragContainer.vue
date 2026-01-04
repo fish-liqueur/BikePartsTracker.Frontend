@@ -2,52 +2,61 @@
   <div
     class="parts-drag-container"
     :class="{
-      'is-drag-over': isDragOver,
-      'is-empty': parts.length === 0,
+      'is-empty': localParts.length === 0,
     }"
-    @dragover="handleDragOver"
-    @dragleave="handleDragLeave"
-    @drop="handleDrop"
+    :data-container-id="containerId"
   >
+
     <!-- Container Header -->
     <div v-if="title" class="container-header">
       <h3 class="container-title">{{ title }}</h3>
-      <q-badge v-if="showCount" color="primary" :label="parts.length" />
+      <q-badge v-if="showCount" color="primary" :label="localParts.length" />
     </div>
 
     <!-- Empty State -->
-    <div v-if="parts.length === 0" class="empty-state">
+    <div v-if="localParts.length === 0" class="empty-state">
       <q-icon name="inventory_2" size="48px" color="grey-5" />
       <p class="empty-text">No parts in this container</p>
       <p class="empty-hint">Drag and drop parts here</p>
     </div>
 
-    <!-- Parts Grid -->
-    <div v-else class="parts-grid">
-      <PartCardDraggable
-        v-for="part in parts"
-        :key="part.id"
-        :part="part"
-        :current-bike-mileage="currentBikeMileage"
+    <!-- Parts Grid with Draggable -->
+    <VueDraggable
+      v-model="localParts"
+      :group="{ name: 'parts', pull: true, put: true }"
+      :animation="200"
+      :force-fallback="false"
+      :fallback-tolerance="5"
+      item-key="id"
+      class="parts-grid"
+      @end="handleDragEnd"
+      @add="handleDragAdd"
+    >
+      
+        <PartCard
+        v-for="element in localParts"
+        :key="element.id"
         :container-id="containerId"
-        @drag-start="handleCardDragStart"
-        @drag-end="handleCardDragEnd"
-        @full-details="$emit('fullDetails', $event)"
-        @rides-history="$emit('ridesHistory', $event)"
-        @show-bike="$emit('showBike', $event)"
-        @remove-from-bike="$emit('removeFromBike', $event)"
-        @put-on-other-bike="$emit('putOnOtherBike', $event)"
-        @pass-to-other-user="$emit('passToOtherUser', $event)"
-        @delete="$emit('delete', $event)"
-        @configure="$emit('configure', $event)"
-      />
-    </div>
+          :part="element"
+          :current-bike-mileage="currentBikeMileage"
+          @full-details="$emit('fullDetails', $event)"
+          @rides-history="$emit('ridesHistory', $event)"
+          @show-bike="$emit('showBike', $event)"
+          @remove-from-bike="$emit('removeFromBike', $event)"
+          @put-on-other-bike="$emit('putOnOtherBike', $event)"
+          @pass-to-other-user="$emit('passToOtherUser', $event)"
+          @delete="$emit('delete', $event)"
+          @configure="$emit('configure', $event)"
+        />
+    </VueDraggable>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import PartCardDraggable from './PartCardDraggable.vue';
+import { ref, watch } from 'vue';
+// @ts-ignore - vue-draggable-plus types may not be available
+import { VueDraggable } from 'vue-draggable-plus';
+import PartCard from '@/components/cards/PartCard.vue';
 import type { BikePart } from '@/types';
 
 interface Props {
@@ -65,7 +74,12 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-  partDropped: [partId: string, sourceContainerId: string, targetContainerId: string];
+  partDropped: [partId: string, sourceContainerId: string, targetContainerId: string, options: {
+    event: any;
+    part: BikePart;
+    newIndex: number;
+    removeFromTarget: () => void;
+  }];
   partMoved: [partId: string, sourceContainerId: string, targetContainerId: string];
   fullDetails: [partId: string];
   ridesHistory: [partId: string];
@@ -75,70 +89,76 @@ const emit = defineEmits<{
   passToOtherUser: [partId: string];
   delete: [partId: string];
   configure: [partId: string];
+  addToContainer: [partId: string, containerId: string, part: BikePart];
 }>();
 
-const isDragOver = ref(false);
-const draggedPartId = ref<string | null>(null);
-const draggedSourceContainerId = ref<string | null>(null);
+// Local copy of parts for v-model
+const localParts = ref<BikePart[]>([...props.parts]);
 
-const handleDragOver = (event: DragEvent) => {
-  event.preventDefault();
-  event.stopPropagation();
+
+// Sync localParts with props.parts when they change externally
+// Use a more robust comparison to ensure we sync properly
+watch(() => props.parts, (newParts) => {
+  // Create a new array to ensure reactivity
+  const newPartsIds = newParts.map(p => p.id).sort().join(',');
+  const currentPartsIds = localParts.value.map(p => p.id).sort().join(',');
   
-  if (event.dataTransfer) {
-    event.dataTransfer.dropEffect = 'move';
+  if (newPartsIds !== currentPartsIds) {
+    localParts.value = [...newParts];
   }
-  
-  isDragOver.value = true;
-};
+}, { deep: true, immediate: true });
 
-const handleDragLeave = (event: DragEvent) => {
-  // Only set dragOver to false if we're leaving the container itself
-  const target = event.target as HTMLElement;
-  const container = event.currentTarget as HTMLElement;
-  
-  if (!container.contains(target)) {
-    isDragOver.value = false;
+const handleDragEnd = (event: any) => {
+  // Handle reordering within the same container - no action needed
+  if (event.from === event.to) {
+    return;
   }
 };
 
-const handleDrop = (event: DragEvent) => {
-  event.preventDefault();
-  event.stopPropagation();
+const handleDragAdd = (event: any) => {
+  // This fires when an item is added to this container from another
+  // The drop has already happened at this point
+  // We need to get the part and source container info
   
-  isDragOver.value = false;
+  // Get the part from the event - it should be in the newIndex position
+  const newIndex = event.newIndex;
+  if (newIndex === undefined || newIndex < 0 || newIndex >= localParts.value.length) {
+    return;
+  }
   
-  if (!event.dataTransfer) return;
+  const part = localParts.value[newIndex];
+  if (!part || !part.id) {
+    return;
+  }
   
-  try {
-    const data = JSON.parse(event.dataTransfer.getData('application/json'));
-    const partId = data.partId;
-    const sourceContainerId = data.containerId;
-    
-    // Only emit if dropping from a different container
-    if (sourceContainerId !== props.containerId) {
-      emit('partDropped', partId, sourceContainerId, props.containerId);
-      emit('partMoved', partId, sourceContainerId, props.containerId);
+  // Try to get source container ID from the dragged element
+  const draggedElement = event.item;
+  let sourceContainerId = '';
+  
+  if (draggedElement?.dataset?.containerId) {
+    sourceContainerId = draggedElement.dataset.containerId;
+  }
+  
+  // Emit event to parent to show dialog
+  // Parent will handle cancellation by removing from this container and adding to source
+  emit('partDropped', part.id, sourceContainerId, props.containerId, {
+    event,
+    part,
+    newIndex,
+    removeFromTarget: () => {
+      // Remove the part from this container
+      const index = localParts.value.findIndex(p => p.id === part.id);
+      if (index !== -1) {
+        localParts.value.splice(index, 1);
+      }
     }
-  } catch (error) {
-    console.error('Failed to parse drag data:', error);
-  }
-};
-
-const handleCardDragStart = (part: BikePart, containerId: string) => {
-  draggedPartId.value = part.id;
-  draggedSourceContainerId.value = containerId;
-};
-
-const handleCardDragEnd = () => {
-  draggedPartId.value = null;
-  draggedSourceContainerId.value = null;
-  isDragOver.value = false;
+  });
 };
 </script>
 
 <style scoped lang="css">
 .parts-drag-container {
+  position: relative;
   /* flex: 1 1 auto; */
   min-height: 200px;
   padding: 16px;
@@ -180,12 +200,17 @@ const handleCardDragEnd = () => {
 }
 
 .empty-state {
+    position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 32px;
   text-align: center;
+    pointer-events: none;
 }
 
 .empty-text {
@@ -201,13 +226,40 @@ const handleCardDragEnd = () => {
   color: #718096;
 }
 
-.parts-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
+.parts-grid-wrapper {
   flex: 1 1 auto;
   overflow-y: auto;
-  padding: .4rem;
+  width: 100%;
+  min-height: 100px;
+}
+
+.parts-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-auto-rows: max-content;
+  gap: 16px;
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  min-height: 100px;
+    padding: .4rem;
+}
+
+.parts-grid-item {
+  /* Ensure grid items are properly sized */
+  min-width: 0;
+}
+
+/* Draggable item styles */
+.parts-grid :deep(.sortable-ghost) {
+  opacity: 0.4;
+  background: #cbd5e0;
+}
+
+.parts-grid :deep(.sortable-drag) {
+  opacity: 0.8;
 }
 
 @media (max-width: 768px) {
