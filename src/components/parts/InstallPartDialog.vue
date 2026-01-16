@@ -21,7 +21,7 @@
           label="Installation Date"
           type="date"
           filled
-          :rules="[val => !!val || 'Installation date is required']"
+          :rules="[(val: string) => !!val || 'Installation date is required']"
         >
           <template v-slot:append>
             <q-icon name="event" class="cursor-pointer">
@@ -42,7 +42,7 @@
           type="number"
           filled
           :rules="[
-            val => val !== null && val !== undefined && val >= 0 || 'Mileage must be a positive number'
+            (val: number | null) => val !== null && val !== undefined && val >= 0 || 'Mileage must be a positive number'
           ]"
           class="q-mt-md"
         />

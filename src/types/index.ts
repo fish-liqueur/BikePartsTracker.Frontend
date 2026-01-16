@@ -4,6 +4,8 @@ export interface User {
   email: string;
   username: string;
   name: string;
+  defaultChainCycleLength: number;
+  defaultChainCycleInterval: number;
   createdAt: Date;
   updatedAt?: Date;
 }
@@ -12,12 +14,16 @@ export interface User {
 export interface Bike {
   id: string;
   name: string;
+  description: string;
   type: BikeType;
   user: User;
   parts: BikePart[];
   totalDistance: number;
   stravaDistance: number;
-  chainsCycle: number;
+  chainsCycleLength: number;
+  chainCycleInterval: number;
+  chainsInCycle: string[] | null;
+  activeChainId: string | null;
   createdAt: Date;
   updatedAt: Date;
   stravaId?: string;
@@ -33,12 +39,12 @@ export interface CreateBikeDto {
 export interface BikePart {
   id: string;
   name: string;
+  description: string;
   partType: PartType;
   brand: string;
   model: string;
   installationDate: Date;
   mileageAtInstallation: number;
-  expectedLifespan: number;
   bikeId: string;
   bike: Bike;
   usageHistory: PartUsageHistory[];
@@ -54,7 +60,6 @@ export interface PartDto {
   model: string;
   installationDate: Date;
   mileageAtInstallation: number;
-  expectedLifespan: number;
   bikeId: string;
 }
 
@@ -65,7 +70,6 @@ export interface CreatePartDto {
   model?: string;
   installationDate?: Date;
   mileageAtInstallation: number;
-  expectedLifespan?: number;
   isActive?: boolean;
   bikeId?: string;
 }
@@ -120,17 +124,12 @@ export enum PartType {
   Cassette = 'Cassette',
   Chainring = 'Chainring',
   BrakePads = 'BrakePads',
-  Tires = 'Tires',
-  Tubes = 'Tubes',
-  BrakeCables = 'BrakeCables',
-  ShiftCables = 'ShiftCables',
+  Tyres = 'Tyres',
+  Battery = 'Battery',
   BottomBracket = 'BottomBracket',
   Headset = 'Headset',
+  Hub = 'Hub',
   Pedals = 'Pedals',
-  Saddle = 'Saddle',
-  Handlebar = 'Handlebar',
-  Stem = 'Stem',
-  Seatpost = 'Seatpost',
   Other = 'Other'
 }
 

@@ -11,10 +11,13 @@ const generateMockParts = (): BikePart[] => {
     PartType.Cassette,
     PartType.Chainring,
     PartType.BrakePads,
-    PartType.Tires,
-    PartType.Tubes,
-    PartType.BrakeCables,
-    PartType.ShiftCables,
+    PartType.Tyres,
+    PartType.Battery,
+    PartType.BottomBracket,
+    PartType.Headset,
+    PartType.Hub,
+    PartType.Pedals,
+
   ];
 
   const brands = ['Shimano', 'SRAM', 'Continental', 'Vittoria', 'KMC', 'Campagnolo'];
@@ -30,12 +33,12 @@ const generateMockParts = (): BikePart[] => {
     return {
       id: `part-${i + 1}`,
       name: `${partType} ${i + 1}`,
+      description: `${brand} ${model} ${partType}`,
       partType,
       brand,
       model,
       installationDate,
       mileageAtInstallation: (i + 1) * 100,
-      expectedLifespan: 2000 + (i % 5) * 500,
       bikeId: i < 8 ? `bike-${(i % 2) + 1}` : '',
       bike: {} as any,
       usageHistory: [],
@@ -132,6 +135,9 @@ export const usePartsStore = defineStore('parts', () => {
       
       const newPart: BikePart = {
         ...partData,
+        description: '',
+        brand: partData.brand || '',
+        model: partData.model || '',
         id: `part-${Date.now()}`,
         bike: {} as any,
         usageHistory: [],
