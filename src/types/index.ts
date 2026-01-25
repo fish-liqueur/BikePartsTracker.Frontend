@@ -22,7 +22,7 @@ export interface Bike {
   stravaDistance: number;
   chainsCycleLength: number;
   chainCycleInterval: number;
-  chainsInCycle: string[] | null;
+  chainsInCycle: (string|null)[] | null;
   activeChainId: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -32,7 +32,20 @@ export interface Bike {
 
 export interface CreateBikeDto {
   name: string;
+  description: string;
   type: BikeType;
+  user: User;
+  parts: BikePart[];
+  totalDistance: number;
+  stravaDistance: number;
+  chainsCycleLength: number;
+  chainCycleInterval: number;
+  chainsInCycle: (string|null)[] | null;
+  activeChainId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  stravaId?: string;
+  isActive?: boolean;
 }
 
 // Part Types
@@ -232,3 +245,8 @@ export interface SyncBikeDto {
   isActive: boolean;
 }
 
+// Bike Types
+export interface UserSettings {
+  defaultChainCycleLength: number;
+  defaultChainCycleIntervalKm: number;
+}

@@ -21,7 +21,13 @@ export const useBikesStore = defineStore('bikes', () => {
       error.value = null;
       
       const fetchedBikes = await bikeService.getBikes();
-      bikes.value = fetchedBikes;
+      bikes.value = fetchedBikes.map(bike => ({
+        ...bike,
+        chainsInCycle: bike.chainsInCycle ?? [null, null, null],
+        activeChainId: bike.activeChainId ?? null,
+        chainsCycleLength: bike.chainsCycleLength ?? 3,
+        chainCycleInterval: bike.chainCycleInterval ?? 700
+      }));
       
       return fetchedBikes;
     } catch (err: any) {

@@ -648,31 +648,6 @@ const partName = computed(() => {
   height: 100%;
 }
 
-.widget-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.header-left {
-  flex: 1;
-}
-
-.widget-title {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #1a202c;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
 
 .toggle-filter {
   margin-right: 8px;

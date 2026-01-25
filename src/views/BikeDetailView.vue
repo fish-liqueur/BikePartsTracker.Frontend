@@ -43,10 +43,14 @@
       <q-tab-panels v-model="activeTab" animated class="tab-panels">
         <!-- Parts Tab -->
         <q-tab-panel name="parts">
-          <PartsWidget
-            :bike-context="bike"
-            title="Parts"
-          />
+          <div class="display-flex flex-column gap-5">
+            <ChainCycleWidget v-if="bike && bike.chainsInCycle?.length" 
+              :bike-context="bike" />
+            <PartsWidget
+              :bike-context="bike"
+              title="Parts"
+            />
+          </div>
         </q-tab-panel>
 
         <!-- Rides Tab -->
@@ -138,6 +142,7 @@ import { usePartsStore } from '@/stores/partsStore';
 import { useLayout } from '@/composables/useLayout';
 import { useQuerySync } from '@/composables/useQuerySync';
 import PartsWidget from '@/components/parts/PartsWidget.vue';
+import ChainCycleWidget from '@/components/parts/ChainCycleWidget.vue';
 import type { CreateBikeDto } from '@/types';
 import { BikeType } from '@/types';
 
@@ -172,7 +177,7 @@ const activeTab = computed({
 });
 
 // Form data
-const formData = ref<CreateBikeDto>({
+const formData = ref<Partial<CreateBikeDto>>({
   name: '',
   type: BikeType.Other
 });
@@ -201,14 +206,14 @@ watch(bike, (newBike) => {
 }, { immediate: true });
 
 // Set parts context bike in store when bike changes
-watch(bike, (newBike) => {
-  partsStore.setPartsContextBike(newBike ?? null);
-}, { immediate: true });
+// watch(bike, (newBike) => {
+//   partsStore.setPartsContextBike(newBike ?? null);
+// }, { immediate: true });
 
 // Clear parts context bike when component unmounts
-onUnmounted(() => {
-  partsStore.setPartsContextBike(null);
-});
+// onUnmounted(() => {
+//   partsStore.setPartsContextBike(null);
+// });
 
 // Fetch parts when parts tab is accessed, but only if store is empty
 watch(activeTab, async (newTab) => {
@@ -338,6 +343,19 @@ const handleDelete = async () => {
     showError('Failed to show confirmation dialog');
   }
 };
+
+const createChainCycle = async () => {
+    try {
+        await withAjaxBar(
+            bikesStore.updateBike(bikeId.value, { chainsInCycle: [null, null, null] } as Partial<CreateBikeDto>)
+        );
+    }
+    catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to create chain cycle';
+        showError(errorMessage);
+    }
+
+}
 </script>
 
 <style scoped lang="css">

@@ -1,4 +1,7 @@
 // Quasar layer - Wraps Quasar framework styles in the quasar layer
 @layer quasar
+  // Import custom Quasar variables first (before Quasar CSS)
+  @import '../quasar-variables.sass'
+  // Import Quasar CSS (will use the variables defined above)
   @import 'quasar/src/css/index.sass'
 

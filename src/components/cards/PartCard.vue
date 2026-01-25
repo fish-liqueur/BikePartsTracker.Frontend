@@ -1,8 +1,9 @@
 <template>
   <q-card class="part-card" 
-  :class="{ 
+>
+      <!-- :class="{ 
     'part-card--on-other-bike': isInstalledOnOtherBike
-    }">
+    }"> -->
     <q-card-section>
       <div class="part-header">
         <div class="part-type-chip-wrapper">
@@ -36,13 +37,7 @@
     <q-separator />
 
     <q-card-section class="part-info">
-      <!-- Remaining kms/days to maintenance -->
-      <div class="info-row">
-        <span class="info-label">Remaining:</span>
-        <span class="info-value" :class="remainingClass">
-          {{ remainingText }}
-        </span>
-      </div>
+
 
       <!-- Total Mileage -->
       <div class="info-row">
@@ -185,10 +180,8 @@ const emit = defineEmits<{
 }>();
 
 const router = useRouter();
-const partsStore = usePartsStore();
 
-// Get bike context from store
-const bikeContext = computed(() => partsStore.partsContextBike);
+
 
 // Calculate total mileage
 const totalMileage = computed((): number => {
@@ -198,21 +191,7 @@ const totalMileage = computed((): number => {
   return Math.max(0, props.currentBikeMileage - props.part.mileageAtInstallation);
 });
 
-// Calculate remaining kms to maintenance
-const remainingKms = computed((): number | null => {
-  if (!props.currentBikeMileage || props.currentBikeMileage === 0) {
-    return null;
-  }
-  
-  if (!props.part.expectedLifespan) {
-    return null;
-  }
-  
-  const currentMileage = totalMileage.value;
-  const remaining = props.part.expectedLifespan - currentMileage;
-  
-  return Math.max(0, remaining);
-});
+
 
 // Calculate remaining days (based on installation date and expected lifespan)
 // This is a simplified calculation - assumes expectedLifespan is in km
@@ -227,41 +206,9 @@ const remainingDays = computed((): number | null => {
   return null;
 });
 
-// Format remaining text
-const remainingText = computed((): string => {
-  const kms = remainingKms.value;
-  
-  if (kms === null) {
-    return 'N/A';
-  }
-  
-  if (kms === 0) {
-    return '0 km (Due)';
-  }
-  
-  return `${kms} km`;
-});
 
-// Remaining class for styling (warning/error if low)
-const remainingClass = computed((): string => {
-  const kms = remainingKms.value;
-  
-  if (kms === null || kms === 0) {
-    return 'remaining-due';
-  }
-  
-  if (!props.part.expectedLifespan) {
-    return '';
-  }
-  
-  // Warning if less than 20% of expected lifespan remaining
-  const percentage = (kms / props.part.expectedLifespan) * 100;
-  if (percentage < 20) {
-    return 'remaining-warning';
-  }
-  
-  return '';
-});
+
+
 
 // Event handlers
 const handleFullDetails = () => {
@@ -302,11 +249,11 @@ const handleConfigure = () => {
   router.push(`/parts/${props.part.id}/configure`);
 };
 
-const isInstalledOnOtherBike = computed(() => {
-  return props.part.bikeId 
-  && bikeContext?.value?.id
-  && bikeContext?.value?.id !== props.part.bikeId;
-});
+// const isInstalledOnOtherBike = computed(() => {
+//   return props.part.bikeId 
+//   && bikeContext?.value?.id
+//   && bikeContext?.value?.id !== props.part.bikeId;
+// });
 </script>
 
 <style scoped lang="css">
