@@ -10,8 +10,7 @@
         label="Add part"
         color="primary"
         icon="add"
-        
-        @click="addPart"
+        @click="handleAddPart"
       />
         <q-toggle
           v-model="showInstalledToOtherBikes"
@@ -100,6 +99,12 @@
       @cancel="handleInstallCancel"
     />
   </div>
+
+  <AddPartDialog
+    v-model="showAddPartDialog"
+    :targetBikeId="bikeContext?.id"
+    @submit="handleAddPart"
+  />
 </template>
 
 <script setup lang="ts">
@@ -112,6 +117,7 @@ import { useLayout } from '@/composables/useLayout';
 import PartsDragContainer from './PartsDragContainer.vue';
 import PartsTableContainer from './PartsTableContainer.vue';
 import InstallPartDialog from './InstallPartDialog.vue';
+import AddPartDialog from './AddPartDialog.vue';
 import type { Bike, BikePart } from '@/types';
 import type { TableColumn } from './PartsTableContainer.vue';
 
@@ -248,6 +254,7 @@ const { showSuccess, showError, withAjaxBar } = useLayout();
 
 // Dialog state
 const showInstallDialog = ref(false);
+const showAddPartDialog = ref(false);
 const pendingPartInstall = ref<{
   partId: string;
   sourceContainerId: string;
@@ -543,10 +550,6 @@ const handleConfigure = (partId: string) => {
   router.push(`/parts/${partId}/configure`);
 };
 
-const addPart = () => {
-  // TODO: Implement add part dialog/modal
-};
-
 // Handle installation dialog
 const handleInstallPart = async (data: { installationDate: string; mileageAtInstallation: number }) => {
   if (!pendingPartInstall.value) return;
@@ -578,11 +581,6 @@ const handleInstallPart = async (data: { installationDate: string; mileageAtInst
     const savedPartId = partId;
     pendingPartInstall.value = null;
 
-    emit('partsChanged', {
-      type: 'moved',
-      partId: savedPartId,
-      data: { sourceContainerId, targetContainerId }
-    });
   } catch (err: any) {
     console.error('Failed to install part:', err);
     showError(err.message || 'Failed to install part');
@@ -638,6 +636,10 @@ const targetBikeName = computed(() => {
 const partName = computed(() => {
   return pendingPartInstall.value?.part?.name || '';
 });
+
+const handleAddPart = () => {
+  showAddPartDialog.value = true;
+};
 </script>
 
 <style scoped lang="css">
@@ -674,7 +676,7 @@ const partName = computed(() => {
   display: flex;
   flex-direction: column;
   width: calc(50% - 12px);
-  height: 100%;
+  /* height: 100%; */
   overflow-y: auto;
 }
 

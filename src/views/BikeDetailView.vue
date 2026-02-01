@@ -143,7 +143,7 @@ import { useLayout } from '@/composables/useLayout';
 import { useQuerySync } from '@/composables/useQuerySync';
 import PartsWidget from '@/components/parts/PartsWidget.vue';
 import ChainCycleWidget from '@/components/parts/ChainCycleWidget.vue';
-import type { CreateBikeDto } from '@/types';
+import type { UpdateBikeDto } from '@/types';
 import { BikeType } from '@/types';
 
 const route = useRoute();
@@ -177,7 +177,7 @@ const activeTab = computed({
 });
 
 // Form data
-const formData = ref<Partial<CreateBikeDto>>({
+const formData = ref<UpdateBikeDto>({
   name: '',
   type: BikeType.Other
 });
@@ -347,7 +347,7 @@ const handleDelete = async () => {
 const createChainCycle = async () => {
     try {
         await withAjaxBar(
-            bikesStore.updateBike(bikeId.value, { chainsInCycle: [null, null, null] } as Partial<CreateBikeDto>)
+            bikesStore.updateBike(bikeId.value, { chainsInCycle: [null, null, null] })
         );
     }
     catch (error) {

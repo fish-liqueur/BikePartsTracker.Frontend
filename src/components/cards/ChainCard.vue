@@ -6,14 +6,14 @@
         'chain-card--active bg-primary text-white' : isActive && part,
         'chain-card--draggable bg-secondary text-white' : !isActive && part,
         'chain-card--draggable bg-warning text-white' : !part 
-      }"
-     
-    >
-
-      <q-card-section>
-        <h4 class="chain-card__name">{{ part.name }}</h4>
-        <p class="chain-card__description">{{ part.description }}</p>
-      </q-card-section>
+      }">
+      <div class="chain-card__index">
+          {{ index + 1 }}
+      </div>
+      <h4 class="chain-card__name">{{ part.name }}</h4>
+      <p class="chain-card__description">{{ part.description }}</p>
+      <p class="chain-card__third-line" :style="thirdLineStyle">{{ thirdLineText }}</p>
+      
 
       <q-menu touch-position>
         <q-list>
@@ -37,9 +37,9 @@
         </q-list>
       </q-menu>
     </q-card>
-    <div class="chain-card-absolute" >
-      Active chain!
-    </div>
+    <!-- <div class="chain-card-absolute" >
+      Active chain
+    </div> -->
   </template>
   <q-card 
     v-else
@@ -51,17 +51,16 @@
     }"
     @click="handleClickCard"
   >
-    <q-card-section>
-      <div class="chain-card__empty">
+  <div class="chain-card__index">
+          {{ index + 1 }}
+        </div>
         <h4 class="chain-card__name">No chain selected!</h4>
         <p class="chain-card__description">Click to select a chain</p>
-      </div>
-    </q-card-section>
   </q-card>
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick } from 'vue';
+import { ref, nextTick, computed } from 'vue';
 
 import type { Bike, BikePart } from '@/types';
 
@@ -69,12 +68,13 @@ interface Props {
   part: BikePart | null;
   isActive: boolean;
   bikeContext: Bike;
+  index: number;
 }
 
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  selectChain: [partId: string | null];
+  onAddChain: [];
   fullDetails: [partId: string];
   removeFromCycle: [partId: string];
 }>();
@@ -98,10 +98,36 @@ const handleFullDetails = () => {
 const handleRemoveFromCycle = () => {
   emit('removeFromCycle', props.part?.id || '');
 };
+
+const thirdLineText = computed(() => {
+  return props.isActive ? 'Active chain' : `should install in ${kmsBeforeInstallation.value} km`;
+});
+
+const kmsBeforeInstallation = computed(() => {
+  if (!props.bikeContext.chainCycleInterval) {
+    return 0;
+  }
+  return props.bikeContext.chainCycleInterval * props.index;
+});
+
+const thirdLineStyle = computed(() => {
+  return { 
+    color: props.isActive ? 'var(--q-warning)' : '#fff',
+    fontWeight: props.isActive ? 'bold' : 'normal',
+  };
+});
 </script>
 
 <style scoped lang="css">
 .chain-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: .1rem .5rem;
+  grid-template-areas: 
+    "index name"
+    "index description"
+    "thirdline thirdline";
+  padding: .5rem;
   transition: box-shadow 0.2s ease;
 }
 
@@ -118,22 +144,45 @@ const handleRemoveFromCycle = () => {
   anchor-name: --chain-card-first;
 }
 
-.chain-card-absolute {
+/* .chain-card-absolute {
   position: absolute;
   position-anchor: --chain-card-first;
   top: anchor(top);
-  left: anchor(center);
+  left: anchor(left);
+  transform: translate(.5rem, -1.5rem);
   pointer-events: none;
+  font-size: 1rem;
+  line-height: 1;
+  border: solid 1px var(--q-warning);
+  border-radius: .25rem;
+  background: white;
+  padding: .25rem .5rem;
+} */
+
+.chain-card__index {
+  grid-area: index;
+  font-size: 2rem;
+  line-height: 1;
+  font-weight: 600;
 }
 
 .chain-card__name {
+  grid-area: name;
   font-size: 1.4rem;
   line-height: 1.4;
 }
 
 .chain-card__description {
+  grid-area: description;
   font-size: 0.8rem;
   margin-bottom: 0;
+}
+
+.chain-card__third-line {
+  grid-area: thirdline;
+  font-size: 0.8rem;
+  margin-bottom: 0;
+  text-align: center;
 }
 </style>
 

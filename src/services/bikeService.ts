@@ -1,5 +1,5 @@
 import { apiService } from './api';
-import type { Bike, CreateBikeDto, ApiResponse, PaginatedResponse, SyncBikeDto } from '@/types';
+import type { Bike, CreateBikeDto, UpdateBikeDto, ApiResponse, PaginatedResponse, SyncBikeDto } from '@/types';
 
 export const bikeService = {
   // Get all bikes for current user
@@ -31,7 +31,7 @@ export const bikeService = {
   },
 
   // Update bike
-  async updateBike(id: string, bikeData: Partial<CreateBikeDto>): Promise<Bike | null> {
+  async updateBike(id: string, bikeData: UpdateBikeDto): Promise<Bike | null> {
     try {
       const response = await apiService.put<Bike>(`/api/bikes/${id}`, bikeData);
       return response.data || null;

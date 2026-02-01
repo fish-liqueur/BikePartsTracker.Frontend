@@ -185,7 +185,7 @@ const router = useRouter();
 
 // Calculate total mileage
 const totalMileage = computed((): number => {
-  if (!props.currentBikeMileage || props.currentBikeMileage === 0) {
+  if (!props.currentBikeMileage || props.currentBikeMileage === 0 || !props.part.mileageAtInstallation) {
     return 0;
   }
   return Math.max(0, props.currentBikeMileage - props.part.mileageAtInstallation);

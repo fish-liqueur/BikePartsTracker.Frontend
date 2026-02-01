@@ -30,8 +30,15 @@
                         :part="chain"
                         :is-active="chain?.id === bikeContext.activeChainId"
                         :bike-context="bikeContext"
+                        :index="index"
+                        :on-add-chain="handleAddChain"
                     />
                 </VueDraggable>
+            </div>
+            <div class="chain-cycle-widget__data-container">
+                <div class="chain-cycle-widget__data-container-item">
+                    Swap chain in <span>300</span> km 
+                </div>
             </div>
         </div>
     </div>
@@ -104,8 +111,22 @@ watch(updateDraggableTrigger, () => {
     updateDraggableChains();
 });
 
-const handleRemoveChainCycle = () => {
-    console.log('Remove chain cycle');
+const handleRemoveChainCycle = async () => {
+    try {
+        await withAjaxBar(
+            bikesStore.updateBike(props.bikeContext.id, { 
+                chainsInCycle: null  
+            })
+        );
+        showSuccess('Chain cycle removed successfully');
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to remove chain cycle';
+        showError(errorMessage);
+    }
+}
+
+const handleAddChain = () => {
+    console.log('Handle add chain');
 }
 </script>
 
@@ -115,6 +136,10 @@ const handleRemoveChainCycle = () => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  padding: 1rem;
+  border-radius: 1rem;
+  background-color: beige;
+  border: 1px solid var(--q-primary);
 }
 
 .chain-cycle-widget__chains-visualizer {
@@ -122,13 +147,26 @@ const handleRemoveChainCycle = () => {
   flex-direction: row;
   align-items: center;
   justify-content: center; */
+  border-radius: 1rem;
+  border: 1px dashed var(--q-positive);
+  background-color: rgba(33, 186, 69, 0.1);
+  padding: 1rem;
 }
 
 .chains-draggable-container {
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: stretch;
   justify-content: flex-start;
   gap: 1rem;
+}
+
+.chain-cycle-widget__layout {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
 }
 </style>

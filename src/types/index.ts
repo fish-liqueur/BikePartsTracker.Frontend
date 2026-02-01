@@ -16,35 +16,51 @@ export interface Bike {
   name: string;
   description: string;
   type: BikeType;
-  user: User;
+  // user: User;
   parts: BikePart[];
   totalDistance: number;
-  stravaDistance: number;
-  chainsCycleLength: number;
-  chainCycleInterval: number;
-  chainsInCycle: (string|null)[] | null;
-  activeChainId: string | null;
   createdAt: Date;
   updatedAt: Date;
   stravaId?: string;
+  stravaDistance?: number;
   isActive?: boolean;
+  chainsInCycle?: (string|null)[];
+  activeChainId?: string | null;
+  chainCycleInterval?: number;
+  chainsCycleLength?: number;
 }
 
 export interface CreateBikeDto {
   name: string;
-  description: string;
-  type: BikeType;
-  user: User;
-  parts: BikePart[];
-  totalDistance: number;
-  stravaDistance: number;
-  chainsCycleLength: number;
-  chainCycleInterval: number;
-  chainsInCycle: (string|null)[] | null;
-  activeChainId: string | null;
-  createdAt: Date;
-  updatedAt: Date;
+  description?: string;
+  type?: BikeType;
+  // user: User;
+  parts?: BikePart[];
+  totalDistance?: number;
+  stravaDistance?: number;
+  chainsCycleLength?: number;
+  chainCycleInterval?: number;
+  chainsInCycle?: (string|null)[];
+  activeChainId?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
   stravaId?: string;
+  isActive?: boolean;
+}
+
+// Update DTO - allows null to explicitly clear optional fields
+export interface UpdateBikeDto {
+  name?: string;
+  description?: string | null;
+  type?: BikeType;
+  parts?: BikePart[];
+  totalDistance?: number;
+  stravaDistance?: number | null;
+  chainsCycleLength?: number | null;
+  chainCycleInterval?: number | null;
+  chainsInCycle?: (string|null)[] | null;  // null = clear, undefined = no change, array = set value
+  activeChainId?: string | null;  // null = clear, undefined = no change, string = set value
+  stravaId?: string | null;
   isActive?: boolean;
 }
 
@@ -52,17 +68,17 @@ export interface CreateBikeDto {
 export interface BikePart {
   id: string;
   name: string;
-  description: string;
+  description?: string;
   partType: PartType;
-  brand: string;
-  model: string;
-  installationDate: Date;
-  mileageAtInstallation: number;
-  bikeId: string;
-  bike: Bike;
-  usageHistory: PartUsageHistory[];
-  createdAt: Date;
-  updatedAt: Date;
+  brand?: string;
+  model?: string;
+  installationDate?: Date;
+  mileageAtInstallation?: number;
+  bikeId: string | null;
+  bike?: Bike;
+  usageHistory?: PartUsageHistory[];
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface PartDto {

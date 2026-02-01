@@ -55,7 +55,15 @@ const emit = defineEmits<{
 const localShow = ref(props.modelValue);
 const newBike = ref<CreateBikeDto>({
   name: '',
-  type: BikeType.Other
+  type: BikeType.Other,
+  description: '',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  parts: [],
+  totalDistance: 0,
+  stravaDistance: 0,
+  chainsCycleLength: 0,
+  chainCycleInterval: 0,
 });
 
 const bikeTypeOptions = [
@@ -95,7 +103,15 @@ const handleDialogUpdate = (value: boolean) => {
 const resetForm = () => {
   newBike.value = {
     name: '',
-    type: BikeType.Other
+    type: BikeType.Other,
+    description: '',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    parts: [],
+    totalDistance: 0,
+    stravaDistance: 0,
+    chainsCycleLength: 0,
+    chainCycleInterval: 0,
   };
 };
 
