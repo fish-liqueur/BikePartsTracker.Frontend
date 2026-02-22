@@ -12,7 +12,7 @@ export const useBikesStore = defineStore('bikes', () => {
 
   // Getters
   const bikesCount = computed(() => bikes.value.length);
-  const getBikeById = computed(() => (id: string) => bikes.value.find(bike => bike.id === id));
+  const getBikeById = computed(() => (id: string | null) => id ? bikes.value.find(bike => bike.id === id) : null);
 
   // Actions
   const fetchBikes = async () => {

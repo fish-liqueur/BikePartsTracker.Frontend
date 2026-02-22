@@ -74,7 +74,7 @@ interface Props {
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  onAddChain: [];
+  onAddChain: [index: number];
   fullDetails: [partId: string];
   removeFromCycle: [partId: string];
 }>();
@@ -86,7 +86,8 @@ const handleClickCard = () => {
     showMenu.value = !showMenu.value;
     console.log('handleClickCard 22', showMenu.value);
   } else {
-    console.log('No chain selected');
+    emit('onAddChain', props.index);
+    console.log('handleClickCard');
   }
 };
 

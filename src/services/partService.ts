@@ -60,13 +60,13 @@ export const partService = {
   },
 
   // Get parts with pagination
-  async getPartsPaginated(page: number = 1, pageSize: number = 10): Promise<PaginatedResponse<BikePart>> {
-    const response = await apiService.get<PaginatedResponse<BikePart>>('/api/parts', {
-      page,
-      pageSize
-    });
-    return response.data;
-  },
+  // async getPartsPaginated(page: number = 1, pageSize: number = 10): Promise<PaginatedResponse<BikePart>> {
+  //   const response = await apiService.get<PaginatedResponse<BikePart>>('/api/parts', {
+  //     page,
+  //     pageSize
+  //   });
+  //   return response.data;
+  // },
 
   // Search parts
   async searchParts(query: string): Promise<BikePart[]> {
@@ -81,32 +81,32 @@ export const partService = {
   },
 
   // Get parts that need replacement (based on mileage)
-  async getPartsNeedingReplacement(bikeId: string, currentMileage: number): Promise<BikePart[]> {
-    const response = await apiService.get<BikePart[]>('/api/parts/needing-replacement', {
-      bikeId,
-      currentMileage
-    });
-    return response.data || [];
-  },
+  // async getPartsNeedingReplacement(bikeId: string, currentMileage: number): Promise<BikePart[]> {
+  //   const response = await apiService.get<BikePart[]>('/api/parts/needing-replacement', {
+  //     bikeId,
+  //     currentMileage
+  //   });
+  //   return response.data || [];
+  // },
 
   // Add usage history entry
-  async addUsageHistory(partId: string, usageData: {
-    mileage: number;
-    date: Date;
-    notes?: string;
-  }): Promise<PartUsageHistory | null> {
-    try {
-      const response = await apiService.post<PartUsageHistory>(`/api/parts/${partId}/usage`, usageData);
-      return response.data || null;
-    } catch (error) {
-      console.error('Failed to add usage history:', error);
-      throw error;
-    }
-  },
+  // async addUsageHistory(partId: string, usageData: {
+  //   mileage: number;
+  //   date: Date;
+  //   notes?: string;
+  // }): Promise<PartUsageHistory | null> {
+  //   try {
+  //     const response = await apiService.post<PartUsageHistory>(`/api/parts/${partId}/usage`, usageData);
+  //     return response.data || null;
+  //   } catch (error) {
+  //     console.error('Failed to add usage history:', error);
+  //     throw error;
+  //   }
+  // },
 
   // Get usage history for a part
-  async getPartUsageHistory(partId: string): Promise<PartUsageHistory[]> {
-    const response = await apiService.get<PartUsageHistory[]>(`/api/parts/${partId}/usage`);
-    return response.data || [];
-  }
+//   async getPartUsageHistory(partId: string): Promise<PartUsageHistory[]> {
+//     const response = await apiService.get<PartUsageHistory[]>(`/api/parts/${partId}/usage`);
+//     return response.data || [];
+//   }
 };

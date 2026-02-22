@@ -10,7 +10,7 @@
         label="Add part"
         color="primary"
         icon="add"
-        @click="handleAddPart"
+        @click="showAddPartDialog = true"
       />
         <q-toggle
           v-model="showInstalledToOtherBikes"
@@ -103,7 +103,8 @@
   <AddPartDialog
     v-model="showAddPartDialog"
     :targetBikeId="bikeContext?.id"
-    @submit="handleAddPart"
+    @create="handleAddPart"
+
   />
 </template>
 
@@ -118,7 +119,7 @@ import PartsDragContainer from './PartsDragContainer.vue';
 import PartsTableContainer from './PartsTableContainer.vue';
 import InstallPartDialog from './InstallPartDialog.vue';
 import AddPartDialog from './AddPartDialog.vue';
-import type { Bike, BikePart } from '@/types';
+import type { Bike, BikePart, CreatePartDto } from '@/types';
 import type { TableColumn } from './PartsTableContainer.vue';
 
 export interface ContainerConfig {
@@ -637,8 +638,8 @@ const partName = computed(() => {
   return pendingPartInstall.value?.part?.name || '';
 });
 
-const handleAddPart = () => {
-  showAddPartDialog.value = true;
+const handleAddPart = (part: CreatePartDto) => {
+  partsStore.createPart(part);
 };
 </script>
 

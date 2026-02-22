@@ -31,7 +31,7 @@
                         :is-active="chain?.id === bikeContext.activeChainId"
                         :bike-context="bikeContext"
                         :index="index"
-                        :on-add-chain="handleAddChain"
+                        @on-add-chain="onUserAddChain"
                     />
                 </VueDraggable>
             </div>
@@ -42,10 +42,17 @@
             </div>
         </div>
     </div>
+
+    <AddChainDialog
+      v-model="showAddChainDialog"
+      :bike-context="bikeContext"
+      @select="handleSelectChain"
+      @create="handleCreateChain"
+    />
 </template>
 
 <script setup lang="ts">
-import type { Bike, BikePart } from '@/types';
+import type { Bike, BikePart, CreatePartDto, UpdateBikeDto } from '@/types';
 import { computed, ref, onMounted, watch } from 'vue';
 import { VueDraggable, type SortableEvent } from 'vue-draggable-plus';
 import { usePartsStore } from '@/stores/partsStore';
@@ -53,6 +60,7 @@ import { useUserSettingsStore } from '@/stores/userSettingsStore';
 import { useBikesStore } from '@/stores/bikesStore';
 import { useLayout } from '@/composables/useLayout';
 import ChainCard from '@/components/cards/ChainCard.vue';
+import AddChainDialog from '@/components/parts/AddСhainDialog.vue';
 
 interface Props {
   bikeContext: Bike;
@@ -67,18 +75,23 @@ const { showSuccess, showError, withAjaxBar } = useLayout();
 const chainsInCycleDetailed = computed(() => props.bikeContext.chainsInCycle?.map(id => partsStore.parts.find(part => part.id === id)));
 const draggableChains = ref<BikePart[]>([]);
 
+const activeChainIndex = computed(() => {
+ return props.bikeContext.chainsInCycle?.findIndex(id => id === props.bikeContext.activeChainId);
+});
+
 const getDraggableChains = () => {
     if (!props.bikeContext.chainsInCycle) {
         throw new Error('Chains cycle not found for this bike');
     }
 
-    const index = props.bikeContext.chainsInCycle?.findIndex(id => id === props.bikeContext.activeChainId);
-
-    if (index === -1) {
+    if (activeChainIndex.value === -1) {
         throw new Error('Active chain not found in chainsInCycle');
     }
 
-    const rotatedChainIds = [ ...props.bikeContext.chainsInCycle?.slice(index), ...props.bikeContext.chainsInCycle?.slice(0, index)] as (string | null)[];
+    const rotatedChainIds = [ 
+      ...props.bikeContext.chainsInCycle?.slice(activeChainIndex.value), 
+      ...props.bikeContext.chainsInCycle?.slice(0, activeChainIndex.value)
+    ] as (string | null)[];
     return rotatedChainIds.map(id => partsStore.parts.find(part => part.id === id) || null) as (BikePart | null)[];
 }
 
@@ -124,9 +137,68 @@ const handleRemoveChainCycle = async () => {
         showError(errorMessage);
     }
 }
+const selectedChainIndex = ref(-1);
+const onUserAddChain = (index: number) => {
+    selectedChainIndex.value = index;
+    showAddChainDialog.value = true;
+}
 
-const handleAddChain = () => {
-    console.log('Handle add chain');
+const showAddChainDialog = ref(false);
+
+const handleSelectChain = async (chain: BikePart) => {
+    console.log('Handle select chain', chain, typeof chain);
+    try {
+        updateBikeWithNewChain(chain.id);
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to create chain';
+        showError(errorMessage);
+    }
+}
+
+const handleCreateChain = async (data: CreatePartDto) => {
+    console.log('Handle create chain', data);
+    try {
+        const newChain = await withAjaxBar(
+            partsStore.createPart(data)
+        );
+        console.log('Handle create chain 2:', data);
+        showSuccess('Chain created successfully');
+        if (newChain) {
+          updateBikeWithNewChain(newChain.id);
+        }
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to create chain';
+        showError(errorMessage);
+    }
+}
+
+const updateBikeWithNewChain = async (newChainId: string) => {
+  if (selectedChainIndex.value >= 0) {
+          const newChainsInCycle = props.bikeContext.chainsInCycle == null 
+            ? getNewChainsCycle() 
+            : [ ...props.bikeContext.chainsInCycle ];
+            const updateBikePayload: UpdateBikeDto = {
+              chainsInCycle: [
+                ...newChainsInCycle.slice(0, selectedChainIndex.value),
+                newChainId,
+                ...newChainsInCycle.slice(selectedChainIndex.value + 1)
+              ]
+            };
+
+            if (selectedChainIndex.value === activeChainIndex.value) {
+              updateBikePayload.activeChainId = newChainId;
+            }
+            
+            await withAjaxBar(
+              bikesStore.updateBike(props.bikeContext.id, updateBikePayload)
+          );
+          showSuccess('Chain added to cycle successfully');
+          }
+}
+
+const getNewChainsCycle = (): (string | null)[] => {
+  const chainCycleLength = props.bikeContext.chainsCycleLength || userSettingsStore?.userSettings?.defaultChainCycleLength || 3;
+  return new Array(chainCycleLength).fill(null);
 }
 </script>
 

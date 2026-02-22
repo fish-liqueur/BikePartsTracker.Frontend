@@ -219,7 +219,7 @@ const totalMileage = (part: BikePart): number => {
   if (!props.currentBikeMileage || props.currentBikeMileage === 0) {
     return 0;
   }
-  return Math.max(0, props.currentBikeMileage - part.mileageAtInstallation);
+  return Math.max(0, props.currentBikeMileage - (part.mileageAtInstallation || 0));
 };
 
 // Calculate mileage in current maintenance cycle
