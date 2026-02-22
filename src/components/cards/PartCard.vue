@@ -18,7 +18,7 @@
         <div class="bike-name-chip-wrapper">
           <q-chip
           v-if="part.bikeId"
-            :label="part.bikeId"
+            :label="bikesStore.getBikeById(part.bikeId)?.name"
             color="secondary"
             text-color="white"
             size="sm"
@@ -157,6 +157,7 @@
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { usePartsStore } from '@/stores/partsStore';
+import { useBikesStore } from '@/stores/bikesStore';
 import type { BikePart } from '@/types';
 
 interface Props {
@@ -181,7 +182,7 @@ const emit = defineEmits<{
 
 const router = useRouter();
 
-
+const bikesStore = useBikesStore();
 
 // Calculate total mileage
 const totalMileage = computed((): number => {
