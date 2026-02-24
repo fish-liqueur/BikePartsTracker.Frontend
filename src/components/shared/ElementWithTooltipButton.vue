@@ -20,7 +20,7 @@ const props = withDefaults(defineProps<Props>(), {
 <style scoped>
 .element-with-tooltip-button {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
   position: relative;
 }

@@ -84,6 +84,7 @@
     .flex-justify-center { justify-content: center; }
     .flex-justify-end { justify-content: flex-end; }
     .flex-justify-start { justify-content: flex-start; } 
+    .flex-justify-between { justify-content: space-between; }
     .flex-align-start { align-items: flex-start; }
     .flex-align-end { align-items: flex-end; }
     .flex-align-stretch { align-items: stretch; }
@@ -93,10 +94,13 @@
     .gap-4 { gap: 1.5rem; }
     .gap-5 { gap: 3rem; }
 
+    .w-100 { width: 100%; }
+    .w-50 { width: 50%; }
+
     /* Tooltip styles - must be global because tooltips render in portals */
     .tooltip-text {
       white-space: pre-line;
     }
-    
+
 }
 
