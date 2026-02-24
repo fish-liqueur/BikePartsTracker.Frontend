@@ -121,7 +121,7 @@ const partTypeOptions = [
   { label: 'Cassette', value: PartType.Cassette },
   { label: 'Chainring', value: PartType.Chainring },
   { label: 'Brake Pads', value: PartType.BrakePads },
-  { label: 'Tyres', value: PartType.Tyres },
+  { label: 'Tyre', value: PartType.Tyre },
   { label: 'Battery', value: PartType.Battery },
   { label: 'Bottom Bracket', value: PartType.BottomBracket },
   { label: 'Headset', value: PartType.Headset },

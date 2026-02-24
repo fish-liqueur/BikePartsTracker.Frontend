@@ -153,7 +153,7 @@ export enum PartType {
   Cassette = 'Cassette',
   Chainring = 'Chainring',
   BrakePads = 'BrakePads',
-  Tyres = 'Tyres',
+  Tyre = 'Tyre',
   Battery = 'Battery',
   BottomBracket = 'BottomBracket',
   Headset = 'Headset',
@@ -261,8 +261,16 @@ export interface SyncBikeDto {
   isActive: boolean;
 }
 
-// Bike Types
 export interface UserSettings {
   defaultChainCycleLength: number;
   defaultChainCycleIntervalKm: number;
+  defaultUseChainCycle: boolean;
+  showTips: boolean;
+}
+
+export interface UserSettingsDto {
+  defaultChainCycleLength?: number | null;
+  defaultChainCycleIntervalKm?: number | null;
+  defaultUseChainCycle?: boolean | null;
+  showTips?: boolean | null;
 }

@@ -57,7 +57,7 @@
             <q-btn color="secondary" 
               icon="settings" 
               label="User settings" 
-              to="settings"
+              to="/settings"
               size="l" 
               flat />
           </q-item-section>
