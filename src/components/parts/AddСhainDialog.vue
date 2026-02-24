@@ -37,7 +37,7 @@
           option-value="id">
           <template v-slot:option="scope">
           <q-item v-bind="getItemAttrs(scope)" :class="getChainOptionClass(scope.opt)">
-            <div class="chain-option" >
+            <div class="chain-option__inner-container" >
               <q-item-section avatar>
                 <q-icon :name="scope.opt.icon" />
               </q-item-section>
@@ -46,7 +46,10 @@
                 <q-item-label caption lines="1">{{ scope.opt.description }}</q-item-label>
                 <q-item-label v-if="isEquippedToOtherBike(scope.opt)" overline lines="1">
                   {{ getOtherBikeString(scope.opt.bikeId) }}
-                  </q-item-label>
+                </q-item-label>
+                <q-item-label v-else-if="isChainInCycle(scope.opt.id)" overline lines="1">
+                  This chain is already in the cycle
+                </q-item-label>
               </q-item-section>
 
             </div>
@@ -204,9 +207,10 @@ const availableChains = computed(() => {
 const activeTab = ref('existing');
 const getChainOptionClass = (chain: BikePart) => {
   return {
+    'chain-option': true,
     'chain-option--on-this-bike': !!chain.bikeId && chain.bikeId === props.bikeContext.id,
     'chain-option--on-other-bike': isEquippedToOtherBike(chain),
-    'chain-option--in-cycle': props.bikeContext.chainsInCycle?.includes(chain.id)
+    'chain-option--in-cycle': isChainInCycle(chain.id)
   };
 };
 
@@ -221,7 +225,7 @@ const getItemAttrs = (itemScope: QSelectOptionScope) => {
   const { itemProps, opt } = itemScope;
   const attrs = { 
     ...itemProps,
-    disable: props.bikeContext.chainsInCycle?.includes(opt.id),
+    disable: isChainInCycle(opt.id),
       };
   return attrs;
 };
@@ -237,8 +241,11 @@ const selectChain = () => {
   };
 
   const isEquippedToOtherBike = (chain: BikePart) => {
-    console.log('isEquippedToOtherBike', chain, props.bikeContext);
     return chain.bikeId && chain.bikeId !== props.bikeContext.id;
+  };
+
+  const isChainInCycle = (chainId: string): boolean => {
+    return props.bikeContext.chainsInCycle?.includes(chainId) || false;
   };
 
   const getOtherBikeString = (id: string) => {
@@ -247,7 +254,6 @@ const selectChain = () => {
   };
 
   const availableChainsSortFunction = (a: BikePart, b: BikePart) => {
-    console.log('availableChainsSortFunction', a, b);
     const aOnOtherBike = isEquippedToOtherBike(a);
     const bOnOtherBike = isEquippedToOtherBike(b);
     if (aOnOtherBike && !bOnOtherBike) {
@@ -261,14 +267,21 @@ const selectChain = () => {
 </script>
 
 <style scoped lang="css">
+.chain-option {
+ max-width: 30rem;
+}
 .chain-option--on-this-bike {
-  background-color: rgba(33, 186, 69, 0.1);
+  background-color: rgba(33, 186, 69, 0.3);
 }
 .chain-option--on-other-bike {
-  background-color: rgba(193, 0, 21, 0.1);
+  background-color: rgba(193, 0, 21, 0.2);
 }
 .chain-option--in-cycle {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(100, 100, 100, 0.4);
+}
+
+.chain-option__inner-container {
+  width: 100%;
 }
 </style>
 

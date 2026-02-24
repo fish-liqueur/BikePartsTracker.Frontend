@@ -12,14 +12,14 @@
       label="Description"
       type="textarea"
       filled
-      rows="3"
+      rows="2"
       class="q-mt-md"
     />
 
     <q-select
       v-model="formData.partType"
       :options="partTypeOptions"
-      label="Part Type *"
+      label="Part Type"
       emit-value
       map-options
       filled
@@ -27,20 +27,22 @@
       :disable="!!lockType"
       class="q-mt-md"
     />
-
-    <q-input
+<div class="display-flex">
+  <q-input
       v-model="formData.brand"
       label="Brand"
       filled
-      class="q-mt-md"
+      class="q-mt-md flex-1"
     />
 
     <q-input
       v-model="formData.model"
       label="Model"
       filled
-      class="q-mt-md"
+      class="q-mt-md flex-1"
     />
+</div>
+
 
     <q-select
       v-model="formData.bikeId"
@@ -52,19 +54,25 @@
       option-value="id"
       filled
       clearable
-      class="q-mt-md"
+      class="q-mt-md q-field--with-bottom"
     />
 
-    <q-input
+    <!-- <q-input
       v-model.number="formData.mileageAtInstallation"
-      label="Mileage at Installation *"
+      label="Mileage at Installation"
       type="number"
       filled
       :rules="[
         (val: number | null) => val !== null && val !== undefined && val >= 0 || 'Mileage must be a positive number'
       ]"
       class="q-mt-md"
-    />
+    /> -->
+    <ElementWithTooltipButton :tooltip-text="installationDateTooltip">
+      <DateTimePicker
+        v-model="formData.installationDate"
+        label="Installation Date & Time"
+      />
+    </ElementWithTooltipButton>
   </q-form>
 </template>
 
@@ -73,6 +81,8 @@ import { ref, computed, watch } from 'vue';
 import { useBikesStore } from '@/stores/bikesStore';
 import type { CreatePartDto } from '@/types';
 import { PartType } from '@/types';
+import ElementWithTooltipButton from '@/components/shared/ElementWithTooltipButton.vue';
+import DateTimePicker from '@/components/shared/DateTimePicker.vue';
 
 interface Props {
   initialData?: Partial<FormData>;
@@ -102,7 +112,8 @@ const formData = ref<FormData>({
   brand: '',
   model: '',
   bikeId: '',
-  mileageAtInstallation: 0
+  mileageAtInstallation: 0,
+  installationDate: new Date()
 });
 
 const partTypeOptions = [
@@ -121,6 +132,10 @@ const partTypeOptions = [
 
 const bikeOptions = computed(() => bikesStore.bikes);
 
+const installationDateTooltip = `The date and time when the part was physically installed on the bike.
+This is used to match your rides history with the part.
+No need to be exact with the time, just put it between the last ride without the part and the first ride with it.`;
+
 // Initialize form from initialData prop
 const initializeForm = () => {
   const initialPartType = props.lockType || props.initialData?.partType || PartType.Other;
@@ -131,7 +146,12 @@ const initializeForm = () => {
     brand: props.initialData?.brand || '',
     model: props.initialData?.model || '',
     bikeId: props.initialData?.bikeId || '',
-    mileageAtInstallation: props.initialData?.mileageAtInstallation || 0
+    mileageAtInstallation: props.initialData?.mileageAtInstallation || 0,
+    installationDate: props.initialData?.installationDate 
+      ? (props.initialData.installationDate instanceof Date 
+          ? props.initialData.installationDate 
+          : new Date(props.initialData.installationDate))
+      : new Date()
   };
 };
 

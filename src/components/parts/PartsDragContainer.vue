@@ -16,8 +16,8 @@
     <!-- Empty State -->
     <div v-if="localParts.length === 0" class="empty-state">
       <q-icon name="inventory_2" size="48px" color="grey-5" />
-      <p class="empty-text">No parts in this container</p>
-      <p class="empty-hint">Drag and drop parts here</p>
+      <p class="empty-text">{{ emptyText[0] }}</p>
+      <p class="empty-hint">{{ emptyText[1] }}</p>
     </div>
 
     <!-- Parts Grid with Draggable -->
@@ -65,12 +65,14 @@ interface Props {
   title?: string;
   showCount?: boolean;
   currentBikeMileage?: number;
+  emptyText?: [string, string];
 }
 
 const props = withDefaults(defineProps<Props>(), {
   title: '',
   showCount: true,
-  currentBikeMileage: 0
+  currentBikeMileage: 0,
+  emptyText: () => ['No parts in this container', 'Click ADD PART button to add one']
 });
 
 const emit = defineEmits<{

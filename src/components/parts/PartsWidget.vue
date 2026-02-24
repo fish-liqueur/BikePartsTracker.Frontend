@@ -45,6 +45,7 @@
           :title="container.title"
           :show-count="showCount"
           :current-bike-mileage="currentBikeMileage"
+          :empty-text="container.emptyText"
           @part-dropped="handlePartDropped"
           @part-moved="handlePartMoved"
           @add-to-container="handleAddToContainer"
@@ -126,6 +127,7 @@ export interface ContainerConfig {
   id: string;
   title?: string;
   parts: BikePart[];
+  emptyText: [string, string];
 }
 
 interface Props {
@@ -302,12 +304,15 @@ const computedContainers = computed<ContainerConfig[]>(() => {
       {
         id: `bike-${props.bikeContext.id}`,
         title: `Installed on this Bike (${props.bikeContext.name})`,
-        parts: partsOnBike
+        parts: partsOnBike,
+        emptyText: ['No parts installed on this bike', 
+        partsNotOnBike.length > 0 ? 'Drag parts here or click ADD PART to install parts' : 'Click ADD PART button to add one'],
       },
       {
         id: 'available',
         title: 'Available Parts',
-        parts: partsNotOnBike
+        parts: partsNotOnBike,
+        emptyText: ['No parts available', 'Click ADD PART button to add one'],
       }
     ];
   } else {
@@ -325,7 +330,8 @@ const computedContainers = computed<ContainerConfig[]>(() => {
       {
         id: 'all',
         title: 'All Parts',
-        parts: parts
+        parts: parts,
+        emptyText: ['No parts available', 'Click ADD PART button to add one'],
       }
     ];
   }

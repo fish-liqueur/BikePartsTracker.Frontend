@@ -173,6 +173,7 @@ const handleCreateChain = async (data: CreatePartDto) => {
 }
 
 const updateBikeWithNewChain = async (newChainId: string) => {
+  try {
   if (selectedChainIndex.value >= 0) {
           const newChainsInCycle = props.bikeContext.chainsInCycle == null 
             ? getNewChainsCycle() 
@@ -194,6 +195,10 @@ const updateBikeWithNewChain = async (newChainId: string) => {
           );
           showSuccess('Chain added to cycle successfully');
           }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to update bike with new chain';
+    showError(errorMessage);
+  }
 }
 
 const getNewChainsCycle = (): (string | null)[] => {
