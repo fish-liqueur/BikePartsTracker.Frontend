@@ -1,10 +1,12 @@
 <template>
-  <q-form @submit.prevent="handleSubmit" class="part-form">
+  <q-form @submit.prevent="handleSubmit" class="form-general">
     <q-input
       v-model="formData.name"
       label="Name *"
       filled
+      standout
       :rules="[(val: string) => !!val || 'Name is required']"
+      class="m-0 p-0"
     />
 
     <q-input
@@ -13,7 +15,7 @@
       type="textarea"
       filled
       rows="2"
-      class="q-mt-md"
+      class="m-0 p-0"
     />
 
     <q-select
@@ -25,25 +27,23 @@
       filled
       :rules="[(val: PartType | null) => !!val || 'Part type is required']"
       :disable="!!lockType"
-      class="q-mt-md"
+      class="m-0 p-0"
     />
-<div class="display-flex">
-  <q-input
-      v-model="formData.brand"
-      label="Brand"
-      filled
-      class="q-mt-md flex-1"
-    />
+    <div class="display-flex gap-2">
+      <q-input
+          v-model="formData.brand"
+          label="Brand"
+          filled
+          class="flex-1"
+        />
 
-    <q-input
-      v-model="formData.model"
-      label="Model"
-      filled
-      class="q-mt-md flex-1"
-    />
-</div>
-
-
+        <q-input
+          v-model="formData.model"
+          label="Model"
+          filled
+          class="flex-1"
+        />
+    </div>
     <q-select
       v-model="formData.bikeId"
       :options="bikeOptions"
@@ -54,7 +54,7 @@
       option-value="id"
       filled
       clearable
-      class="q-mt-md q-field--with-bottom"
+      class="m-0 p-0"
     />
 
     <!-- <q-input
@@ -195,11 +195,4 @@ defineExpose({
   handleSubmit
 });
 </script>
-
-<style scoped lang="css">
-.part-form {
-  display: flex;
-  flex-direction: column;
-}
-</style>
 

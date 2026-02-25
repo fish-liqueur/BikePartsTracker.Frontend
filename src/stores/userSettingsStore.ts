@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { userSettingsService } from '@/services/userSettingsService';
-import type { UserSettings } from '@/types';
+import type { UserSettings, UserSettingsDto } from '@/types';
 
 export const useUserSettingsStore = defineStore('userSettings', () => {
   // State
@@ -22,10 +22,10 @@ export const useUserSettingsStore = defineStore('userSettings', () => {
     } 
   };
 
-  const updateSettings = async (settings: Partial<UserSettings>) => {
+  const updateSettings = async (settings: UserSettingsDto) => {
     try {
       const updatedSettings = await userSettingsService.updateUserSettings(settings);
-      userSettings.value = updatedSettings;
+      userSettings.value = updatedSettings as UserSettings;
       return updatedSettings;
     } catch (err: any) {
       throw err;

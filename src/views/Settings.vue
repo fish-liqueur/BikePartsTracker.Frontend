@@ -1,11 +1,13 @@
 <template>
   <div class="view-container">
     <StravaWidget />
+    <UserSettingsWidget />
   </div>
 </template>
 
 <script setup lang="ts">
 import StravaWidget from '@/components/stravaWidget/StravaWidget.vue';
+import UserSettingsWidget from '@/components/settings/UserSettingsWidget.vue';
 </script>
 
 <style scoped>

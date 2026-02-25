@@ -17,13 +17,11 @@
 
       <q-card-actions align="stretch">
         <q-btn :flat="hasAthlete" 
-        size="lg" 
         color="primary" 
         :loading="isLoading" 
         :disabled="hasAthlete" 
         @click="handleAddStrava">Connect Strava</q-btn>
-        <q-btn :flat="!hasAthlete" 
-        size="lg" 
+        <q-btn :flat="!hasAthlete"   
         color="negative" 
         :loading="isLoading" 
         :disabled="!hasAthlete" 
