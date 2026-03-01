@@ -52,7 +52,7 @@
         </q-btn>
       </template>
       <q-list>
-        <q-item clickable v-close-popup >
+        <q-item v-if="authStore.currentUser" clickable v-close-popup >
           <q-item-section>
             <q-btn color="secondary" 
               icon="settings" 
@@ -62,7 +62,7 @@
               flat />
           </q-item-section>
         </q-item>
-        <q-item clickable>
+        <q-item v-if="authStore.currentUser" clickable>
           <q-item-section>
             <q-btn color="negative" 
               icon="logout" 
