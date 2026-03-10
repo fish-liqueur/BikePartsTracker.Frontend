@@ -44,7 +44,7 @@
         <!-- Parts Tab -->
         <q-tab-panel name="parts">
           <div class="display-flex flex-column gap-5">
-            <ChainCycleWidget v-if="bike && bike.chainsInCycle?.length" 
+            <ChainCycleWidget  
               :bike-context="bike" />
             <PartsWidget
               :bike-context="bike"
@@ -344,18 +344,7 @@ const handleDelete = async () => {
   }
 };
 
-const createChainCycle = async () => {
-    try {
-        await withAjaxBar(
-            bikesStore.updateBike(bikeId.value, { chainsInCycle: [null, null, null] })
-        );
-    }
-    catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to create chain cycle';
-        showError(errorMessage);
-    }
 
-}
 </script>
 
 <style scoped lang="css">

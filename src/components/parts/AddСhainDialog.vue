@@ -58,6 +58,14 @@
         </template>
           </q-select>
       </q-card-section>
+      <q-card-section v-if="selectedChainIndex === 0">
+        <ElementWithTooltipButton :tooltip-text="installationDateTooltip">
+          <DateTimePicker
+            v-model="installationDate"
+            label="Installation Date & Time"
+          />
+        </ElementWithTooltipButton>
+      </q-card-section>
       </q-tab-panel>
       <q-tab-panel name="new">
         <PartForm
@@ -102,22 +110,26 @@ import { useLayout } from '@/composables/useLayout';
 import type { Bike, BikePart, CreatePartDto } from '@/types';
 import { PartType } from '@/types';
 import PartForm from './PartForm.vue';
+import ElementWithTooltipButton from '@/components/shared/ElementWithTooltipButton.vue';
+import DateTimePicker from '@/components/shared/DateTimePicker.vue';
 
 interface Props {
   modelValue: boolean;
   basicPart?: BikePart | null;
   bikeContext: Bike;
+  selectedChainIndex: number;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   targetBikeId: null,
   basicPart: null,
+  selectedChainIndex: -1,
 });
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean];
-  create: [data: CreatePartDto,];
-  select: [chain: BikePart];
+  create: [data: CreatePartDto, index: number];
+  select: [chain: BikePart, index: number];
   cancel: [];
 }>();
 
@@ -157,6 +169,7 @@ const initialFormData = computed(() => {
     data.model = props.basicPart.model || '';
     data.bikeId = props.basicPart.bikeId || '';
     data.mileageAtInstallation = props.basicPart.mileageAtInstallation || 0;
+    data.installationDate = props.basicPart.installationDate || new Date();
   }
   
   // If targetBikeId is provided and matches a bike, set it (overrides basicPart.bikeId if both are provided)
@@ -169,6 +182,12 @@ const initialFormData = computed(() => {
   
   return data;
 });
+
+const installationDate = ref<Date>(new Date());
+
+const installationDateTooltip = `The date and time when the part was physically installed on the bike.
+This is used to match your rides history with the part.
+No need to be exact with the time, just put it between the last ride without the part and the first ride with it.`;
 
 const handleCancel = () => {
   emit('update:modelValue', false);
@@ -190,7 +209,7 @@ const handleSubmit = (formData: FormData) => {
   const dataWithDescription = formData.description 
     ? { ...createData, description: formData.description } as any
     : createData;
-  emit('create', dataWithDescription);
+  emit('create', dataWithDescription, props.selectedChainIndex);
   emit('update:modelValue', false);
 };
 
@@ -225,7 +244,7 @@ const getItemAttrs = (itemScope: QSelectOptionScope) => {
   const { itemProps, opt } = itemScope;
   const attrs = { 
     ...itemProps,
-    disable: isChainInCycle(opt.id),
+   //disable: isChainInCycle(opt.id),
       };
   return attrs;
 };
@@ -236,7 +255,7 @@ const selectChain = () => {
     return;
   }
   console.log('selectChain', selectedChain.value, typeof selectedChain.value);
-    emit('select', selectedChain.value as BikePart);
+    emit('select', selectedChain.value as BikePart, props.selectedChainIndex);
     emit('update:modelValue', false);
   };
 
@@ -245,7 +264,7 @@ const selectChain = () => {
   };
 
   const isChainInCycle = (chainId: string): boolean => {
-    return props.bikeContext.chainsInCycle?.includes(chainId) || false;
+    return props.bikeContext.chainCycles?.find(chainCycle => chainCycle.chains.includes(chainId)) !== undefined || false;
   };
 
   const getOtherBikeString = (id: string) => {

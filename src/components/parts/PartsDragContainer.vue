@@ -39,6 +39,7 @@
         :container-id="containerId"
           :part="element"
           :current-bike-mileage="currentBikeMileage"
+          :bike-context="bikeContext"
           @full-details="$emit('fullDetails', $event)"
           @rides-history="$emit('ridesHistory', $event)"
           @show-bike="$emit('showBike', $event)"
@@ -57,7 +58,7 @@ import { ref, watch } from 'vue';
 // @ts-ignore - vue-draggable-plus types may not be available
 import { VueDraggable } from 'vue-draggable-plus';
 import PartCard from '@/components/cards/PartCard.vue';
-import type { BikePart } from '@/types';
+import type { Bike, BikePart } from '@/types';
 
 interface Props {
   parts: BikePart[];
@@ -66,13 +67,15 @@ interface Props {
   showCount?: boolean;
   currentBikeMileage?: number;
   emptyText?: [string, string];
+  bikeContext?: Bike | null;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   title: '',
   showCount: true,
   currentBikeMileage: 0,
-  emptyText: () => ['No parts in this container', 'Click ADD PART button to add one']
+  emptyText: () => ['No parts in this container', 'Click ADD PART button to add one'],
+  bikeContext: null
 });
 
 const emit = defineEmits<{
@@ -121,8 +124,9 @@ const handleDragAdd = (event: any) => {
   // This fires when an item is added to this container from another
   // The drop has already happened at this point
   // We need to get the part and source container info
-  
+  console.log('! handleDragAdd event', event);
   // Get the part from the event - it should be in the newIndex position
+
   const newIndex = event.newIndex;
   if (newIndex === undefined || newIndex < 0 || newIndex >= localParts.value.length) {
     return;

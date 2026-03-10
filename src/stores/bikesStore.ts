@@ -23,10 +23,7 @@ export const useBikesStore = defineStore('bikes', () => {
       const fetchedBikes = await bikeService.getBikes();
       bikes.value = fetchedBikes.map(bike => ({
         ...bike,
-        chainsInCycle: bike.chainsInCycle ?? [null, null, null],
-        activeChainId: bike.activeChainId ?? null,
-        chainsCycleLength: bike.chainsCycleLength ?? 3,
-        chainCycleInterval: bike.chainCycleInterval ?? 700
+        chainCycle: bike.chainCycles ?? [],
       }));
       
       return fetchedBikes;

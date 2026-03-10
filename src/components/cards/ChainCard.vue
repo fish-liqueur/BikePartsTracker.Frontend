@@ -5,7 +5,6 @@
       :class="{ 
         'chain-card--active bg-primary text-white' : isActive && part,
         'chain-card--draggable bg-secondary text-white' : !isActive && part,
-        'chain-card--draggable bg-warning text-white' : !part 
       }">
       <div class="chain-card__index">
           {{ index + 1 }}
@@ -43,11 +42,11 @@
   </template>
   <q-card 
     v-else
-    class="chain-card" 
+    class="chain-card chain-card--draggable" 
     :class="{ 
       'bg-primary text-white' : isActive && part,
       'bg-secondary text-white' : !isActive && part,
-      'bg-warning text-white' : !part 
+      'chain-card--no-chain text-white' : !part 
     }"
     @click="handleClickCard"
   >
@@ -57,37 +56,62 @@
         <h4 class="chain-card__name">No chain selected!</h4>
         <p class="chain-card__description">Click to select a chain</p>
   </q-card>
+
+  <AddChainDialog
+      v-model="showAddChainDialog"
+      :bike-context="bikeContext"
+      @select="(chain: BikePart) => handleSelectChain(chain)"
+      @create="handleCreateChain"
+    />
 </template>
 
 <script setup lang="ts">
 import { ref, nextTick, computed } from 'vue';
-
-import type { Bike, BikePart } from '@/types';
+import { usePartsStore } from '@/stores/partsStore';
+import { useLayout } from '@/composables/useLayout';
+import type { Bike, BikePart, CreatePartDto } from '@/types';
 
 interface Props {
   part: BikePart | null;
   isActive: boolean;
   bikeContext: Bike;
   index: number;
+  chainCycleId: string;
 }
 
 const props = defineProps<Props>();
-
 const emit = defineEmits<{
-  onAddChain: [index: number];
+  onSelectChain: [chainId: string, chainCycleId: string, index: number];
   fullDetails: [partId: string];
   removeFromCycle: [partId: string];
 }>();
 
+const partsStore = usePartsStore();
+const { showSuccess, showError, withAjaxBar } = useLayout();
+
 const showMenu = ref(false);
+const showAddChainDialog = ref(false);
+
+const thirdLineText = computed(() => {
+  return props.isActive ? 'Active chain' : `should install in ${kmsBeforeInstallation.value} km`;
+});
+
+const kmsBeforeInstallation = computed(() => {
+ return 0;
+});
+const thirdLineStyle = computed(() => {
+  return { 
+    color: props.isActive ? 'var(--q-warning)' : '#fff',
+    fontWeight: props.isActive ? 'bold' : 'normal',
+  };
+});
 
 const handleClickCard = () => {
   if (props.part) {
     showMenu.value = !showMenu.value;
     console.log('handleClickCard 22', showMenu.value);
   } else {
-    emit('onAddChain', props.index);
-    console.log('handleClickCard');
+    showAddChainDialog.value = true;
   }
 };
 
@@ -100,30 +124,34 @@ const handleRemoveFromCycle = () => {
   emit('removeFromCycle', props.part?.id || '');
 };
 
-const thirdLineText = computed(() => {
-  return props.isActive ? 'Active chain' : `should install in ${kmsBeforeInstallation.value} km`;
-});
 
-const kmsBeforeInstallation = computed(() => {
-  if (!props.bikeContext.chainCycleInterval) {
-    return 0;
-  }
-  return props.bikeContext.chainCycleInterval * props.index;
-});
 
-const thirdLineStyle = computed(() => {
-  return { 
-    color: props.isActive ? 'var(--q-warning)' : '#fff',
-    fontWeight: props.isActive ? 'bold' : 'normal',
-  };
-});
+const handleCreateChain = async (data: CreatePartDto, index: number) => {
+    try {
+        const newChain = await withAjaxBar(
+            partsStore.createPart(data)
+        );
+        showSuccess('Chain created successfully');
+        if (newChain) {
+          emit('onSelectChain', newChain.id, props.chainCycleId, props.index);
+        }
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to create chain';
+        showError(errorMessage);
+    }
+}
+
+const handleSelectChain = async (chain: BikePart) => {
+  emit('onSelectChain', chain.id, props.chainCycleId, props.index);
+}
 </script>
 
 <style scoped lang="css">
 .chain-card {
+  flex: 1 1 50%;
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: .1rem .5rem;
+  grid-template-columns: auto 1fr;
+  gap: .5rem;
   grid-template-areas: 
     "index name"
     "index description"
@@ -143,6 +171,10 @@ const thirdLineStyle = computed(() => {
 
 .chain-card:first-child {
   anchor-name: --chain-card-first;
+}
+
+.chain-card--no-chain {
+  background-color: #aaa;
 }
 
 /* .chain-card-absolute {
@@ -169,12 +201,17 @@ const thirdLineStyle = computed(() => {
 
 .chain-card__name {
   grid-area: name;
+  text-align: end;
   font-size: 1.4rem;
   line-height: 1.4;
 }
 
 .chain-card__description {
-  grid-area: description;
+  display: -webkit-box;
+-webkit-line-clamp: 2;
+-webkit-box-orient: vertical;
+overflow: hidden;
+text-overflow: ellipsis;
   font-size: 0.8rem;
   margin-bottom: 0;
 }

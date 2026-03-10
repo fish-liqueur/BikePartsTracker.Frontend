@@ -24,10 +24,8 @@ export interface Bike {
   stravaId?: string;
   stravaDistance?: number;
   isActive?: boolean;
-  chainsInCycle?: (string|null)[];
-  activeChainId?: string | null;
-  chainCycleInterval?: number;
-  chainsCycleLength?: number;
+  /** Empty array means no chain cycle is configured for this bike. */
+  chainCycles: ChainCycle[];
 }
 
 export interface CreateBikeDto {
@@ -38,10 +36,7 @@ export interface CreateBikeDto {
   parts?: BikePart[];
   totalDistance?: number;
   stravaDistance?: number;
-  chainsCycleLength?: number;
-  chainCycleInterval?: number;
-  chainsInCycle?: (string|null)[];
-  activeChainId?: string;
+  chainCycles?: CreateChainCycleDto[];
   createdAt?: Date;
   updatedAt?: Date;
   stravaId?: string;
@@ -56,10 +51,8 @@ export interface UpdateBikeDto {
   parts?: BikePart[];
   totalDistance?: number;
   stravaDistance?: number | null;
-  chainsCycleLength?: number | null;
-  chainCycleInterval?: number | null;
-  chainsInCycle?: (string|null)[] | null;  // null = clear, undefined = no change, array = set value
-  activeChainId?: string | null;  // null = clear, undefined = no change, string = set value
+  /** null = clear all cycles, undefined = no change, array = replace cycles */
+  chainCycles?: UpdateChainCycleDto[] | null;
   stravaId?: string | null;
   isActive?: boolean;
 }
@@ -273,4 +266,32 @@ export interface UserSettingsDto {
   defaultChainCycleIntervalKm?: number | null;
   defaultUseChainCycle?: boolean | null;
   showTips?: boolean | null;
+}
+
+export interface ChainCycle {
+  id: string;
+  /** Ordered list of chain part IDs that form the rotation. */
+  chains: string[];
+  /** ID of the chain part that is currently installed. */
+  activeChainId: string | null;
+  /** Distance (km) between chain swaps within this cycle. */
+  intervalKm?: number;
+  /** Total number of chains in the rotation. */
+  cycleLength?: number;
+}
+
+export interface CreateChainCycleDto {
+  chains: string[];
+  activeChainId?: string | null;
+  intervalKm?: number;
+  cycleLength?: number;
+}
+
+export interface UpdateChainCycleDto {
+  id?: string;
+  chains?: string[];
+  /** null = clear active chain, undefined = no change, string = set value */
+  activeChainId?: string | null;
+  intervalKm?: number | null;
+  cycleLength?: number | null;
 }

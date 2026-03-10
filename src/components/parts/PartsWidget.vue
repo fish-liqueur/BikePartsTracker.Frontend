@@ -46,6 +46,7 @@
           :show-count="showCount"
           :current-bike-mileage="currentBikeMileage"
           :empty-text="container.emptyText"
+          :bike-context="bikeContext"
           @part-dropped="handlePartDropped"
           @part-moved="handlePartMoved"
           @add-to-container="handleAddToContainer"

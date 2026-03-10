@@ -1,30 +1,37 @@
 <template>
   <q-card class="part-card" 
->
-      <!-- :class="{ 
+      :class="{ 
     'part-card--on-other-bike': isInstalledOnOtherBike
-    }"> -->
+    }">
     <q-card-section>
       <div class="part-header">
-        <div class="part-type-chip-wrapper">
+        <div class="part-header__chip-wrapper">
           <q-chip
             :label="part.partType"
             color="primary"
             text-color="white"
-            size="sm"
+            size="md"
             class="part-type-chip"
           />
-        </div>
-        <div class="bike-name-chip-wrapper">
           <q-chip
-          v-if="part.bikeId"
+            v-if="part.bikeId"
             :label="bikesStore.getBikeById(part.bikeId)?.name"
-            color="secondary"
+            :color="bikeChipColor"
             text-color="white"
-            size="sm"
+            size="md"
             class="bike-name-chip"
           />
         </div>
+        <div class="chain-description" :style="chainDescription.style">
+        <ElementWithTooltipButton 
+        v-if="isChain" 
+        :tooltip-text="chainDescription.tooltipText"
+        show-always>
+              <span>{{ chainDescription.text }}</span>
+        </ElementWithTooltipButton>
+      </div>
+
+
 
 
           <h3 class="part-name">{{ part.name }}</h3>
@@ -158,15 +165,18 @@ import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { usePartsStore } from '@/stores/partsStore';
 import { useBikesStore } from '@/stores/bikesStore';
-import type { BikePart } from '@/types';
+import { PartType, type Bike, type BikePart } from '@/types';
+import ElementWithTooltipButton from '@/components/shared/ElementWithTooltipButton.vue';
 
 interface Props {
   part: BikePart;
+  bikeContext?: Bike | null;
   currentBikeMileage?: number;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  currentBikeMileage: 0
+  currentBikeMileage: 0,
+  bikeContext: null
 });
 
 const emit = defineEmits<{
@@ -250,11 +260,75 @@ const handleConfigure = () => {
   router.push(`/parts/${props.part.id}/configure`);
 };
 
-// const isInstalledOnOtherBike = computed(() => {
-//   return props.part.bikeId 
-//   && bikeContext?.value?.id
-//   && bikeContext?.value?.id !== props.part.bikeId;
-// });
+const isInstalledOnOtherBike = computed((): boolean => {
+  if (!props.part.bikeId || !props.bikeContext?.id) {
+    return false;
+  }
+  return props.bikeContext?.id !== props.part.bikeId;
+});
+
+const isChain = computed((): boolean => {
+  return props.part.partType === PartType.Chain;
+});
+
+const isChainInCycle = computed((): boolean => {
+  if (props.bikeContext?.chainCycles?.length === 0) {
+    return false;
+  }
+  return props.bikeContext?.chainCycles?.find(chainCycle => chainCycle.chains.includes(props.part.id)) !== undefined;
+});
+
+const isChainInCycleActive = computed((): boolean => {
+  if (props.bikeContext?.chainCycles?.length === 0) {
+    return false;
+  }
+  return props.bikeContext?.chainCycles?.find(chainCycle => chainCycle.activeChainId === props.part.id) !== undefined;
+});
+
+const bikeChipColor = computed((): string => {
+  if (props.part.bikeId === props.bikeContext?.id) {
+    return 'secondary';
+  } else {
+    return 'warning';
+  }
+});
+
+const chainDescription = computed(() => {
+  const attributes: { 
+    text: string,
+    tooltipText: string,
+    style: {
+      backgroundColor: string,
+      color: string,
+      borderColor: string
+    }
+  } = { 
+    text: 'Works without\nchain cycle',
+    tooltipText: `No chain cycle is set for this bike (${props.bikeContext?.name}).
+Mileage for this chain increases with every ride.
+If you add more chains without setting a chain cycle, 
+mileage form every ride will be recorded for all of them.`,
+    style: {
+      backgroundColor: 'transparent',
+      color: 'var(--q-dark)',
+      borderColor: 'var(--q-dark)'
+    } 
+  };
+
+  if (isChainInCycleActive.value) {
+    attributes.text = `Chain in cycle \nand active`;
+    attributes.tooltipText = `Chain is currently installed on the bike.\nThe bike's mileage will be added to the mileage of this chain.`;
+    attributes.style.backgroundColor = 'var(--q-warning)';
+    attributes.style.color = 'var(--q-white)';
+    attributes.style.borderColor = 'var(--q-negative)';
+  } else if (isChainInCycle.value) {
+    attributes.text = `Chain in cycle,\nbut not active now`;
+    attributes.tooltipText = `Chain in cycle, currently not active.\nThis chain is not currently installed on the bike and is waiting for its turn.\nUntil then, the bike's mileage will not be added to the mileage of this chain.`;
+    attributes.style.color = 'var(--q-primary)';
+    attributes.style.borderColor = 'var(--q-primary)';
+  } 
+  return attributes;
+});
 </script>
 
 <style scoped lang="css">
@@ -264,23 +338,20 @@ const handleConfigure = () => {
 }
 
 .part-header {
-  display: grid;
-  grid-template-columns: auto auto;
+  display: flex;
+  flex-direction: column;
 }
 
-.part-type-chip-wrapper {
-  grid-area: 1 / 1 / 2 / 2;
+.part-header__chip-wrapper {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: .5rem;
 }
 
 .part-type-chip {
   margin-bottom: 8px;
-}
-
-.bike-name-chip-wrapper {
-  grid-area: 1 / 2 / 2 / 3;
-  text-align: right;
-  min-width: 0;
-  max-width: 100%;
 }
 
 .bike-name-chip {
@@ -294,9 +365,15 @@ const handleConfigure = () => {
   white-space: nowrap;
 }
 
+.chain-description {
+  padding: 4px 8px;
+  border-radius: .5rem;
+  border: 1px solid var(--q-primary);
+  white-space: pre-wrap;
+  text-align: left;
+}
+
 .part-name {
-  grid-area: 2 / 1 / 3 / -1;
-  margin: 0 0 4px 0;
   font-size: 1.25rem;
   font-weight: 600;
   color: #1a202c;
