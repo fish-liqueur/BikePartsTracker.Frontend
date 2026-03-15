@@ -1,61 +1,19 @@
 <template>
   <q-form @submit.prevent="handleSubmit" class="form-general">
-    <q-input
-      v-model="formData.name"
-      label="Name *"
-      filled
-      standout
-      :rules="[(val: string) => !!val || 'Name is required']"
-      class="m-0 p-0"
-    />
+    <q-input v-model="formData.name" label="Name *" filled standout
+      :rules="[(val: string) => !!val || 'Name is required']" class="m-0 p-0" />
 
-    <q-input
-      v-model="formData.description"
-      label="Description"
-      type="textarea"
-      filled
-      rows="2"
-      class="m-0 p-0"
-    />
+    <q-input v-model="formData.description" label="Description" type="textarea" filled rows="2" class="m-0 p-0" />
 
-    <q-select
-      v-model="formData.partType"
-      :options="partTypeOptions"
-      label="Part Type"
-      emit-value
-      map-options
-      filled
-      :rules="[(val: PartType | null) => !!val || 'Part type is required']"
-      :disable="!!lockType"
-      class="m-0 p-0"
-    />
+    <q-select v-model="formData.partType" :options="partTypeOptions" label="Part Type" emit-value map-options filled
+      :rules="[(val: PartType | null) => !!val || 'Part type is required']" :disable="!!lockType" class="m-0 p-0" />
     <div class="display-flex gap-2">
-      <q-input
-          v-model="formData.brand"
-          label="Brand"
-          filled
-          class="flex-1"
-        />
+      <q-input v-model="formData.brand" label="Brand" filled class="flex-1" />
 
-        <q-input
-          v-model="formData.model"
-          label="Model"
-          filled
-          class="flex-1"
-        />
+      <q-input v-model="formData.model" label="Model" filled class="flex-1" />
     </div>
-    <q-select
-      v-model="formData.bikeId"
-      :options="bikeOptions"
-      label="Bike"
-      emit-value
-      map-options
-      option-label="name"
-      option-value="id"
-      filled
-      clearable
-      class="m-0 p-0"
-    />
+    <q-select v-model="formData.bikeId" :options="bikeOptions" label="Bike" emit-value map-options option-label="name"
+      option-value="id" filled clearable class="m-0 p-0" />
 
     <!-- <q-input
       v-model.number="formData.mileageAtInstallation"
@@ -67,12 +25,12 @@
       ]"
       class="q-mt-md"
     /> -->
-    <ElementWithTooltipButton :tooltip-text="installationDateTooltip">
+    <!-- <ElementWithTooltipButton :tooltip-text="installationDateTooltip">
       <DateTimePicker
         v-model="formData.installationDate"
         label="Installation Date & Time"
       />
-    </ElementWithTooltipButton>
+    </ElementWithTooltipButton> -->
   </q-form>
 </template>
 
@@ -147,10 +105,10 @@ const initializeForm = () => {
     model: props.initialData?.model || '',
     bikeId: props.initialData?.bikeId || '',
     mileageAtInstallation: props.initialData?.mileageAtInstallation || 0,
-    installationDate: props.initialData?.installationDate 
-      ? (props.initialData.installationDate instanceof Date 
-          ? props.initialData.installationDate 
-          : new Date(props.initialData.installationDate))
+    installationDate: props.initialData?.installationDate
+      ? (props.initialData.installationDate instanceof Date
+        ? props.initialData.installationDate
+        : new Date(props.initialData.installationDate))
       : new Date()
   };
 };
@@ -173,11 +131,11 @@ watch(formData, () => {
 }, { deep: true });
 
 const isValid = computed(() => {
-  return !!formData.value.name && 
-         !!formData.value.partType &&
-         formData.value.mileageAtInstallation !== null && 
-         formData.value.mileageAtInstallation !== undefined &&
-         formData.value.mileageAtInstallation >= 0;
+  return !!formData.value.name &&
+    !!formData.value.partType &&
+    formData.value.mileageAtInstallation !== null &&
+    formData.value.mileageAtInstallation !== undefined &&
+    formData.value.mileageAtInstallation >= 0;
 });
 
 // Handle form submit
@@ -195,4 +153,3 @@ defineExpose({
   handleSubmit
 });
 </script>
-

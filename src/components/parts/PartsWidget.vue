@@ -6,59 +6,28 @@
         <h2 v-if="title" class="widget-title">{{ title }}</h2>
       </div>
       <div class="header-right">
-        <q-btn
-        label="Add part"
-        color="primary"
-        icon="add"
-        @click="showAddPartDialog = true"
-      />
-        <q-toggle
-          v-model="showInstalledToOtherBikes"
-          label="Show parts equipped to other bikes"
-          color="primary"
-          class="toggle-filter"
-        />
-        <q-btn-toggle
-          v-model="localViewMode"
-          :options="viewModeOptions"
-          toggle-color="primary"
-          @update:model-value="handleViewModeChange"
-        />
+        <q-btn label="Add part" color="primary" icon="add" @click="showAddPartDialog = true" />
+        <q-toggle v-model="showInstalledToOtherBikes" label="Show parts equipped to other bikes" color="primary"
+          class="toggle-filter" />
+        <q-btn-toggle v-model="localViewMode" :options="viewModeOptions" toggle-color="primary"
+          @update:model-value="handleViewModeChange" />
       </div>
     </div>
 
     <!-- Cards View -->
     <div v-if="localViewMode === 'cards'" class="cards-view">
-      <div
-        v-if="computedContainers && computedContainers.length > 0"
-        class="containers-wrapper"
-        :class="{
-          'containers-single': computedContainers.length === 1,
-          'containers-multiple': computedContainers.length > 1
-        }"
-      >
-        <PartsDragContainer
-          v-for="container in computedContainers"
-          :key="container.id"
-          :parts="container.parts"
-          :container-id="container.id"
-          :title="container.title"
-          :show-count="showCount"
-          :current-bike-mileage="currentBikeMileage"
-          :empty-text="container.emptyText"
-          :bike-context="bikeContext"
-          @part-dropped="handlePartDropped"
-          @part-moved="handlePartMoved"
-          @add-to-container="handleAddToContainer"
-          @full-details="handleFullDetails"
-          @rides-history="handleRidesHistory"
-          @show-bike="handleShowBike"
-          @remove-from-bike="handleRemoveFromBike"
-          @put-on-other-bike="handlePutOnOtherBike"
-          @pass-to-other-user="handlePassToOtherUser"
-          @delete="handleDelete"
-          @configure="handleConfigure"
-        />
+      <div v-if="computedContainers && computedContainers.length > 0" class="containers-wrapper" :class="{
+        'containers-single': computedContainers.length === 1,
+        'containers-multiple': computedContainers.length > 1
+      }">
+        <PartsDragContainer v-for="container in computedContainers" :key="container.id" :parts="container.parts"
+          :container-id="container.id" :title="container.title" :show-count="showCount"
+          :current-bike-mileage="currentBikeMileage" :empty-text="container.emptyText"
+          :bike-context="container.id === 'available' ? null : bikeContext" @part-dropped="handlePartDropped"
+          @part-moved="handlePartMoved" @add-to-container="handleAddToContainer" @full-details="handleFullDetails"
+          @rides-history="handleRidesHistory" @show-bike="handleShowBike" @remove-from-bike="handleRemoveFromBike"
+          @put-on-other-bike="handlePutOnOtherBike" @pass-to-other-user="handlePassToOtherUser" @delete="handleDelete"
+          @configure="handleConfigure" />
       </div>
       <div v-else class="no-containers">
         <q-icon name="error_outline" size="48px" color="grey-5" />
@@ -68,46 +37,21 @@
 
     <!-- Table View -->
     <div v-else class="table-view">
-      <PartsTableContainer
-        v-for="container in computedContainers"
-        :key="container.id"
-        :parts="container.parts"
-        :container-id="container.id"
-        :title="container.title"
-        :show-count="showCount"
-        :current-bike-mileage="currentBikeMileage"
-        :loading="isLoading"
-        :columns="tableColumns"
-        @part-selected="handlePartSelected"
-        @full-details="handleFullDetails"
-        @rides-history="handleRidesHistory"
-        @show-bike="handleShowBike"
-        @remove-from-bike="handleRemoveFromBike"
-        @put-on-other-bike="handlePutOnOtherBike"
-        @pass-to-other-user="handlePassToOtherUser"
-        @delete="handleDelete"
-        @configure="handleConfigure"
-      />
+      <PartsTableContainer v-for="container in computedContainers" :key="container.id" :parts="container.parts"
+        :container-id="container.id" :title="container.title" :show-count="showCount"
+        :current-bike-mileage="currentBikeMileage" :loading="isLoading" :columns="tableColumns"
+        @part-selected="handlePartSelected" @full-details="handleFullDetails" @rides-history="handleRidesHistory"
+        @show-bike="handleShowBike" @remove-from-bike="handleRemoveFromBike" @put-on-other-bike="handlePutOnOtherBike"
+        @pass-to-other-user="handlePassToOtherUser" @delete="handleDelete" @configure="handleConfigure" />
     </div>
 
     <!-- Install Part Dialog -->
-    <InstallPartDialog
-      v-model="showInstallDialog"
-      :part-name="partName"
-      :source-bike-name="sourceBikeName"
-      :target-bike-name="targetBikeName"
-      :current-bike-mileage="currentBikeMileage"
-      @install="handleInstallPart"
-      @cancel="handleInstallCancel"
-    />
+    <InstallPartDialog v-model="showInstallDialog" :part-name="partName" :source-bike-name="sourceBikeName"
+      :target-bike-name="targetBikeName" :current-bike-mileage="currentBikeMileage" @install="handleInstallPart"
+      @cancel="handleInstallCancel" />
   </div>
 
-  <AddPartDialog
-    v-model="showAddPartDialog"
-    :targetBikeId="bikeContext?.id"
-    @create="handleAddPart"
-
-  />
+  <AddPartDialog v-model="showAddPartDialog" :targetBikeId="bikeContext?.id" @create="handleAddPart" />
 </template>
 
 <script setup lang="ts">
@@ -239,8 +183,8 @@ const defaultTableColumns: TableColumn[] = [
 
 // Computed columns - use provided columns or defaults
 const tableColumns = computed(() => {
-  return props.tableColumns && props.tableColumns.length > 0 
-    ? props.tableColumns 
+  return props.tableColumns && props.tableColumns.length > 0
+    ? props.tableColumns
     : defaultTableColumns;
 });
 
@@ -289,25 +233,25 @@ const computedContainers = computed<ContainerConfig[]>(() => {
     const partsOnBike = allParts.value.filter(
       part => part.bikeId === props.bikeContext?.id
     );
-    
+
     let partsNotOnBike = allParts.value.filter(
       part => part.bikeId !== props.bikeContext?.id
     );
-    
+
     if (!showInstalledToOtherBikes.value) {
       // Filter to show only parts installed to nothing (no bikeId)
-      partsNotOnBike = partsNotOnBike.filter(part => 
+      partsNotOnBike = partsNotOnBike.filter(part =>
         part.bikeId === '' || part.bikeId === null || !part.bikeId
       );
     }
-    
+
     return [
       {
         id: `bike-${props.bikeContext.id}`,
         title: `Installed on this Bike (${props.bikeContext.name})`,
         parts: partsOnBike,
-        emptyText: ['No parts installed on this bike', 
-        partsNotOnBike.length > 0 ? 'Drag parts here or click ADD PART to install parts' : 'Click ADD PART button to add one'],
+        emptyText: ['No parts installed on this bike',
+          partsNotOnBike.length > 0 ? 'Drag parts here or click ADD PART to install parts' : 'Click ADD PART button to add one'],
       },
       {
         id: 'available',
@@ -319,14 +263,14 @@ const computedContainers = computed<ContainerConfig[]>(() => {
   } else {
     // Single container: all parts (or filtered if toggle is off)
     let parts = allParts.value;
-    
+
     if (!showInstalledToOtherBikes.value) {
       // Filter to show only parts installed to nothing (no bikeId)
-      parts = parts.filter(part => 
+      parts = parts.filter(part =>
         part.bikeId === '' || part.bikeId === null || !part.bikeId
       );
     }
-    
+
     return [
       {
         id: 'all',
@@ -356,7 +300,7 @@ const handlePartDropped = async (
   options?: any
 ) => {
   const { part, removeFromTarget } = options || {};
-  
+
   if (!part) {
     showError('Part not found');
     // Remove from target container if we can
@@ -368,7 +312,7 @@ const handlePartDropped = async (
 
   // Extract bikeId from targetContainerId
   let targetBikeId: string | null = null;
-  
+
   if (targetContainerId.startsWith('bike-')) {
     // Extract bike ID from container ID like "bike-123"
     targetBikeId = targetContainerId.replace('bike-', '');
@@ -385,7 +329,7 @@ const handlePartDropped = async (
           partsStore.movePartToBike(partId, '', null, 0)
         );
         showSuccess('Part removed from bike');
-        
+
         // Store update will automatically update computedContainers via reactivity
         emit('partsChanged', {
           type: 'moved',
@@ -491,7 +435,7 @@ const handleShowBike = (bikeId: string) => {
 
 const handleRemoveFromBike = async (partId: string) => {
   console.log('handleRemoveFromBike', partId);
-  
+
   $q.dialog({
     title: 'Remove Part from Bike?',
     message: 'Are you sure you want to remove this part from the bike?',
@@ -564,7 +508,7 @@ const handleInstallPart = async (data: { installationDate: string; mileageAtInst
 
   try {
     const { partId, sourceContainerId, targetContainerId, part } = pendingPartInstall.value;
-    
+
     // Extract target bike ID
     let targetBikeId = '';
     if (targetContainerId.startsWith('bike-')) {
@@ -584,7 +528,7 @@ const handleInstallPart = async (data: { installationDate: string; mileageAtInst
 
     showSuccess('Part installed successfully');
     showInstallDialog.value = false;
-    
+
     // Store update will automatically update computedContainers via reactivity
     const savedPartId = partId;
     pendingPartInstall.value = null;
@@ -614,7 +558,7 @@ const handleInstallCancel = async () => {
       pendingPartInstall.value.part
     );
   }
-  
+
   showInstallDialog.value = false;
   pendingPartInstall.value = null;
 };
@@ -693,25 +637,25 @@ const handleAddPart = (part: CreatePartDto) => {
 }
 
 .containers-wrapper.containers-multiple .parts-drag-container:first-child :deep(.part-card) {
-    box-shadow:
-    2px 1px .5rem rgba(33, 186, 69, 0.4), 
-    2px 2px .4rem rgba(49, 204, 236, 0.3), 
+  box-shadow:
+    2px 1px .5rem rgba(33, 186, 69, 0.4),
+    2px 2px .4rem rgba(49, 204, 236, 0.3),
     0 3px 1px -2px rgba(33, 186, 69, 0.3);
-    transition: 0.3s;
+  transition: 0.3s;
 }
 
 .containers-wrapper.containers-multiple .parts-drag-container:first-child :deep(.part-card):hover {
-    box-shadow:
-    2px 1px .5rem rgba(33, 186, 69, 0.8), 
-    2px 2px .4rem rgba(49, 204, 236, 0.6), 
+  box-shadow:
+    2px 1px .5rem rgba(33, 186, 69, 0.8),
+    2px 2px .4rem rgba(49, 204, 236, 0.6),
     0 3px 1px -2px rgba(33, 186, 69, 0.6);
 }
 
 .containers-wrapper.containers-multiple .parts-drag-container:last-child {
   background-color: rgba(49, 204, 236, 0.1);
   box-shadow:
-    2px 1px .5rem rgba(49, 204, 236, 0.6), 
-    2px 2px .4rem rgba(49, 204, 236, 0.5), 
+    2px 1px .5rem rgba(49, 204, 236, 0.6),
+    2px 2px .4rem rgba(49, 204, 236, 0.5),
     0 3px 1px -2px rgba(49, 204, 236, 0.5);
 }
 
@@ -719,8 +663,8 @@ const handleAddPart = (part: CreatePartDto) => {
   filter: grayscale(60%);
   /* background-color: rgba(193, 0, 21, 0.1); */
   box-shadow:
-    2px 1px .5rem rgba(193, 0, 21, 0.4), 
-    2px 2px .4rem rgba(193, 0, 21, 0.3), 
+    2px 1px .5rem rgba(193, 0, 21, 0.4),
+    2px 2px .4rem rgba(193, 0, 21, 0.3),
     0 3px 1px -2px rgba(193, 0, 21, 0.3);
 }
 
@@ -768,4 +712,3 @@ const handleAddPart = (part: CreatePartDto) => {
   }
 }
 </style>
-

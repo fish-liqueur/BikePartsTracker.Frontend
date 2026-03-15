@@ -1,43 +1,27 @@
 <template>
-  <q-card class="part-card" 
-      :class="{ 
+  <q-card class="part-card" :class="{
     'part-card--on-other-bike': isInstalledOnOtherBike
-    }">
+  }">
     <q-card-section>
       <div class="part-header">
         <div class="part-header__chip-wrapper">
-          <q-chip
-            :label="part.partType"
-            color="primary"
-            text-color="white"
-            size="md"
-            class="part-type-chip"
-          />
-          <q-chip
-            v-if="part.bikeId"
-            :label="bikesStore.getBikeById(part.bikeId)?.name"
-            :color="bikeChipColor"
-            text-color="white"
-            size="md"
-            class="bike-name-chip"
-          />
+          <q-chip :label="part.partType" color="primary" text-color="white" size="md" class="part-type-chip" />
+          <q-chip v-if="part.bikeId" :label="bikesStore.getBikeById(part.bikeId)?.name" :color="bikeChipColor"
+            text-color="white" size="md" class="bike-name-chip" />
         </div>
-        <div class="chain-description" :style="chainDescription.style">
-        <ElementWithTooltipButton 
-        v-if="isChain" 
-        :tooltip-text="chainDescription.tooltipText"
-        show-always>
-              <span>{{ chainDescription.text }}</span>
-        </ElementWithTooltipButton>
-      </div>
+        <div class="chain-description" v-if="isChain && bikeContext" :style="chainDescription.style">
+          <ElementWithTooltipButton :tooltip-text="chainDescription.tooltipText" show-always>
+            <span>{{ chainDescription.text }}</span>
+          </ElementWithTooltipButton>
+        </div>
 
 
 
 
-          <h3 class="part-name">{{ part.name }}</h3>
-          <div v-if="part.brand || part.model" class="part-brand-model">
-            {{ part.brand }} {{ part.model }}
-          </div>
+        <h3 class="part-name">{{ part.name }}</h3>
+        <div v-if="part.brand || part.model" class="part-brand-model">
+          {{ part.brand }} {{ part.model }}
+        </div>
       </div>
     </q-card-section>
 
@@ -57,30 +41,19 @@
 
     <!-- Action Buttons -->
     <q-card-actions align="right" class="part-actions">
-      <q-btn
-        flat
-        label="Full Details"
-        color="primary"
-        icon="info"
-        size="sm"
-        @click="handleFullDetails"
-      />
+      <q-btn flat label="Full Details" color="primary" icon="info" size="sm" @click="handleFullDetails" />
       <q-btn-dropdown color="primary" icon="menu">
-      <q-list>
-        <q-item clickable v-close-popup @click="handleFullDetails">
-          <q-item-section avatar>
-            <q-icon name="dashboard_2_gear" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>To Part page</q-item-label>
-            <!-- <q-item-label caption>February 22, 2016</q-item-label> -->
-          </q-item-section>
-        </q-item>
-        <q-item
-            v-if="part.bike"
-            clickable
-            v-close-popup
-          >
+        <q-list>
+          <q-item clickable v-close-popup @click="handleFullDetails">
+            <q-item-section avatar>
+              <q-icon name="dashboard_2_gear" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>To Part page</q-item-label>
+              <!-- <q-item-label caption>February 22, 2016</q-item-label> -->
+            </q-item-section>
+          </q-item>
+          <q-item v-if="part.bike" clickable v-close-popup>
             <q-item-section avatar>
               <q-icon name="build" />
             </q-item-section>
@@ -88,12 +61,7 @@
               <q-item-label>Do maintenance!</q-item-label>
             </q-item-section>
           </q-item>
-        <q-item
-            v-if="part.bike"
-            clickable
-            v-close-popup
-            @click="handleShowBike"
-          >
+          <q-item v-if="part.bike" clickable v-close-popup @click="handleShowBike">
             <q-item-section avatar>
               <q-icon name="pedal_bike" />
             </q-item-section>
@@ -102,13 +70,8 @@
               <q-item-label caption>{{ part.bike.name }}</q-item-label>
             </q-item-section>
           </q-item>
-   
-          <q-item
-            v-if="part.bike"
-            clickable
-            v-close-popup
-            @click="handleRemoveFromBike"
-          >
+
+          <q-item v-if="part.bike" clickable v-close-popup @click="handleRemoveFromBike">
             <q-item-section avatar>
               <q-icon name="archive" />
             </q-item-section>
@@ -117,12 +80,8 @@
               <q-item-label caption>and keep in the box</q-item-label>
             </q-item-section>
           </q-item>
-          
-          <q-item
-            clickable
-            v-close-popup
-            @click="handlePutOnOtherBike"
-          >
+
+          <q-item clickable v-close-popup @click="handlePutOnOtherBike">
             <q-item-section avatar>
               <q-icon name="swap_horiz" />
             </q-item-section>
@@ -141,21 +100,17 @@
               <q-item-label>Pass Part to Other User</q-item-label>
             </q-item-section>
           </q-item> -->
-          <q-item
-            clickable
-            v-close-popup
-            @click="handleDelete"
-          >
+          <q-item clickable v-close-popup @click="handleDelete">
             <q-item-section avatar>
-              <q-icon name="delete" color="negative"/>
+              <q-icon name="delete" color="negative" />
             </q-item-section>
             <q-item-section>
               <q-item-label>Delete part</q-item-label>
               <q-item-label caption>delete part and all its history</q-item-label>
             </q-item-section>
           </q-item>
-      </q-list>
-    </q-btn-dropdown>
+        </q-list>
+      </q-btn-dropdown>
     </q-card-actions>
   </q-card>
 </template>
@@ -202,18 +157,11 @@ const totalMileage = computed((): number => {
   return Math.max(0, props.currentBikeMileage - props.part.mileageAtInstallation);
 });
 
-
-
-// Calculate remaining days (based on installation date and expected lifespan)
-// This is a simplified calculation - assumes expectedLifespan is in km
-// For days calculation, we'd need average daily usage or lifespan in days
 const remainingDays = computed((): number | null => {
   if (!props.part.installationDate) {
     return null;
   }
-  
-  // If we have usage history, we could calculate average daily usage
-  // For now, return null as we don't have enough data
+
   return null;
 });
 
@@ -294,7 +242,7 @@ const bikeChipColor = computed((): string => {
 });
 
 const chainDescription = computed(() => {
-  const attributes: { 
+  const attributes: {
     text: string,
     tooltipText: string,
     style: {
@@ -302,7 +250,7 @@ const chainDescription = computed(() => {
       color: string,
       borderColor: string
     }
-  } = { 
+  } = {
     text: 'Works without\nchain cycle',
     tooltipText: `No chain cycle is set for this bike (${props.bikeContext?.name}).
 Mileage for this chain increases with every ride.
@@ -312,7 +260,7 @@ mileage form every ride will be recorded for all of them.`,
       backgroundColor: 'transparent',
       color: 'var(--q-dark)',
       borderColor: 'var(--q-dark)'
-    } 
+    }
   };
 
   if (isChainInCycleActive.value) {
@@ -326,7 +274,7 @@ mileage form every ride will be recorded for all of them.`,
     attributes.tooltipText = `Chain in cycle, currently not active.\nThis chain is not currently installed on the bike and is waiting for its turn.\nUntil then, the bike's mileage will not be added to the mileage of this chain.`;
     attributes.style.color = 'var(--q-primary)';
     attributes.style.borderColor = 'var(--q-primary)';
-  } 
+  }
   return attributes;
 });
 </script>
@@ -427,4 +375,3 @@ mileage form every ride will be recorded for all of them.`,
   margin: 2px;
 }
 </style>
-

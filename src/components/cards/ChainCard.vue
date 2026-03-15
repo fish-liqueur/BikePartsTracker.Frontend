@@ -1,19 +1,15 @@
 <template>
-  <template v-if="part">
-    <q-card 
-      class="chain-card" 
-      :class="{ 
-        'chain-card--active bg-primary text-white' : isActive && part,
-        'chain-card--draggable bg-secondary text-white' : !isActive && part,
-      }">
+  <template>
+    <q-card class="chain-card" :class="{
+      'chain-card--active bg-primary text-white': isActive && part,
+      'chain-card--draggable bg-secondary text-white': !isActive && part,
+    }">
       <div class="chain-card__index">
-          {{ index + 1 }}
+        {{ index + 1 }}
       </div>
       <h4 class="chain-card__name">{{ part.name }}</h4>
       <p class="chain-card__description">{{ part.description }}</p>
       <p class="chain-card__third-line" :style="thirdLineStyle">{{ thirdLineText }}</p>
-      
-
       <q-menu touch-position>
         <q-list>
           <q-item clickable v-close-popup @click="handleFullDetails">
@@ -36,33 +32,7 @@
         </q-list>
       </q-menu>
     </q-card>
-    <!-- <div class="chain-card-absolute" >
-      Active chain
-    </div> -->
   </template>
-  <q-card 
-    v-else
-    class="chain-card chain-card--draggable" 
-    :class="{ 
-      'bg-primary text-white' : isActive && part,
-      'bg-secondary text-white' : !isActive && part,
-      'chain-card--no-chain text-white' : !part 
-    }"
-    @click="handleClickCard"
-  >
-  <div class="chain-card__index">
-          {{ index + 1 }}
-        </div>
-        <h4 class="chain-card__name">No chain selected!</h4>
-        <p class="chain-card__description">Click to select a chain</p>
-  </q-card>
-
-  <AddChainDialog
-      v-model="showAddChainDialog"
-      :bike-context="bikeContext"
-      @select="(chain: BikePart) => handleSelectChain(chain)"
-      @create="handleCreateChain"
-    />
 </template>
 
 <script setup lang="ts">
@@ -72,7 +42,7 @@ import { useLayout } from '@/composables/useLayout';
 import type { Bike, BikePart, CreatePartDto } from '@/types';
 
 interface Props {
-  part: BikePart | null;
+  part: BikePart;
   isActive: boolean;
   bikeContext: Bike;
   index: number;
@@ -90,30 +60,24 @@ const partsStore = usePartsStore();
 const { showSuccess, showError, withAjaxBar } = useLayout();
 
 const showMenu = ref(false);
-const showAddChainDialog = ref(false);
 
 const thirdLineText = computed(() => {
   return props.isActive ? 'Active chain' : `should install in ${kmsBeforeInstallation.value} km`;
 });
 
 const kmsBeforeInstallation = computed(() => {
- return 0;
+  return 0;
 });
 const thirdLineStyle = computed(() => {
-  return { 
+  return {
     color: props.isActive ? 'var(--q-warning)' : '#fff',
     fontWeight: props.isActive ? 'bold' : 'normal',
   };
 });
 
 const handleClickCard = () => {
-  if (props.part) {
-    showMenu.value = !showMenu.value;
-    console.log('handleClickCard 22', showMenu.value);
-  } else {
-    showAddChainDialog.value = true;
-  }
-};
+  showMenu.value = !showMenu.value;
+}
 
 const handleFullDetails = () => {
   emit('fullDetails', props.part?.id || '');
@@ -124,21 +88,19 @@ const handleRemoveFromCycle = () => {
   emit('removeFromCycle', props.part?.id || '');
 };
 
-
-
 const handleCreateChain = async (data: CreatePartDto, index: number) => {
-    try {
-        const newChain = await withAjaxBar(
-            partsStore.createPart(data)
-        );
-        showSuccess('Chain created successfully');
-        if (newChain) {
-          emit('onSelectChain', newChain.id, props.chainCycleId, props.index);
-        }
-    } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to create chain';
-        showError(errorMessage);
+  try {
+    const newChain = await withAjaxBar(
+      partsStore.createPart(data)
+    );
+    showSuccess('Chain created successfully');
+    if (newChain) {
+      emit('onSelectChain', newChain.id, props.chainCycleId, props.index);
     }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to create chain';
+    showError(errorMessage);
+  }
 }
 
 const handleSelectChain = async (chain: BikePart) => {
@@ -152,7 +114,7 @@ const handleSelectChain = async (chain: BikePart) => {
   display: grid;
   grid-template-columns: auto 1fr;
   gap: .5rem;
-  grid-template-areas: 
+  grid-template-areas:
     "index name"
     "index description"
     "thirdline thirdline";
@@ -177,21 +139,6 @@ const handleSelectChain = async (chain: BikePart) => {
   background-color: #aaa;
 }
 
-/* .chain-card-absolute {
-  position: absolute;
-  position-anchor: --chain-card-first;
-  top: anchor(top);
-  left: anchor(left);
-  transform: translate(.5rem, -1.5rem);
-  pointer-events: none;
-  font-size: 1rem;
-  line-height: 1;
-  border: solid 1px var(--q-warning);
-  border-radius: .25rem;
-  background: white;
-  padding: .25rem .5rem;
-} */
-
 .chain-card__index {
   grid-area: index;
   font-size: 2rem;
@@ -208,10 +155,10 @@ const handleSelectChain = async (chain: BikePart) => {
 
 .chain-card__description {
   display: -webkit-box;
--webkit-line-clamp: 2;
--webkit-box-orient: vertical;
-overflow: hidden;
-text-overflow: ellipsis;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: 0.8rem;
   margin-bottom: 0;
 }
@@ -223,4 +170,3 @@ text-overflow: ellipsis;
   text-align: center;
 }
 </style>
-
