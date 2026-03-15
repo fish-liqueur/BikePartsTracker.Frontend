@@ -1,7 +1,7 @@
 <template>
   <div class="element-with-tooltip-button">
     <slot />
-    <TooltipButton v-if="enabled" :text="tooltipText" class="ml-3" />
+    <TooltipButton v-if="enabled" :text="tooltipText" class="ml-2" />
   </div>
 </template>
 
@@ -35,7 +35,7 @@ const enabled = computed(() => {
   position: relative;
 }
 
-.element-with-tooltip-button > :first-child {
+.element-with-tooltip-button> :first-child {
   flex: 1;
 }
 </style>

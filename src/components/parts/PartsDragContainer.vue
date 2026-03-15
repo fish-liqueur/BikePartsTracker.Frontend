@@ -1,11 +1,7 @@
 <template>
-  <div
-    class="parts-drag-container"
-    :class="{
-      'is-empty': localParts.length === 0,
-    }"
-    :data-container-id="containerId"
-  >
+  <div class="parts-drag-container" :class="{
+    'is-empty': localParts.length === 0,
+  }" :data-container-id="containerId">
 
     <!-- Container Header -->
     <div v-if="title" class="container-header">
@@ -21,34 +17,16 @@
     </div>
 
     <!-- Parts Grid with Draggable -->
-    <VueDraggable
-      v-model="localParts"
-      :group="{ name: 'parts', pull: true, put: true }"
-      :animation="200"
-      :force-fallback="false"
-      :fallback-tolerance="5"
-      item-key="id"
-      class="parts-grid"
-      @end="handleDragEnd"
-      @add="handleDragAdd"
-    >
-      
-        <PartCard
-        v-for="element in localParts"
-        :key="element.id"
-        :container-id="containerId"
-          :part="element"
-          :current-bike-mileage="currentBikeMileage"
-          :bike-context="bikeContext"
-          @full-details="$emit('fullDetails', $event)"
-          @rides-history="$emit('ridesHistory', $event)"
-          @show-bike="$emit('showBike', $event)"
-          @remove-from-bike="$emit('removeFromBike', $event)"
-          @put-on-other-bike="$emit('putOnOtherBike', $event)"
-          @pass-to-other-user="$emit('passToOtherUser', $event)"
-          @delete="$emit('delete', $event)"
-          @configure="$emit('configure', $event)"
-        />
+    <VueDraggable v-model="localParts" :group="{ name: 'parts', pull: true, put: true }" :animation="200"
+      :force-fallback="false" :fallback-tolerance="5" item-key="id" class="parts-grid" @end="handleDragEnd"
+      @add="handleDragAdd">
+
+      <PartCard v-for="element in localParts" :key="element.id" :container-id="containerId" :part="element"
+        :current-bike-mileage="currentBikeMileage" :bike-context="bikeContext"
+        @full-details="$emit('fullDetails', $event)" @rides-history="$emit('ridesHistory', $event)"
+        @show-bike="$emit('showBike', $event)" @remove-from-bike="$emit('removeFromBike', $event)"
+        @put-on-other-bike="$emit('putOnOtherBike', $event)" @pass-to-other-user="$emit('passToOtherUser', $event)"
+        @delete="$emit('delete', $event)" @configure="$emit('configure', $event)" />
     </VueDraggable>
   </div>
 </template>
@@ -107,7 +85,7 @@ watch(() => props.parts, (newParts) => {
   // Create a new array to ensure reactivity
   const newPartsIds = newParts.map(p => p.id).sort().join(',');
   const currentPartsIds = localParts.value.map(p => p.id).sort().join(',');
-  
+
   if (newPartsIds !== currentPartsIds) {
     localParts.value = [...newParts];
   }
@@ -131,20 +109,20 @@ const handleDragAdd = (event: any) => {
   if (newIndex === undefined || newIndex < 0 || newIndex >= localParts.value.length) {
     return;
   }
-  
+
   const part = localParts.value[newIndex];
   if (!part || !part.id) {
     return;
   }
-  
+
   // Try to get source container ID from the dragged element
   const draggedElement = event.item;
   let sourceContainerId = '';
-  
+
   if (draggedElement?.dataset?.containerId) {
     sourceContainerId = draggedElement.dataset.containerId;
   }
-  
+
   // Emit event to parent to show dialog
   // Parent will handle cancellation by removing from this container and adding to source
   emit('partDropped', part.id, sourceContainerId, props.containerId, {
@@ -206,17 +184,17 @@ const handleDragAdd = (event: any) => {
 }
 
 .empty-state {
-    /* position: absolute;
+  position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%); */
+  transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 32px;
   text-align: center;
-    pointer-events: none;
+  pointer-events: none;
 }
 
 .empty-text {
@@ -250,7 +228,7 @@ const handleDragAdd = (event: any) => {
   height: 100%;
   overflow-y: auto;
   min-height: 100px;
-    padding: .4rem;
+  padding: .4rem;
 }
 
 .parts-grid-item {
@@ -272,10 +250,9 @@ const handleDragAdd = (event: any) => {
   .parts-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .parts-drag-container {
     padding: 12px;
   }
 }
 </style>
-

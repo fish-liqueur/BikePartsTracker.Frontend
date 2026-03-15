@@ -385,7 +385,6 @@ const handleAddToContainer = (partId: string, containerId: string, part: BikePar
   partsStore.fetchParts();
 };
 
-
 const handlePartMoved = (
   partId: string,
   sourceContainerId: string,
@@ -393,6 +392,7 @@ const handlePartMoved = (
 ) => {
   // This is handled by handlePartDropped
   // But we emit it separately if needed
+  console.log('handlePartMoved', partId, sourceContainerId, targetContainerId);
   emit('partsChanged', {
     type: 'moved',
     partId,
@@ -589,8 +589,17 @@ const partName = computed(() => {
   return pendingPartInstall.value?.part?.name || '';
 });
 
-const handleAddPart = (part: CreatePartDto) => {
-  partsStore.createPart(part);
+const handleAddPart = async (part: CreatePartDto) => {
+  try {
+    await withAjaxBar(
+      partsStore.createPart(part)
+    );
+    showSuccess('Part created successfully');
+
+  } catch (err: any) {
+    console.error('Failed to create part:', err);
+    showError(err.message || 'Failed to create part');
+  }
 };
 </script>
 

@@ -9,17 +9,17 @@
           <q-chip v-if="part.bikeId" :label="bikesStore.getBikeById(part.bikeId)?.name" :color="bikeChipColor"
             text-color="white" size="md" class="bike-name-chip" />
         </div>
-        <div class="chain-description" v-if="isChain && bikeContext" :style="chainDescription.style">
-          <ElementWithTooltipButton :tooltip-text="chainDescription.tooltipText" show-always>
-            <span>{{ chainDescription.text }}</span>
+        <div class="chain-description" v-if="isChain && bikeContext" :style="chainCycleStatus.style">
+          <ElementWithTooltipButton :tooltip-text="chainCycleStatus.tooltipText" show-always>
+            <span>{{ chainCycleStatus.text }}</span>
           </ElementWithTooltipButton>
         </div>
 
-
-
-
         <h3 class="part-name">{{ part.name }}</h3>
-        <div v-if="part.brand || part.model" class="part-brand-model">
+        <div v-if="part.description" class="part-brand-model">
+          {{ part.description }}
+        </div>
+        <div v-else="part.brand || part.model" class="part-brand-model">
           {{ part.brand }} {{ part.model }}
         </div>
       </div>
@@ -241,7 +241,7 @@ const bikeChipColor = computed((): string => {
   }
 });
 
-const chainDescription = computed(() => {
+const chainCycleStatus = computed(() => {
   const attributes: {
     text: string,
     tooltipText: string,
@@ -329,6 +329,11 @@ mileage form every ride will be recorded for all of them.`,
 
 .part-brand-model {
   grid-area: 3 / 1 / 4 / -1;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: #718096;
   font-size: 0.875rem;
   margin-top: 4px;
