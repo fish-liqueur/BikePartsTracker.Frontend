@@ -66,7 +66,8 @@ import PartsTableContainer from './PartsTableContainer.vue';
 import InstallPartDialog from './InstallPartDialog.vue';
 import AddPartDialog from './AddPartDialog.vue';
 import type { Bike, BikePart, CreatePartDto } from '@/types';
-import type { TableColumn } from './PartsTableContainer.vue';
+import { defaultPartColumns } from './partsTableColumns';
+import type { TableColumn } from './partsTableColumns';
 
 export interface ContainerConfig {
   id: string;
@@ -74,7 +75,10 @@ export interface ContainerConfig {
   parts: BikePart[];
   emptyText: [string, string];
 }
-
+interface DropOptions {
+  part?: BikePart;
+  removeFromTarget?: () => void;
+}
 interface Props {
   viewMode?: 'cards' | 'table';
   bikeContext?: Bike | null;
@@ -89,105 +93,8 @@ const props = withDefaults(defineProps<Props>(), {
   bikeContext: null,
   showCount: true,
   currentBikeMileage: 0,
-  tableColumns: () => [
-    {
-      name: 'partType',
-      label: 'Type',
-      field: 'partType',
-      align: 'left',
-      sortable: true,
-    },
-    {
-      name: 'name',
-      label: 'Name',
-      field: 'name',
-      align: 'left',
-      sortable: true,
-    },
-    {
-      name: 'bike',
-      label: 'Bike',
-      field: 'bikeId',
-      align: 'left',
-      sortable: true,
-    },
-    {
-      name: 'mileage',
-      label: 'Total Mileage',
-      field: 'mileage',
-      align: 'right',
-      sortable: true,
-    },
-    {
-      name: 'remaining',
-      label: 'Remaining',
-      field: 'remaining',
-      align: 'right',
-      sortable: true,
-    },
-    {
-      name: 'actions',
-      label: 'Actions',
-      field: 'actions',
-      align: 'center',
-      sortable: false,
-    },
-  ]
+  tableColumns: () => defaultPartColumns
 });
-
-// Default table columns - defined after props to avoid hoisting issue
-const defaultTableColumns: TableColumn[] = [
-  {
-    name: 'partType',
-    label: 'Type',
-    field: 'partType',
-    align: 'left',
-    sortable: true,
-  },
-  {
-    name: 'name',
-    label: 'Name',
-    field: 'name',
-    align: 'left',
-    sortable: true,
-  },
-  {
-    name: 'bike',
-    label: 'Bike',
-    field: 'bikeId',
-    align: 'left',
-    sortable: true,
-  },
-  {
-    name: 'mileage',
-    label: 'Total Mileage',
-    field: 'mileage',
-    align: 'right',
-    sortable: true,
-  },
-  {
-    name: 'remaining',
-    label: 'Remaining',
-    field: 'remaining',
-    align: 'right',
-    sortable: true,
-  },
-  {
-    name: 'actions',
-    label: 'Actions',
-    field: 'actions',
-    align: 'center',
-    sortable: false,
-  },
-];
-
-// Computed columns - use provided columns or defaults
-const tableColumns = computed(() => {
-  return props.tableColumns && props.tableColumns.length > 0
-    ? props.tableColumns
-    : defaultTableColumns;
-});
-
 const emit = defineEmits<{
   'update:viewMode': [value: 'cards' | 'table'];
   partsChanged: [event: { type: string; partId: string; data?: any }];
@@ -210,22 +117,39 @@ const pendingPartInstall = ref<{
   part: BikePart | null;
   removeFromTarget?: () => void;
 } | null>(null);
-
+// Local view mode
 const localViewMode = ref<'cards' | 'table'>(props.viewMode);
-// Default: true if no bikeContext, false if bikeContext is set
-const showInstalledToOtherBikes = ref<boolean>(props.bikeContext === null);
-
 const viewModeOptions = [
   { label: 'Cards', value: 'cards', icon: 'grid_view' },
   { label: 'Table', value: 'table', icon: 'table_view' }
 ];
+// Default: true if no bikeContext, false if bikeContext is set
+// const showInstalledToOtherBikes = ref<boolean>(props.bikeContext === null);
 
-const isLoading = computed(() => partsStore.isLoading);
-
-// Get all parts from store
 const allParts = computed(() => partsStore.parts);
+const isLoading = computed(() => partsStore.isLoading);
+const partName = computed(() => {
+  return pendingPartInstall.value?.part?.name || '';
+});
+const showInstalledToOtherBikes = computed(() => props.bikeContext === null);
+const sourceBikeName = computed(() => {
+  if (!pendingPartInstall.value?.part) return '';
+  const sourceBikeId = pendingPartInstall.value.part.bikeId;
+  return getBikeName(sourceBikeId);
+});
+const targetBikeName = computed(() => {
+  if (!pendingPartInstall.value?.targetContainerId) return '';
+  if (pendingPartInstall.value.targetContainerId.startsWith('bike-')) {
+    const bikeId = pendingPartInstall.value.targetContainerId.replace('bike-', '');
+    return getBikeName(bikeId);
+  }
+  return '';
+});
+const tableColumns = computed(() =>
+  props.tableColumns.length > 0 ? props.tableColumns : defaultPartColumns
+);
 
-// Compute containers based on bikeContext
+// containers based on bikeContext
 const computedContainers = computed<ContainerConfig[]>(() => {
   if (props.bikeContext) {
     // Two containers: parts on this bike, and parts not on this bike
@@ -282,196 +206,68 @@ const computedContainers = computed<ContainerConfig[]>(() => {
   }
 });
 
-const handleViewModeChange = (mode: 'cards' | 'table') => {
-  localViewMode.value = mode;
-  emit('update:viewMode', mode);
-  emit('viewModeChanged', mode);
-};
 
 // Watch for external viewMode changes
 watch(() => props.viewMode, (newMode) => {
   localViewMode.value = newMode;
 });
 
-const handlePartDropped = async (
-  partId: string,
-  sourceContainerId: string,
-  targetContainerId: string,
-  options?: any
-) => {
-  const { part, removeFromTarget } = options || {};
-
-  if (!part) {
-    showError('Part not found');
-    // Remove from target container if we can
-    if (removeFromTarget) {
-      removeFromTarget();
-    }
-    return;
-  }
-
-  // Extract bikeId from targetContainerId
-  let targetBikeId: string | null = null;
-
-  if (targetContainerId.startsWith('bike-')) {
-    // Extract bike ID from container ID like "bike-123"
-    targetBikeId = targetContainerId.replace('bike-', '');
-  } else if (targetContainerId === 'available' || targetContainerId === 'all') {
-    // Moving to available/uninstalled - show confirmation
-    $q.dialog({
-      title: 'Remove Part from Bike?',
-      message: 'Are you sure you want to remove this part from the bike?',
-      cancel: true,
-      persistent: false
-    }).onOk(async () => {
-      try {
-        await withAjaxBar(
-          partsStore.movePartToBike(partId, '', null, 0)
-        );
-        showSuccess('Part removed from bike');
-
-        // Store update will automatically update computedContainers via reactivity
-        emit('partsChanged', {
-          type: 'moved',
-          partId,
-          data: { sourceContainerId, targetContainerId }
-        });
-      } catch (err: any) {
-        console.error('Failed to remove part from bike:', err);
-        showError(err.message || 'Failed to remove part from bike');
-        // Remove from target on error
-        if (removeFromTarget) {
-          removeFromTarget();
-        }
-        // Add back to source container
-        addPartToContainer(partId, sourceContainerId, part);
-      }
-    }).onCancel(() => {
-      // Cancel: remove from target and add back to source
-      if (removeFromTarget) {
-        removeFromTarget();
-      }
-      addPartToContainer(partId, sourceContainerId, part);
-    });
-    return;
-  }
-
-  // If installing on a bike, show installation dialog
-  if (targetBikeId) {
-    // Store pending installation info
-    pendingPartInstall.value = {
-      partId,
-      sourceContainerId,
-      targetContainerId,
-      part,
-      removeFromTarget
-    };
-    showInstallDialog.value = true;
-  }
-};
-
-// Helper to add part back to source container on cancel
+// ---- Methods ----
 const addPartToContainer = (partId: string, containerId: string, part: BikePart) => {
-  // We'll need to emit an event that the container can listen to
-  // For now, refresh from store which will reset everything
-  // A better approach would be to use a ref to the container component
   partsStore.fetchParts();
 };
 
-// Handle add to container event from child
-const handleAddToContainer = (partId: string, containerId: string, part: BikePart) => {
-  // This is handled by refreshing from store
-  // The container's watch on props.parts will update localParts
-  partsStore.fetchParts();
-};
-
-const handlePartMoved = (
-  partId: string,
-  sourceContainerId: string,
-  targetContainerId: string
-) => {
-  // This is handled by handlePartDropped
-  // But we emit it separately if needed
-  console.log('handlePartMoved', partId, sourceContainerId, targetContainerId);
-  emit('partsChanged', {
-    type: 'moved',
-    partId,
-    data: { sourceContainerId, targetContainerId }
-  });
-};
-
-const handlePartSelected = (part: BikePart) => {
-  emit('partsChanged', {
-    type: 'selected',
-    partId: part.id,
-    data: { part }
-  });
-};
-
-const handleFullDetails = (partId: string) => {
-  emit('partsChanged', {
-    type: 'fullDetails',
-    partId
-  });
-  router.push(`/parts/${partId}`);
-};
-
-const handleRidesHistory = (partId: string) => {
-  emit('partsChanged', {
-    type: 'ridesHistory',
-    partId
-  });
-  router.push(`/parts/${partId}/rides`);
-};
-
-const handleShowBike = (bikeId: string) => {
-  emit('partsChanged', {
-    type: 'showBike',
-    partId: '',
-    data: { bikeId }
-  });
-  router.push(`/bikes/${bikeId}`);
-};
-
-const handleRemoveFromBike = async (partId: string) => {
-  console.log('handleRemoveFromBike', partId);
-
+const confirmRemoveFromBike = (partId: string, onSuccess: () => void, onRollback?: () => void) => {
   $q.dialog({
     title: 'Remove Part from Bike?',
     message: 'Are you sure you want to remove this part from the bike?',
     cancel: true,
-    persistent: false
+    persistent: false,
   }).onOk(async () => {
     try {
-      await withAjaxBar(
-        partsStore.movePartToBike(partId, '', null, 0)
-      );
+      await withAjaxBar(partsStore.movePartToBike(partId, '', null, 0));
       showSuccess('Part removed from bike');
-      emit('partsChanged', {
-        type: 'removedFromBike',
-        partId
-      });
+      onSuccess();
     } catch (err: any) {
       console.error('Failed to remove part from bike:', err);
       showError(err.message || 'Failed to remove part from bike');
+      onRollback?.();
     }
-  });
+  }).onCancel(() => onRollback?.());
 };
 
-const handlePutOnOtherBike = (partId: string) => {
-  emit('partsChanged', {
-    type: 'putOnOtherBike',
-    partId
-  });
-  // TODO: Implement bike selection dialog/modal
+const extractBikeId = (containerId: string): string | null =>
+  containerId.startsWith('bike-') ? containerId.replace('bike-', '') : null;
+
+const getBikeName = (bikeId: string | null): string => {
+  if (!bikeId) return '';
+  const bike = bikesStore.getBikeById(bikeId);
+  return bike?.name || '';
 };
 
-const handlePassToOtherUser = (partId: string) => {
+const handleAddPart = async (part: CreatePartDto) => {
+  try {
+    await withAjaxBar(
+      partsStore.createPart(part)
+    );
+    showSuccess('Part created successfully');
+
+  } catch (err: any) {
+    console.error('Failed to create part:', err);
+    showError(err.message || 'Failed to create part');
+  }
+};
+
+const handleAddToContainer = (partId: string, containerId: string, part: BikePart) => {
+  partsStore.fetchParts();
+};
+
+const handleConfigure = (partId: string) => {
   emit('partsChanged', {
-    type: 'passToOtherUser',
+    type: 'configure',
     partId
   });
-  // TODO: Implement user selection dialog/modal
+  router.push(`/parts/${partId}/configure`);
 };
 
 const handleDelete = async (partId: string) => {
@@ -494,26 +290,38 @@ const handleDelete = async (partId: string) => {
   }
 };
 
-const handleConfigure = (partId: string) => {
+const handleFullDetails = (partId: string) => {
   emit('partsChanged', {
-    type: 'configure',
+    type: 'fullDetails',
     partId
   });
-  router.push(`/parts/${partId}/configure`);
+  router.push(`/parts/${partId}`);
 };
 
-// Handle installation dialog
+const handleInstallCancel = async () => {
+  // Cancel: remove from target and add back to source
+  if (pendingPartInstall.value?.removeFromTarget) {
+    pendingPartInstall.value.removeFromTarget();
+  }
+  if (pendingPartInstall.value?.part) {
+    addPartToContainer(
+      pendingPartInstall.value.partId,
+      pendingPartInstall.value.sourceContainerId,
+      pendingPartInstall.value.part
+    );
+  }
+
+  showInstallDialog.value = false;
+  pendingPartInstall.value = null;
+};
+
 const handleInstallPart = async (data: { installationDate: string; mileageAtInstallation: number }) => {
   if (!pendingPartInstall.value) return;
 
   try {
     const { partId, sourceContainerId, targetContainerId, part } = pendingPartInstall.value;
 
-    // Extract target bike ID
-    let targetBikeId = '';
-    if (targetContainerId.startsWith('bike-')) {
-      targetBikeId = targetContainerId.replace('bike-', '');
-    }
+    const targetBikeId = extractBikeId(targetContainerId) ?? '';
 
     const installationDateObj = new Date(data.installationDate);
 
@@ -546,60 +354,102 @@ const handleInstallPart = async (data: { installationDate: string; mileageAtInst
   }
 };
 
-const handleInstallCancel = async () => {
-  // Cancel: remove from target and add back to source
-  if (pendingPartInstall.value?.removeFromTarget) {
-    pendingPartInstall.value.removeFromTarget();
+const handlePartDropped = (
+  partId: string,
+  sourceContainerId: string,
+  targetContainerId: string,
+  options?: DropOptions
+) => {
+  const { part, removeFromTarget } = options ?? {};
+
+  if (!part) {
+    showError('Part not found');
+    removeFromTarget?.();
+    return;
   }
-  if (pendingPartInstall.value?.part) {
-    addPartToContainer(
-      pendingPartInstall.value.partId,
-      pendingPartInstall.value.sourceContainerId,
-      pendingPartInstall.value.part
+
+  const targetBikeId = extractBikeId(targetContainerId);
+
+  if (targetBikeId) {
+    pendingPartInstall.value = { partId, sourceContainerId, targetContainerId, part, removeFromTarget };
+    showInstallDialog.value = true;
+    return;
+  }
+
+  if (targetContainerId === 'available' || targetContainerId === 'all') {
+    confirmRemoveFromBike(
+      partId,
+      () => emit('partsChanged', { type: 'moved', partId, data: { sourceContainerId, targetContainerId } }),
+      () => revertDrop(partId, sourceContainerId, part, removeFromTarget),
     );
   }
-
-  showInstallDialog.value = false;
-  pendingPartInstall.value = null;
 };
 
-// Get bike names for dialog
-const getBikeName = (bikeId: string | null): string => {
-  if (!bikeId) return '';
-  const bike = bikesStore.getBikeById(bikeId);
-  return bike?.name || '';
+const handlePartMoved = (partId: string, sourceContainerId: string, targetContainerId: string) => {
+  emit('partsChanged', {
+    type: 'moved',
+    partId,
+    data: { sourceContainerId, targetContainerId }
+  });
 };
 
-const sourceBikeName = computed(() => {
-  if (!pendingPartInstall.value?.part) return '';
-  const sourceBikeId = pendingPartInstall.value.part.bikeId;
-  return getBikeName(sourceBikeId);
-});
+const handlePartSelected = (part: BikePart) => {
+  emit('partsChanged', {
+    type: 'selected',
+    partId: part.id,
+    data: { part }
+  });
+};
 
-const targetBikeName = computed(() => {
-  if (!pendingPartInstall.value?.targetContainerId) return '';
-  if (pendingPartInstall.value.targetContainerId.startsWith('bike-')) {
-    const bikeId = pendingPartInstall.value.targetContainerId.replace('bike-', '');
-    return getBikeName(bikeId);
-  }
-  return '';
-});
+const handlePassToOtherUser = (partId: string) => {
+  emit('partsChanged', {
+    type: 'passToOtherUser',
+    partId
+  });
+  // TODO: Implement user selection dialog/modal
+};
 
-const partName = computed(() => {
-  return pendingPartInstall.value?.part?.name || '';
-});
+const handlePutOnOtherBike = (partId: string) => {
+  emit('partsChanged', {
+    type: 'putOnOtherBike',
+    partId
+  });
+  // TODO: Implement bike selection dialog/modal
+};
 
-const handleAddPart = async (part: CreatePartDto) => {
-  try {
-    await withAjaxBar(
-      partsStore.createPart(part)
-    );
-    showSuccess('Part created successfully');
+const handleRemoveFromBike = (partId: string) => {
+  confirmRemoveFromBike(
+    partId,
+    () => emit('partsChanged', { type: 'removedFromBike', partId }),
+  );
+};
 
-  } catch (err: any) {
-    console.error('Failed to create part:', err);
-    showError(err.message || 'Failed to create part');
-  }
+const handleRidesHistory = (partId: string) => {
+  emit('partsChanged', {
+    type: 'ridesHistory',
+    partId
+  });
+  router.push(`/parts/${partId}/rides`);
+};
+
+const handleShowBike = (bikeId: string) => {
+  emit('partsChanged', {
+    type: 'showBike',
+    partId: '',
+    data: { bikeId }
+  });
+  router.push(`/bikes/${bikeId}`);
+};
+
+const handleViewModeChange = (mode: 'cards' | 'table') => {
+  localViewMode.value = mode;
+  emit('update:viewMode', mode);
+  emit('viewModeChanged', mode);
+};
+
+const revertDrop = (partId: string, sourceContainerId: string, part: BikePart, removeFromTarget?: () => void) => {
+  removeFromTarget?.();
+  addPartToContainer(partId, sourceContainerId, part);
 };
 </script>
 

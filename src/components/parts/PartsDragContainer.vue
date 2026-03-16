@@ -106,6 +106,8 @@ const handleDragAdd = (event: any) => {
   // Get the part from the event - it should be in the newIndex position
 
   const newIndex = event.newIndex;
+  let sourceContainerId = '';
+
   if (newIndex === undefined || newIndex < 0 || newIndex >= localParts.value.length) {
     return;
   }
@@ -117,7 +119,7 @@ const handleDragAdd = (event: any) => {
 
   // Try to get source container ID from the dragged element
   const draggedElement = event.item;
-  let sourceContainerId = '';
+
 
   if (draggedElement?.dataset?.containerId) {
     sourceContainerId = draggedElement.dataset.containerId;

@@ -7,28 +7,11 @@
     </div>
 
     <!-- Quasar Table -->
-    <q-table
-      :rows="parts"
-      :columns="columns"
-      row-key="id"
-      :loading="loading"
-      :pagination="pagination"
-      @request="onRequest"
-      :filter="filter"
-      :selected-rows-label="getSelectedString"
-      selection="none"
-      :grid="$q.screen.xs"
-      class="parts-table"
-    >
+    <q-table :rows="parts" :columns="columns" row-key="id" :loading="loading" :pagination="pagination"
+      @request="onRequest" :filter="filter" :selected-rows-label="getSelectedString" selection="none"
+      :grid="$q.screen.xs" class="parts-table">
       <template v-slot:top-right>
-        <q-input
-          v-model="filter"
-          borderless
-          dense
-          debounce="300"
-          placeholder="Search"
-          class="search-input"
-        >
+        <q-input v-model="filter" borderless dense debounce="300" placeholder="Search" class="search-input">
           <template v-slot:append>
             <q-icon name="search" />
           </template>
@@ -36,19 +19,10 @@
       </template>
 
       <template v-slot:body="props">
-        <q-tr
-          :props="props"
-          :class="{ 'row-selected': props.selected }"
-          @click="handleRowClick(props.row)"
-          class="table-row"
-        >
+        <q-tr :props="props" :class="{ 'row-selected': props.selected }" @click="handleRowClick(props.row)"
+          class="table-row">
           <q-td key="partType" :props="props">
-            <q-chip
-              :label="props.row.partType"
-              color="primary"
-              text-color="white"
-              size="sm"
-            />
+            <q-chip :label="props.row.partType" color="primary" text-color="white" size="sm" />
           </q-td>
           <q-td key="name" :props="props">
             <div class="part-name-cell">
@@ -73,42 +47,23 @@
             </span>
           </q-td>
           <q-td key="actions" :props="props" auto-width>
-            <q-btn
-              flat
-              round
-              dense
-              icon="more_vert"
-              color="primary"
-            >
+            <q-btn flat round dense icon="more_vert" color="primary">
               <q-menu>
                 <q-list style="min-width: 150px">
-                  <q-item
-                    clickable
-                    v-close-popup
-                    @click="$emit('fullDetails', props.row.id)"
-                  >
+                  <q-item clickable v-close-popup @click="$emit('fullDetails', props.row.id)">
                     <q-item-section avatar>
                       <q-icon name="info" />
                     </q-item-section>
                     <q-item-section>Full Details</q-item-section>
                   </q-item>
-                  <q-item
-                    clickable
-                    v-close-popup
-                    @click="$emit('configure', props.row.id)"
-                  >
+                  <q-item clickable v-close-popup @click="$emit('configure', props.row.id)">
                     <q-item-section avatar>
                       <q-icon name="settings" />
                     </q-item-section>
                     <q-item-section>Configure</q-item-section>
                   </q-item>
                   <q-separator />
-                  <q-item
-                    clickable
-                    v-close-popup
-                    @click="$emit('delete', props.row.id)"
-                    class="text-negative"
-                  >
+                  <q-item clickable v-close-popup @click="$emit('delete', props.row.id)" class="text-negative">
                     <q-item-section avatar>
                       <q-icon name="delete" />
                     </q-item-section>
@@ -135,14 +90,9 @@
 import { ref, computed } from 'vue';
 import type { BikePart } from '@/types';
 
-export interface TableColumn {
-  name: string;
-  label: string;
-  field: string | ((row: any) => any);
-  align?: 'left' | 'center' | 'right';
-  sortable?: boolean;
-  format?: (val: any, row: any) => string;
-}
+import { defaultPartColumns } from './partsTableColumns';
+import type { TableColumn } from './partsTableColumns';
+export type { TableColumn };
 
 interface Props {
   parts: BikePart[];
@@ -159,50 +109,7 @@ const props = withDefaults(defineProps<Props>(), {
   showCount: true,
   currentBikeMileage: 0,
   loading: false,
-  columns: () => [
-    {
-      name: 'partType',
-      label: 'Type',
-      field: 'partType',
-      align: 'left' as const,
-      sortable: true,
-    },
-    {
-      name: 'name',
-      label: 'Name',
-      field: 'name',
-      align: 'left' as const,
-      sortable: true,
-    },
-    {
-      name: 'bike',
-      label: 'Bike',
-      field: 'bikeId',
-      align: 'left' as const,
-      sortable: true,
-    },
-    {
-      name: 'mileage',
-      label: 'Total Mileage',
-      field: 'mileage',
-      align: 'right' as const,
-      sortable: true,
-    },
-    {
-      name: 'remaining',
-      label: 'Remaining',
-      field: 'remaining',
-      align: 'right' as const,
-      sortable: true,
-    },
-    {
-      name: 'actions',
-      label: 'Actions',
-      field: 'actions',
-      align: 'center' as const,
-      sortable: false,
-    },
-  ]
+  columns: () => defaultPartColumns
 });
 
 const emit = defineEmits<{
@@ -246,54 +153,50 @@ const getTotalMileage = (part: BikePart): number => {
   if (!props.currentBikeMileage || props.currentBikeMileage === 0) {
     return 0;
   }
-  return Math.max(0, props.currentBikeMileage - part.mileageAtInstallation);
+  return 0;
 };
 
 const getRemainingKms = (part: BikePart): number | null => {
   if (!props.currentBikeMileage || props.currentBikeMileage === 0) {
     return null;
   }
-  
-  if (!part.expectedLifespan) {
-    return null;
-  }
-  
+
+
+
   const currentMileage = getTotalMileage(part);
-  const remaining = part.expectedLifespan - currentMileage;
-  
+  const remaining = 0;
+
   return Math.max(0, remaining);
 };
 
 const getRemainingText = (part: BikePart): string => {
   const kms = getRemainingKms(part);
-  
+
   if (kms === null) {
     return 'N/A';
   }
-  
+
   if (kms === 0) {
     return '0 km (Due)';
   }
-  
+
   return `${kms} km`;
 };
 
 const getRemainingClass = (part: BikePart): string => {
   const kms = getRemainingKms(part);
-  
+
   if (kms === null || kms === 0) {
     return 'remaining-due';
   }
-  
-  if (!part.expectedLifespan) {
-    return '';
-  }
-  
-  const percentage = kms / part.expectedLifespan * 100;
+
+
+
+  const percentage = 100;
   if (percentage < 20) {
     return 'remaining-warning';
   }
-  
+
   return '';
 };
 </script>
@@ -388,4 +291,3 @@ const getRemainingClass = (part: BikePart): string => {
   }
 }
 </style>
-
