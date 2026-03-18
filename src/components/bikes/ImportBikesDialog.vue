@@ -8,19 +8,27 @@
       <q-card-section class="row items-center q-pb-none">
         <div class="text-h6">Import Bikes from Strava</div>
         <q-space />
-        <q-btn icon="close" flat round dense v-close-popup />
+        <q-btn icon="close"
+               flat
+               round
+               dense
+               v-close-popup />
       </q-card-section>
 
       <q-card-section>
         <!-- Loading State -->
-        <div v-if="isFetchingAthlete" class="flex flex-center" style="min-height: 200px">
+        <div v-if="isFetchingAthlete"
+             class="flex flex-center"
+             style="min-height: 200px">
           <q-spinner color="primary" size="3em" />
           <div class="q-ml-md">Fetching bikes from Strava...</div>
         </div>
 
         <!-- Error State -->
         <div v-else-if="fetchError" class="error-state">
-          <q-icon name="error_outline" size="48px" color="negative" />
+          <q-icon name="error_outline"
+                  size="48px"
+                  color="negative" />
           <div class="text-h6 q-mt-md">Failed to fetch Strava data</div>
           <div class="text-body2 q-mt-sm">{{ fetchError }}</div>
           <q-btn 
@@ -32,9 +40,13 @@
         </div>
 
         <!-- No Bikes State -->
-        <div v-else-if="importBikes.length === 0" class="flex flex-center" style="min-height: 200px">
+        <div v-else-if="importBikes.length === 0"
+             class="flex flex-center"
+             style="min-height: 200px">
           <div class="text-center">
-            <q-icon name="directions_bike" size="64px" color="grey-5" />
+            <q-icon name="directions_bike"
+                    size="64px"
+                    color="grey-5" />
             <div class="text-h6 q-mt-md">No bikes found in Strava</div>
           </div>
         </div>
@@ -92,25 +104,25 @@
             <template v-slot:body-cell-name="props">
               <q-td :props="props">
                 <div v-if="props.row.mergeWith 
-                && props.row.matchedExisting 
-                && props.row.matchedExisting.name !== props.row.editedName" 
-                class="text-body2 saved-name">
-                    Strava name: <span class="text-primary" @click="props.row.matchedExisting.name = props.row.editedName">
-                        <q-tooltip>
-                            Click to use Strava name
-                        </q-tooltip>
-                        {{ props.row.editedName }}
-                    </span>
+                       && props.row.matchedExisting 
+                       && props.row.matchedExisting.name !== props.row.editedName" 
+                     class="text-body2 saved-name">
+                  Strava name: <span class="text-primary" @click="props.row.matchedExisting.name = props.row.editedName">
+                    <q-tooltip>
+                      Click to use Strava name
+                    </q-tooltip>
+                    {{ props.row.editedName }}
+                  </span>
                 </div>
                 <div v-if="props.row.matchedExisting 
-                && props.row.matchedExisting!.name !== props.row.matchedExisting.storedName" 
-                class="text-body2 saved-name">
-                    Existing name: <span class="text-primary" @click="props.row.matchedExisting.name = props.row.matchedExisting.storedName">
-                        <q-tooltip>
-                            Click to use existing bike name
-                        </q-tooltip>
-                        {{ props.row.matchedExisting.storedName }}
-                    </span>
+                       && props.row.matchedExisting!.name !== props.row.matchedExisting.storedName" 
+                     class="text-body2 saved-name">
+                  Existing name: <span class="text-primary" @click="props.row.matchedExisting.name = props.row.matchedExisting.storedName">
+                    <q-tooltip>
+                      Click to use existing bike name
+                    </q-tooltip>
+                    {{ props.row.matchedExisting.storedName }}
+                  </span>
                 </div>
                 <q-input
                   v-if="props.row.mergeWith"
@@ -123,14 +135,14 @@
                 />
                 <template v-else>
                  
-                    <q-input
-                  v-model="props.row.editedName"
-                  dense
-                  outlined
-                  hide-bottom-space
-                  :rules="[(val: string) => !!val || 'Name is required']"
-                  :bg-color="props.row.selected ? 'white' : 'transparent'"
-                />
+                  <q-input
+                    v-model="props.row.editedName"
+                    dense
+                    outlined
+                    hide-bottom-space
+                    :rules="[(val: string) => !!val || 'Name is required']"
+                    :bg-color="props.row.selected ? 'white' : 'transparent'"
+                  />
                 </template>
             
               </q-td>
@@ -208,7 +220,10 @@
       </q-card-section>
 
       <q-card-actions align="right" class="q-pa-md">
-        <q-btn flat label="Cancel" color="negative" @click="handleCancel" />
+        <q-btn flat
+               label="Cancel"
+               color="negative"
+               @click="handleCancel" />
         <q-btn
           label="Import Selected"
           color="primary"
@@ -222,12 +237,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import {
+  ref, computed, watch 
+} from 'vue';
 import { stravaService } from '@/services/stravaService';
 import { bikeService } from '@/services/bikeService';
 import { useBikesStore } from '@/stores/bikesStore';
 import { useLayout } from '@/composables/useLayout';
-import type { StravaBike, Bike, SyncBikeDto } from '@/types';
+import type {
+  StravaBike, Bike, SyncBikeDto 
+} from '@/types';
 import { BikeType } from '@/types';
 
 interface Props {
@@ -260,7 +279,9 @@ const importBikes = ref<ImportBikeState[]>([]);
 const existingBikes = ref<BikeWithStoredName[]>([]);
 
 const bikesStore = useBikesStore();
-const { showSuccess, showError, withAjaxBar } = useLayout();
+const {
+  showSuccess, showError, withAjaxBar 
+} = useLayout();
 
 // Bike type options for dropdown
 const bikeTypeOptions = [
@@ -433,8 +454,8 @@ const deselectAll = () => {
 };
 
 const handleMergeChange = (bikeState: ImportBikeState) => {
-    // Do not allow to merge more than one strava bike to the same existing bike
-    clearOtherBikesMergeWith(bikeState);
+  // Do not allow to merge more than one strava bike to the same existing bike
+  clearOtherBikesMergeWith(bikeState);
 
   // When merging, preserve existing bike's name and type
   if (bikeState.mergeWith) {
@@ -470,9 +491,7 @@ const handleCancel = () => {
 
 const handleSave = async () => {
   // Validate all selected bikes
-  const invalidBikes = importBikes.value.filter(
-    b => b.selected && !b.mergeWith && !b.editedName
-  );
+  const invalidBikes = importBikes.value.filter(b => b.selected && !b.mergeWith && !b.editedName);
 
   if (invalidBikes.length > 0) {
     showError('Please provide a name for all new bikes');
@@ -543,14 +562,14 @@ const handleSave = async () => {
 };
 
 const rowStyleFn = (row: ImportBikeState) => {
-        if (!row.selected) {
-            return 'background-color: rgba(193, 0, 21, 0.1)';
-        } else if (row.mergeWith) {
-            return 'background-color: rgba(49, 204, 236, 0.1)';
-        } else {
-            return 'background-color: rgba(33, 186, 69, 0.1)';
-        }
-      }
+  if (!row.selected) {
+    return 'background-color: rgba(193, 0, 21, 0.1)';
+  } else if (row.mergeWith) {
+    return 'background-color: rgba(49, 204, 236, 0.1)';
+  } else {
+    return 'background-color: rgba(33, 186, 69, 0.1)';
+  }
+};
 </script>
 
 <style scoped lang="css">

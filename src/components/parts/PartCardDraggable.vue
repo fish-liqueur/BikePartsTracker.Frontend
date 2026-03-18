@@ -68,7 +68,9 @@ const handleDragStart = (event: DragEvent) => {
   // Set drag image (optional - use a custom ghost image)
   // For now, browser will use default
   
-  emit('dragStart', props.part, props.containerId);
+  emit(
+    'dragStart', props.part, props.containerId
+  );
 };
 
 const handleDragEnd = () => {

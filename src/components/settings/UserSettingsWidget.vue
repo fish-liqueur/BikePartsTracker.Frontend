@@ -1,19 +1,19 @@
 <template>
- <q-card>
-      <q-card-section>
-        <h5 class="text-h5">User Settings</h5>
-        <q-form @submit.prevent="handleSubmit" class="form-general pt-2">
-            <ElementWithTooltipButton tooltip-text="New chain cycles will have this number of chains">
-            <q-select
+  <q-card>
+    <q-card-section>
+      <h5 class="text-h5">User Settings</h5>
+      <q-form @submit.prevent="handleSubmit" class="form-general pt-2">
+        <ElementWithTooltipButton tooltip-text="New chain cycles will have this number of chains">
+          <q-select
             v-model="formData.defaultChainCycleLength"
             :options="[2, 3]"
             label="Default chain cycle length"
             filled
             class="m-0 p-0"
-            />
+          />
         </ElementWithTooltipButton>
         <ElementWithTooltipButton tooltip-text="How many kilometers you'd like to ride between chain swaps">
-            <q-input
+          <q-input
             v-model="formData.defaultChainCycleIntervalKm"
             label="Default chain cycle interval (km)"
             filled
@@ -22,27 +22,30 @@
             :rules="[
               (val: number | null) => val !== null && val !== undefined && val >= 0 || 'Interval must be a positive number'
             ]"
-            />
+          />
         </ElementWithTooltipButton>
         <ElementWithTooltipButton tooltip-text="Use chain cycle on new bikes">
-            <q-checkbox v-model="formData.defaultUseChainCycle" label="Use chain cycle by default" />
+          <q-checkbox v-model="formData.defaultUseChainCycle" label="Use chain cycle by default" />
         </ElementWithTooltipButton>
         <ElementWithTooltipButton :tooltip-text="showTipsString" show-always>
-            <q-checkbox v-model="formData.showTips" label="Show UI tips" />
+          <q-checkbox v-model="formData.showTips" label="Show UI tips" />
         </ElementWithTooltipButton>
-        </q-form>
+      </q-form>
         
-      </q-card-section>
+    </q-card-section>
 
-      <q-card-actions align="stretch">
-        <q-btn flat label="Cancel" color="primary" @click="initializeForm" />
-        <q-btn
-          label="Save User Settings"
-          color="primary"
-          @click="saveSettings"
-        />
-      </q-card-actions>
-    </q-card>
+    <q-card-actions align="stretch">
+      <q-btn flat
+             label="Cancel"
+             color="primary"
+             @click="initializeForm" />
+      <q-btn
+        label="Save User Settings"
+        color="primary"
+        @click="saveSettings"
+      />
+    </q-card-actions>
+  </q-card>
 </template>
 
 <script setup lang="ts">
@@ -61,7 +64,7 @@ const formData = ref<UserSettingsDto>({
 });
 
 const initializeForm = () => {
-    formData.value = {
+  formData.value = {
     defaultChainCycleLength: userSettingsStore.userSettings?.defaultChainCycleLength || 3,
     defaultChainCycleIntervalKm: userSettingsStore.userSettings?.defaultChainCycleIntervalKm || 777,
     defaultUseChainCycle: userSettingsStore.userSettings?.defaultUseChainCycle ?? true,
@@ -73,9 +76,11 @@ const saveSettings = async () => {
   await userSettingsStore.updateSettings(formData.value);
 };
 
-watch(() => userSettingsStore.userSettings, () => {
-  initializeForm();
-}, { immediate: true, deep: true });
+watch(
+  () => userSettingsStore.userSettings, () => {
+    initializeForm();
+  }, { immediate: true, deep: true }
+);
 
 const showTipsString = `Hide or show tooltips explaining the UI features
 (this tooltip is always shown)`;

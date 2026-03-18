@@ -1,5 +1,7 @@
 import { apiService } from './api';
-import type { BikePart, PartDto, CreatePartDto, PartUsageHistory, ApiResponse, PaginatedResponse } from '@/types';
+import type {
+  BikePart, PartDto, CreatePartDto, PartUsageHistory, ApiResponse, PaginatedResponse 
+} from '@/types';
 
 export const partService = {
   // Get all parts for the current user (all bikes)

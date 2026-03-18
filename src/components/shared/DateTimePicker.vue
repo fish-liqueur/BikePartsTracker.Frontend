@@ -12,26 +12,42 @@
   >
     <template v-slot:append>
       <q-icon name="event" class="cursor-pointer">
-        <q-popup-proxy cover transition-show="scale" transition-hide="scale" ref="popupRef">
+        <q-popup-proxy cover
+                       transition-show="scale"
+                       transition-hide="scale"
+                       ref="popupRef">
           <q-card>
             <div class="display-flex">
               <q-card-section>
-              <q-date v-model="dateString" mask="YYYY-MM-DD" @update:model-value="handleDateChange">
-              </q-date>
-            </q-card-section>
-            <q-separator />
-            <q-card-section>
-              <q-time v-model="timeString" mask="HH:mm" format24h @update:model-value="handleTimeChange">
+                <q-date v-model="dateString"
+                        mask="YYYY-MM-DD"
+                        @update:model-value="handleDateChange">
+                </q-date>
+              </q-card-section>
+              <q-separator />
+              <q-card-section>
+                <q-time v-model="timeString"
+                        mask="HH:mm"
+                        format24h
+                        @update:model-value="handleTimeChange">
               
-              </q-time>
-            </q-card-section>
+                </q-time>
+              </q-card-section>
             </div>
             <q-card-section>
               <div class="display-flex flex-justify-between w-100">
-                <q-btn label="set to now" color="secondary" @click="setToNow" />
+                <q-btn label="set to now"
+                       color="secondary"
+                       @click="setToNow" />
                 <div class="display-flex gap-2">
-                  <q-btn v-close-popup label="Cancel" color="primary" flat />
-                  <q-btn v-close-popup label="OK" color="primary" @click="handleConfirm" />
+                  <q-btn v-close-popup
+                         label="Cancel"
+                         color="primary"
+                         flat />
+                  <q-btn v-close-popup
+                         label="OK"
+                         color="primary"
+                         @click="handleConfirm" />
                 </div>
               </div>
             </q-card-section>
@@ -43,7 +59,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import {
+  ref, computed, watch 
+} from 'vue';
 
 interface Props {
   modelValue: Date | undefined | null;
@@ -126,9 +144,11 @@ const initializeFromModelValue = () => {
 };
 
 // Watch for changes in modelValue from parent
-watch(() => props.modelValue, () => {
-  initializeFromModelValue();
-}, { immediate: true });
+watch(
+  () => props.modelValue, () => {
+    initializeFromModelValue();
+  }, { immediate: true }
+);
 
 const setToNow = () => {
   emit('update:modelValue', new Date());
@@ -170,7 +190,9 @@ const updateDateTime = () => {
   const [year, month, day] = dateString.value.split('-').map(Number);
   const [hours, minutes] = timeString.value.split(':').map(Number);
   
-  const newDate = new Date(year, month - 1, day, hours, minutes);
+  const newDate = new Date(
+    year, month - 1, day, hours, minutes
+  );
   emit('update:modelValue', newDate);
 };
 
@@ -184,7 +206,9 @@ const validateDateTime = (value: string | number | null): true | string => {
   if (!match) return 'Invalid date format (DD/MM/YYYY HH:MM)';
 
   const [, day, month, year, hours, minutes] = match.map(Number);
-  const date = new Date(year, month - 1, day, hours, minutes);
+  const date = new Date(
+    year, month - 1, day, hours, minutes
+  );
 
   // Round-trip check catches rolled-over values like 31/02 → 03/03
   if (
@@ -220,7 +244,9 @@ const handleUpdate = (value: string | number | null): void => {
   if (!match) return;
   
   const [, day, month, year, hours, minutes] = match.map(Number);
-  const date = new Date(year, month - 1, day, hours, minutes);
+  const date = new Date(
+    year, month - 1, day, hours, minutes
+  );
   
   if (!isNaN(date.getTime())) {
     emit('update:modelValue', date);

@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -73,10 +73,12 @@ const router = createRouter({
       component: () => import('@/views/NotFound.vue')
     }
   ],
-})
+});
 
 // Navigation guards
-router.beforeEach((to, from, next) => {
+router.beforeEach((
+  to, from, next
+) => {
   const isAuthenticated = !!localStorage.getItem('authToken');
   
   if (to.meta.requiresAuth && !isAuthenticated) {
@@ -90,4 +92,4 @@ router.beforeEach((to, from, next) => {
   }
 });
 
-export default router
+export default router;

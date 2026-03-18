@@ -55,7 +55,9 @@
               color="secondary"
             />
           </q-td>
-          <q-td key="actions" :props="props" auto-width>
+          <q-td key="actions"
+                :props="props"
+                auto-width>
             <q-btn
               flat
               round
@@ -126,7 +128,9 @@
 
       <template v-slot:no-data>
         <div class="empty-state">
-          <q-icon name="directions_bike" size="48px" color="grey-5" />
+          <q-icon name="directions_bike"
+                  size="48px"
+                  color="grey-5" />
           <div class="text-grey">No bikes available</div>
         </div>
       </template>
@@ -209,7 +213,9 @@ const getSelectedString = () => {
 };
 
 const onRequest = (tableProps: any) => {
-  const { page, rowsPerPage, sortBy, descending } = tableProps.pagination;
+  const {
+    page, rowsPerPage, sortBy, descending 
+  } = tableProps.pagination;
   pagination.value.page = page;
   pagination.value.rowsPerPage = rowsPerPage;
   pagination.value.sortBy = sortBy;

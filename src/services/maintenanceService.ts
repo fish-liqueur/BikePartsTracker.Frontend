@@ -1,5 +1,7 @@
 import { apiService } from './api';
-import type { Maintenance, MaintenanceDto, CreateMaintenanceDto, ApiResponse, PaginatedResponse } from '@/types';
+import type {
+  Maintenance, MaintenanceDto, CreateMaintenanceDto, ApiResponse, PaginatedResponse 
+} from '@/types';
 
 export const maintenanceService = {
   // Get all maintenance records for a bike
@@ -68,7 +70,9 @@ export const maintenanceService = {
   },
 
   // Get maintenance records by date range
-  async getMaintenanceByDateRange(bikeId: string, startDate: Date, endDate: Date): Promise<Maintenance[]> {
+  async getMaintenanceByDateRange(
+    bikeId: string, startDate: Date, endDate: Date
+  ): Promise<Maintenance[]> {
     const response = await apiService.get<Maintenance[]>('/api/maintenance/date-range', {
       bikeId,
       startDate: startDate.toISOString(),
@@ -87,7 +91,9 @@ export const maintenanceService = {
   },
 
   // Get maintenance cost summary for a bike
-  async getMaintenanceCostSummary(bikeId: string, startDate?: Date, endDate?: Date): Promise<{
+  async getMaintenanceCostSummary(
+    bikeId: string, startDate?: Date, endDate?: Date
+  ): Promise<{
     totalCost: number;
     maintenanceCount: number;
     averageCost: number;

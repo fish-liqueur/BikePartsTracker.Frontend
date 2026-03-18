@@ -1,9 +1,10 @@
 <template>
   <template>
-    <q-card class="chain-card" :class="{
-      'chain-card--active bg-primary text-white': isActive && part,
-      'chain-card--draggable bg-secondary text-white': !isActive && part,
-    }">
+    <q-card class="chain-card"
+            :class="{
+              'chain-card--active bg-primary text-white': isActive && part,
+              'chain-card--draggable bg-secondary text-white': !isActive && part,
+            }">
       <div class="chain-card__index">
         {{ index + 1 }}
       </div>
@@ -12,7 +13,9 @@
       <p class="chain-card__third-line" :style="thirdLineStyle">{{ thirdLineText }}</p>
       <q-menu touch-position>
         <q-list>
-          <q-item clickable v-close-popup @click="handleFullDetails">
+          <q-item clickable
+                  v-close-popup
+                  @click="handleFullDetails">
             <q-item-section avatar>
               <q-icon name="info" />
             </q-item-section>
@@ -20,7 +23,9 @@
               <q-item-label>To detailed page</q-item-label>
             </q-item-section>
           </q-item>
-          <q-item clickable v-close-popup @click="handleRemoveFromCycle">
+          <q-item clickable
+                  v-close-popup
+                  @click="handleRemoveFromCycle">
             <q-item-section avatar>
               <q-icon name="remove_circle" />
             </q-item-section>
@@ -36,10 +41,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick, computed } from 'vue';
-import { usePartsStore } from '@/stores/partsStore';
+import {
+  computed 
+} from 'vue';
+// import { usePartsStore } from '@/stores/partsStore';
 import { useLayout } from '@/composables/useLayout';
-import type { Bike, BikePart, CreatePartDto } from '@/types';
+import type {
+  Bike, BikePart 
+} from '@/types';
 
 interface Props {
   part: BikePart;
@@ -56,10 +65,13 @@ const emit = defineEmits<{
   removeFromCycle: [partId: string];
 }>();
 
-const partsStore = usePartsStore();
-const { showSuccess, showError, withAjaxBar } = useLayout();
+// const partsStore = usePartsStore();
+const {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  showSuccess, showError, withAjaxBar 
+} = useLayout();
 
-const showMenu = ref(false);
+// const showMenu = ref(false);
 
 const thirdLineText = computed(() => {
   return props.isActive ? 'Active chain' : `should install in ${kmsBeforeInstallation.value} km`;
@@ -75,9 +87,10 @@ const thirdLineStyle = computed(() => {
   };
 });
 
-const handleClickCard = () => {
-  showMenu.value = !showMenu.value;
-}
+
+// const handleClickCard = () => {
+//   showMenu.value = !showMenu.value;
+// };
 
 const handleFullDetails = () => {
   emit('fullDetails', props.part?.id || '');
@@ -88,24 +101,26 @@ const handleRemoveFromCycle = () => {
   emit('removeFromCycle', props.part?.id || '');
 };
 
-const handleCreateChain = async (data: CreatePartDto, index: number) => {
-  try {
-    const newChain = await withAjaxBar(
-      partsStore.createPart(data)
-    );
-    showSuccess('Chain created successfully');
-    if (newChain) {
-      emit('onSelectChain', newChain.id, props.chainCycleId, props.index);
-    }
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Failed to create chain';
-    showError(errorMessage);
-  }
-}
+// const handleCreateChain = async (data: CreatePartDto, index: number) => {
+//   try {
+//     const newChain = await withAjaxBar(partsStore.createPart(data));
+//     showSuccess('Chain created successfully');
+//     if (newChain) {
+//       emit(
+//         'onSelectChain', newChain.id, props.chainCycleId, props.index
+//       );
+//     }
+//   } catch (error) {
+//     const errorMessage = error instanceof Error ? error.message : 'Failed to create chain';
+//     showError(errorMessage);
+//   }
+// };
 
-const handleSelectChain = async (chain: BikePart) => {
-  emit('onSelectChain', chain.id, props.chainCycleId, props.index);
-}
+// const handleSelectChain = async (chain: BikePart) => {
+//   emit(
+//     'onSelectChain', chain.id, props.chainCycleId, props.index
+//   );
+// };
 </script>
 
 <style scoped lang="css">

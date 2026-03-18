@@ -9,17 +9,25 @@
         <p class="chain-card__description">Click or drag a chain from the list</p>
       </div>
     </div>
-    <AddChainDialog v-model="showAddChainDialog" :bike-context="bikeContext" :index="props.index"
-      :chainCycleId="props.chainCycleId" @select="handleSelectChain" @create="handleCreateChain" />
+    <AddChainDialog v-model="showAddChainDialog"
+                    :bike-context="bikeContext"
+                    :index="props.index"
+                    :chainCycleId="props.chainCycleId"
+                    @select="handleSelectChain"
+                    @create="handleCreateChain" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick, computed } from 'vue';
-import { usePartsStore } from '@/stores/partsStore';
+import {
+  ref
+} from 'vue';
+// import { usePartsStore } from '@/stores/partsStore';
 import { useLayout } from '@/composables/useLayout';
 import AddChainDialog from '@/components/parts/AddСhainDialog.vue';
-import type { Bike, BikePart, CreatePartDto } from '@/types';
+import type {
+  Bike, CreatePartDto 
+} from '@/types';
 
 interface Props {
   bikeContext: Bike;
@@ -33,8 +41,11 @@ const emit = defineEmits<{
   onCreateChain: [chain: CreatePartDto, chainCycleId: string, index: number];
 }>();
 
-const partsStore = usePartsStore();
-const { showSuccess, showError, withAjaxBar } = useLayout();
+// const partsStore = usePartsStore();
+const {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  showSuccess, showError, withAjaxBar 
+} = useLayout();
 
 const showAddChainDialog = ref(false);
 
@@ -43,12 +54,16 @@ const handleClickCard = () => {
 };
 
 const handleCreateChain = async (chain: CreatePartDto) => {
-  emit('onCreateChain', chain, props.chainCycleId, props.index);
-}
+  emit(
+    'onCreateChain', chain, props.chainCycleId, props.index
+  );
+};
 
 const handleSelectChain = async (chainId: string) => {
-  emit('onSelectChain', chainId, props.chainCycleId, props.index);
-}
+  emit(
+    'onSelectChain', chainId, props.chainCycleId, props.index
+  );
+};
 </script>
 
 <style scoped lang="css">

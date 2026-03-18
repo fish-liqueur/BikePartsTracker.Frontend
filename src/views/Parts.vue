@@ -1,11 +1,11 @@
 <template>
   <div class="view-container">
-      <PartsWidget
-        v-model:view-mode="viewMode"
-        title="Parts Management"
-        @parts-changed="handlePartsChanged"
-        @view-mode-changed="handleViewModeChanged"
-      />
+    <PartsWidget
+      v-model:view-mode="viewMode"
+      title="Parts Management"
+      @parts-changed="handlePartsChanged"
+      @view-mode-changed="handleViewModeChanged"
+    />
   </div>
 </template>
 

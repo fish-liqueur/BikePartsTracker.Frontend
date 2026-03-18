@@ -7,24 +7,40 @@
       </div>
       <div class="header-right">
         <ElementWithTooltipButton v-if="chainCyclesDetailed.length > 0" tooltip-text="remove chain cycle">
-          <q-btn label="Delete all chain cycles" color="accent" icon="remove_circle_outline"
-            @click="handleRemoveAllChainCycles" />
+          <q-btn label="Delete all chain cycles"
+                 color="accent"
+                 icon="remove_circle_outline"
+                 @click="handleRemoveAllChainCycles" />
         </ElementWithTooltipButton>
         <ElementWithTooltipButton v-else tooltip-text="add chain cycle">
-          <q-btn label="Use chain cycle" color="primary" icon="add_circle_outline" @click="handleAddChainCycle" />
+          <q-btn label="Use chain cycle"
+                 color="primary"
+                 icon="add_circle_outline"
+                 @click="handleAddChainCycle" />
         </ElementWithTooltipButton>
       </div>
     </div>
     <div v-if="chainCyclesDetailed.length > 0" class="chain-cycle-widget__layout">
-      <div v-for="(chainCycle, index) in chainCyclesDetailed" :key="chainCycle.id" class="chain-cycle-item">
+      <div v-for="(chainCycle, index) in chainCyclesDetailed"
+           :key="chainCycle.id"
+           class="chain-cycle-item">
         <div class="chain-cycle-item__chains-visualizer">
           <template v-for="(chain, index) in chainCycle.chains" :key="chain?.id || `empty-${index}`">
-            <ChainCard v-if="chain" :key="chain?.id" :part="chain" :is-active="chain?.id === chainCycle.activeChainId"
-              :bike-context="bikeContext" :index="index" :chain-cycle-id="chainCycle.id"
-              @on-select-chain="updateBikeChainCycle" />
-            <ChainCardEmpty v-else :key="`empty-${index}`" :index="index" :chain-cycle-id="chainCycle.id"
-              :bike-context="bikeContext" @on-select-chain="updateBikeChainCycle"
-              @on-create-chain="handleUserCreateChain" />
+            <ChainCard v-if="chain"
+                       :key="chain?.id"
+                       :part="chain"
+                       :is-active="chain?.id === chainCycle.activeChainId"
+                       :bike-context="bikeContext"
+                       :index="index"
+                       :chain-cycle-id="chainCycle.id"
+                       @on-select-chain="updateBikeChainCycle" />
+            <ChainCardEmpty v-else
+                            :key="`empty-${index}`"
+                            :index="index"
+                            :chain-cycle-id="chainCycle.id"
+                            :bike-context="bikeContext"
+                            @on-select-chain="updateBikeChainCycle"
+                            @on-create-chain="handleUserCreateChain" />
           </template>
         </div>
         <div class="chain-cycle-item__data-container">
@@ -32,13 +48,18 @@
             Swap chain in <span>300</span> km
             <div class="display-flex flex-column align-center justify-center gap-2">
               <ElementWithTooltipButton :tooltip-text="deleteChainCycleTooltipText">
-                <q-btn label="Delete chain cycle" color="danger" outline
-                  @click="handleRemoveChainCycle(chainCycle.id)" />
+                <q-btn label="Delete chain cycle"
+                       color="danger"
+                       outline
+                       @click="handleRemoveChainCycle(chainCycle.id)" />
               </ElementWithTooltipButton>
 
               <ElementWithTooltipButton v-if="index === chainCyclesDetailed.length - 1"
-                :tooltip-text="addMoreChainCyclesTooltipText">
-                <q-btn label="+1 chain cycle" color="primary" outline @click="handleAddMoreChainCycle" />
+                                        :tooltip-text="addMoreChainCyclesTooltipText">
+                <q-btn label="+1 chain cycle"
+                       color="primary"
+                       outline
+                       @click="handleAddMoreChainCycle" />
               </ElementWithTooltipButton>
 
             </div>
@@ -52,17 +73,21 @@
 
 <script setup lang="ts">
 // ---- Imports ----
-import type { Bike, BikePart, ChainCycle, CreateChainCycleDto, CreatePartDto, UpdateBikeDto } from '@/types';
-import { computed, ref, onMounted, watch } from 'vue';
+import type {
+  Bike, BikePart, ChainCycle, CreateChainCycleDto, CreatePartDto 
+} from '@/types';
+import {
+  computed
+} from 'vue';
 import { useQuasar } from 'quasar';
-import { VueDraggable, type SortableEvent } from 'vue-draggable-plus';
+// import { VueDraggable, type SortableEvent } from 'vue-draggable-plus';
 import { usePartsStore } from '@/stores/partsStore';
 import { useUserSettingsStore } from '@/stores/userSettingsStore';
 import { useBikesStore } from '@/stores/bikesStore';
 import { useLayout } from '@/composables/useLayout';
 import ChainCard from '@/components/cards/ChainCard.vue';
 import ChainCardEmpty from '@/components/cards/ChainCardEmpty.vue';
-import AddChainDialog from '@/components/parts/AddСhainDialog.vue';
+// import AddChainDialog from '@/components/parts/AddСhainDialog.vue';
 import ElementWithTooltipButton from '@/components/shared/ElementWithTooltipButton.vue';
 
 // ---- Types / Interfaces ----
@@ -77,7 +102,9 @@ const props = defineProps<Props>();
 const bikesStore = useBikesStore();
 const partsStore = usePartsStore();
 const userSettingsStore = useUserSettingsStore();
-const { showSuccess, showError, withAjaxBar } = useLayout();
+const {
+  showSuccess, showError, withAjaxBar 
+} = useLayout();
 const $q = useQuasar();
 
 // ---- State ----
@@ -114,7 +141,9 @@ const chainCyclesDetailed = computed(() => {
 
 //     return props.bikeContext.chainsInCycle.map(id => partsStore.parts.find(part => part.id === id) || null) as (BikePart | null)[];
 // }
-const updateBikeChainCycle = async (newChainId: string, chainCycleId: string, index: number) => {
+const updateBikeChainCycle = async (
+  newChainId: string, chainCycleId: string, index: number
+) => {
   try {
     const newChainCycles: ChainCycle[] = [...props.bikeContext.chainCycles];
     const targetCycle = newChainCycles.find(chainCycle => chainCycle.id === chainCycleId);
@@ -122,15 +151,13 @@ const updateBikeChainCycle = async (newChainId: string, chainCycleId: string, in
       throw new Error('Chain cycle not found');
     }
     targetCycle.chains[index] = newChainId;
-    await withAjaxBar(
-      bikesStore.updateBike(props.bikeContext.id, { chainCycles: newChainCycles })
-    );
+    await withAjaxBar(bikesStore.updateBike(props.bikeContext.id, { chainCycles: newChainCycles }));
     showSuccess('Chain added to cycle successfully');
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Failed to update bike with new chain';
     showError(errorMessage);
   }
-}
+};
 
 const getNewChainCycles = (): CreateChainCycleDto[] => {
   const length = userSettingsStore?.userSettings?.defaultChainCycleLength || 3;
@@ -142,7 +169,7 @@ const getNewChainCycles = (): CreateChainCycleDto[] => {
   }] as CreateChainCycleDto[];
 
   return newChainCycles;
-}
+};
 
 const handleAddMoreChainCycle = async () => {
   $q.dialog({
@@ -152,18 +179,16 @@ const handleAddMoreChainCycle = async () => {
     persistent: false,
   }).onOk(async () => {
     try {
-      await withAjaxBar(
-        bikesStore.updateBike(props.bikeContext.id, {
-          chainCycles: [...props.bikeContext.chainCycles, ...getNewChainCycles()]
-        })
-      );
+      await withAjaxBar(bikesStore.updateBike(props.bikeContext.id, {
+        chainCycles: [...props.bikeContext.chainCycles, ...getNewChainCycles()]
+      }));
       showSuccess('Extra chain cycle added successfully');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to add chain cycle';
       showError(errorMessage);
     }
   });
-}
+};
 
 const handleRemoveAllChainCycles = async () => {
   $q.dialog({
@@ -173,18 +198,16 @@ const handleRemoveAllChainCycles = async () => {
     persistent: false,
   }).onOk(async () => {
     try {
-      await withAjaxBar(
-        bikesStore.updateBike(props.bikeContext.id, {
-          chainCycles: []
-        })
-      );
+      await withAjaxBar(bikesStore.updateBike(props.bikeContext.id, {
+        chainCycles: []
+      }));
       showSuccess('Chain cycles removed successfully');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to remove chain cycle';
       showError(errorMessage);
     }
   });
-}
+};
 
 const handleRemoveChainCycle = (chainCycleId: string) => {
   $q.dialog({
@@ -193,47 +216,45 @@ const handleRemoveChainCycle = (chainCycleId: string) => {
     persistent: false,
   }).onOk(async () => {
     try {
-      await withAjaxBar(
-        bikesStore.updateBike(props.bikeContext.id, {
-          chainCycles: props.bikeContext.chainCycles?.filter(chainCycle => chainCycle.id !== chainCycleId)
-        })
-      );
+      await withAjaxBar(bikesStore.updateBike(props.bikeContext.id, {
+        chainCycles: props.bikeContext.chainCycles?.filter(chainCycle => chainCycle.id !== chainCycleId)
+      }));
       showSuccess('Chain cycle removed successfully');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to remove chain cycle';
       showError(errorMessage);
     }
   });
-}
+};
 
 const handleAddChainCycle = async () => {
   try {
-    await withAjaxBar(
-      bikesStore.updateBike(props.bikeContext.id, {
-        chainCycles: getNewChainCycles()
-      })
-    );
+    await withAjaxBar(bikesStore.updateBike(props.bikeContext.id, {
+      chainCycles: getNewChainCycles()
+    }));
     showSuccess('Chain cycle added successfully! Now you can add chains to the cycle.');
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Failed to add chain cycle';
     showError(errorMessage);
   }
-}
+};
 
-const handleUserCreateChain = async (chain: CreatePartDto, chainCycleId: string, index: number) => {
+const handleUserCreateChain = async (
+  chain: CreatePartDto, chainCycleId: string, index: number
+) => {
   try {
-    const newChain = await withAjaxBar(
-      partsStore.createPart(chain)
-    );
+    const newChain = await withAjaxBar(partsStore.createPart(chain));
     showSuccess('Chain created successfully');
     if (newChain) {
-      await updateBikeChainCycle(newChain.id, chainCycleId, index);
+      await updateBikeChainCycle(
+        newChain.id, chainCycleId, index
+      );
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Failed to create chain';
     showError(errorMessage);
   }
-}
+};
 
 // ---- Watchers ----
 

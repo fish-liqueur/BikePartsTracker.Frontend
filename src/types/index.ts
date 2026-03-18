@@ -229,19 +229,19 @@ export interface StravaAthleteDto {
   badge_type_id?: number;
   profile_medium?: string;
   profile?: string;
-  friend?: any;
-  follower?: any;
+  friend?: unknown;
+  follower?: unknown;
   follower_count?: number;
   friend_count?: number;
   mutual_friend_count?: number;
   athlete_type?: number;
   date_preference?: string;
   measurement_preference?: string;
-  clubs?: any[];
+  clubs?: unknown[];
   ftp?: number | null;
   weight?: number;
   bikes?: StravaBike[];
-  shoes?: any[];
+  shoes?: unknown[];
 }
 
 export interface SyncBikeDto {

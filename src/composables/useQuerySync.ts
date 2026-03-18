@@ -49,9 +49,7 @@ type QueryState<TConfig extends Record<string, QueryParamConfig<any>>> = {
  * - Provides setters that merge existing query and use router.replace by default.
  * - Skips redundant updates using a lightweight equality check.
  */
-export function useQuerySync<TConfig extends Record<string, QueryParamConfig<any>>>(
-  config: TConfig
-) {
+export function useQuerySync<TConfig extends Record<string, QueryParamConfig<any>>>(config: TConfig) {
   const route = useRoute();
   const router = useRouter();
 
@@ -82,9 +80,7 @@ export function useQuerySync<TConfig extends Record<string, QueryParamConfig<any
 
   // Initialize refs
   Object.entries(config).forEach(([name, cfg]) => {
-    state[name as keyof TConfig] = ref(
-      parseValue(cfg as QueryParamConfig<unknown>, route.query[(cfg as QueryParamConfig<unknown>).key])
-    ) as QueryState<TConfig>[keyof TConfig];
+    state[name as keyof TConfig] = ref(parseValue(cfg as QueryParamConfig<unknown>, route.query[(cfg as QueryParamConfig<unknown>).key])) as QueryState<TConfig>[keyof TConfig];
   });
 
   const syncFromRoute = () => {
@@ -148,10 +144,8 @@ export function useQuerySync<TConfig extends Record<string, QueryParamConfig<any
     await router[method]({ query: nextQuery });
   };
 
-  const setParams = async (
-    updates: Partial<{ [K in keyof TConfig]: ConfigValue<TConfig[K]> }>,
-    options: SetParamOptions = {}
-  ) => {
+  const setParams = async (updates: Partial<{ [K in keyof TConfig]: ConfigValue<TConfig[K]> }>,
+    options: SetParamOptions = {}) => {
     let changed = false;
 
     (Object.keys(updates) as Array<keyof TConfig>).forEach(name => {

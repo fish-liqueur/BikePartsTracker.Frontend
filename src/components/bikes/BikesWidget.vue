@@ -47,10 +47,12 @@
           @delete="handleDelete"
           @retire="handleRetire"
           @activate="handleActivate"
-          />
+        />
       </div>
       <div v-else class="no-bikes">
-        <q-icon name="directions_bike" size="64px" color="grey-5" />
+        <q-icon name="directions_bike"
+                size="64px"
+                color="grey-5" />
         <p>No bikes available</p>
         <q-btn
           label="Add Your First Bike"
@@ -90,7 +92,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import {
+  ref, computed, onMounted 
+} from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useBikesStore } from '@/stores/bikesStore';
@@ -105,10 +109,10 @@ import type { Bike, CreateBikeDto } from '@/types';
 export interface TableColumn {
   name: string;
   label: string;
-  field: string | ((row: any) => any);
+  field: string | ((row: unknown) => unknown);
   align?: 'left' | 'center' | 'right';
   sortable?: boolean;
-  format?: (val: any, row: any) => string;
+  format?: (val: unknown, row: unknown) => string;
 }
 
 interface Props {
@@ -150,12 +154,14 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-  bikesChanged: [event: { type: string; bikeId: string; data?: any }];
+  bikesChanged: [event: { type: string; bikeId: string; data?: unknown }];
 }>();
 
 const router = useRouter();
 const bikesStore = useBikesStore();
-const { showSuccess, showError, withAjaxBar } = useLayout();
+const {
+  showSuccess, showError, withAjaxBar 
+} = useLayout();
 
 const $q = useQuasar();
 
@@ -180,8 +186,12 @@ const showAddBikeDialog = ref(false);
 const showImportBikesDialog = ref(false);
 
 const viewModeOptions = [
-  { label: 'Cards', value: 'cards', icon: 'grid_view' },
-  { label: 'Table', value: 'table', icon: 'table_view' }
+  {
+    label: 'Cards', value: 'cards', icon: 'grid_view' 
+  },
+  {
+    label: 'Table', value: 'table', icon: 'table_view' 
+  }
 ];
 
 const isLoading = computed(() => bikesStore.isLoading);
@@ -189,18 +199,20 @@ const bikes = computed(() => bikesStore.bikes.filter(bike => bike.isActive || sh
 const tableColumns = computed(() => props.tableColumns);
 
 const handleViewModeChange = (mode: 'cards' | 'table') => {
-  void setQueryParam('viewMode', mode, { replace: true });
+  void setQueryParam(
+    'viewMode', mode, { replace: true }
+  );
 };
 
 const handleShowRetiredBikesChange = (value: boolean) => {
-  void setQueryParam('showRetiredBikes', value, { replace: true });
+  void setQueryParam(
+    'showRetiredBikes', value, { replace: true }
+  );
 };
 
 const handleAddBike = async (bikeData: CreateBikeDto) => {
   try {
-    const newBike = await withAjaxBar(
-      bikesStore.createBike(bikeData)
-    );
+    const newBike = await withAjaxBar(bikesStore.createBike(bikeData));
     
     showSuccess('Bike added successfully');
     showAddBikeDialog.value = false;
@@ -210,9 +222,10 @@ const handleAddBike = async (bikeData: CreateBikeDto) => {
       bikeId: newBike?.id || '',
       data: { bike: newBike }
     });
-  } catch (err: any) {
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to add bike';
     console.error('Failed to add bike:', err);
-    showError(err.message || 'Failed to add bike');
+    showError(message);
   }
 };
 
@@ -263,50 +276,47 @@ const handleConfigure = (bikeId: string) => {
 const handleDelete = async (bikeId: string) => {
   try {
     $q.dialog({
-        title: 'Do you want to delete this bike?',
-        message: 'This action cannot be undone. All data will be lost for good.',
-        cancel: true,
-        persistent: false
-      }).onOk(async () => {
-        await withAjaxBar(
-          bikesStore.deleteBike(bikeId)
-        );
-        showSuccess('Bike deleted successfully');
-      })
-  } catch (err: any) {
+      title: 'Do you want to delete this bike?',
+      message: 'This action cannot be undone. All data will be lost for good.',
+      cancel: true,
+      persistent: false
+    }).onOk(async () => {
+      await withAjaxBar(bikesStore.deleteBike(bikeId));
+      showSuccess('Bike deleted successfully');
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to delete the bike';
     console.error('Failed to delete the bike:', err);
-    showError(err.message || 'Failed to delete the bike');
+    showError(message);
   }
 };
 
 const handleRetire = async (bikeId: string) => {
   try {
     $q.dialog({
-        title: 'Do you want to retire this bike?',
-        message: 'This action CAN be undone. Think of it like about putting the bike to the farthest part of your garage, with no intention to ride it anymore.',
-        cancel: true,
-        persistent: false
-      }).onOk(async () => {
-        await withAjaxBar(
-          bikesStore.retireBike(bikeId)
-        );
-        showSuccess('Bike retired successfully');
-      })
-  } catch (err: any) {
+      title: 'Do you want to retire this bike?',
+      message: 'This action CAN be undone. Think of it like about putting the bike to the farthest part of your garage, with no intention to ride it anymore.',
+      cancel: true,
+      persistent: false
+    }).onOk(async () => {
+      await withAjaxBar(bikesStore.retireBike(bikeId));
+      showSuccess('Bike retired successfully');
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to retire the bike';
     console.error('Failed to retire the bike:', err);
-    showError(err.message || 'Failed to retire the bike');
+    showError(message);
   }
 };
 
 const handleActivate = async (bikeId: string) => {
   try {
-    await withAjaxBar(
-      bikesStore.activateBike(bikeId)
-    );
+    await withAjaxBar(bikesStore.activateBike(bikeId));
     showSuccess('Bike activated successfully');
-  } catch (err: any) {
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to activate the bike';
     console.error('Failed to activate the bike:', err);
-    showError(err.message || 'Failed to activate the bike');
+    showError(message);
   }
 };
 

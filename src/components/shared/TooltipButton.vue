@@ -1,5 +1,9 @@
 <template>
-  <q-btn flat round size="small" color="secondary" icon="question_mark" >
+  <q-btn flat
+         round
+         size="small"
+         color="secondary"
+         icon="question_mark" >
     <q-tooltip class="text-body2 tooltip-text">{{ text }}</q-tooltip>
   </q-btn>
 </template>

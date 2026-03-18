@@ -3,7 +3,10 @@
     <q-card-section>
       <div class="bike-header">
         <h3 class="bike-name">{{ bike.name }}</h3>
-        <q-chip :label="bike.type" color="primary" text-color="white" size="sm" />
+        <q-chip :label="bike.type"
+                color="primary"
+                text-color="white"
+                size="sm" />
       </div>
     </q-card-section>
 
@@ -70,7 +73,7 @@
 
     <!-- Action Buttons -->
     <q-card-actions align="right">
-    <q-btn
+      <q-btn
         flat
         label="Full Details"
         color="primary"
@@ -79,8 +82,8 @@
         @click="handleFullDetails"
       />
       <q-btn-dropdown color="primary" icon="menu">
-      <q-list>
-        <q-item
+        <q-list>
+          <q-item
             clickable
             v-close-popup
             @click="handleParts"
@@ -107,18 +110,20 @@
             </q-item-section>
           </q-item>
 
-        <q-item clickable v-close-popup @click="handleFullDetails">
-          <q-item-section avatar>
-            <q-icon name="dashboard_2_gear" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>To detailed page</q-item-label>
+          <q-item clickable
+                  v-close-popup
+                  @click="handleFullDetails">
+            <q-item-section avatar>
+              <q-icon name="dashboard_2_gear" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>To detailed page</q-item-label>
             <!-- <q-item-label caption>February 22, 2016</q-item-label> -->
-          </q-item-section>
-        </q-item>
+            </q-item-section>
+          </q-item>
 
           <q-item
-          v-if="props.bike.isActive"
+            v-if="props.bike.isActive"
             clickable
             v-close-popup
             @click="handleRetire"
@@ -161,8 +166,8 @@
               <q-item-label caption>for the bikes created by mistake</q-item-label>
             </q-item-section>
           </q-item>
-      </q-list>
-    </q-btn-dropdown>
+        </q-list>
+      </q-btn-dropdown>
     </q-card-actions>
   </q-card>
 </template>

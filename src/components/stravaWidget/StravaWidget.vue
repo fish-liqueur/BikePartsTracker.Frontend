@@ -1,33 +1,33 @@
 <template>
-      <q-card>
-      <q-card-section>
-        <h5 class="text-h5">Strava Connection</h5>
-        <div class="strava-status">
-          <q-icon 
-            :name="isConnected ? 'check_circle' : 'link_off'" 
-            :color="isConnected ? 'positive' : 'grey'"
-            size="2em"
-          />
-          <div class="status-text">
-            <p class="status-value">{{ isConnected ? `Connected as ${currentAthlete?.firstname} ${currentAthlete?.lastname}` : 'Not Connected' }}</p>
-          </div>
+  <q-card>
+    <q-card-section>
+      <h5 class="text-h5">Strava Connection</h5>
+      <div class="strava-status">
+        <q-icon 
+          :name="isConnected ? 'check_circle' : 'link_off'" 
+          :color="isConnected ? 'positive' : 'grey'"
+          size="2em"
+        />
+        <div class="status-text">
+          <p class="status-value">{{ isConnected ? `Connected as ${currentAthlete?.firstname} ${currentAthlete?.lastname}` : 'Not Connected' }}</p>
         </div>
-        <div v-if="error" class="text-subtitle1 color-negative">{{ error }}</div>
-      </q-card-section>
+      </div>
+      <div v-if="error" class="text-subtitle1 color-negative">{{ error }}</div>
+    </q-card-section>
 
-      <q-card-actions align="stretch">
-        <q-btn :flat="hasAthlete" 
-        color="primary" 
-        :loading="isLoading" 
-        :disabled="hasAthlete" 
-        @click="handleAddStrava">Connect Strava</q-btn>
-        <q-btn :flat="!hasAthlete"   
-        color="negative" 
-        :loading="isLoading" 
-        :disabled="!hasAthlete" 
-        @click="handleDisconnectStrava">Disconnect Strava</q-btn>
-      </q-card-actions>
-    </q-card>
+    <q-card-actions align="stretch">
+      <q-btn :flat="hasAthlete" 
+             color="primary" 
+             :loading="isLoading" 
+             :disabled="hasAthlete" 
+             @click="handleAddStrava">Connect Strava</q-btn>
+      <q-btn :flat="!hasAthlete"   
+             color="negative" 
+             :loading="isLoading" 
+             :disabled="!hasAthlete" 
+             @click="handleDisconnectStrava">Disconnect Strava</q-btn>
+    </q-card-actions>
+  </q-card>
 </template>
 
 <script setup lang="ts">
@@ -55,13 +55,13 @@ const handleAddStrava = () => {
 const handleDisconnectStrava = async () => {
   try {
     $q.dialog({
-        title: 'Confirm',
-        message: 'Do you want to disconnect from Strava?',
-        cancel: true,
-        persistent: false
-      }).onOk(() => {
-        stravaStore.disconnect();
-      })
+      title: 'Confirm',
+      message: 'Do you want to disconnect from Strava?',
+      cancel: true,
+      persistent: false
+    }).onOk(() => {
+      stravaStore.disconnect();
+    });
 
   } catch (err: any) {
     // Error is already handled in the store

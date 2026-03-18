@@ -3,15 +3,30 @@
     <!-- Container Header -->
     <div v-if="title" class="container-header">
       <h3 class="container-title">{{ title }}</h3>
-      <q-badge v-if="showCount" color="primary" :label="parts.length" />
+      <q-badge v-if="showCount"
+               color="primary"
+               :label="parts.length" />
     </div>
 
     <!-- Quasar Table -->
-    <q-table :rows="parts" :columns="columns" row-key="id" :loading="loading" :pagination="pagination"
-      @request="onRequest" :filter="filter" :selected-rows-label="getSelectedString" selection="none"
-      :grid="$q.screen.xs" class="parts-table">
+    <q-table :rows="parts"
+             :columns="columns"
+             row-key="id"
+             :loading="loading"
+             :pagination="pagination"
+             @request="onRequest"
+             :filter="filter"
+             :selected-rows-label="getSelectedString"
+             selection="none"
+             :grid="$q.screen.xs"
+             class="parts-table">
       <template v-slot:top-right>
-        <q-input v-model="filter" borderless dense debounce="300" placeholder="Search" class="search-input">
+        <q-input v-model="filter"
+                 borderless
+                 dense
+                 debounce="300"
+                 placeholder="Search"
+                 class="search-input">
           <template v-slot:append>
             <q-icon name="search" />
           </template>
@@ -19,10 +34,15 @@
       </template>
 
       <template v-slot:body="props">
-        <q-tr :props="props" :class="{ 'row-selected': props.selected }" @click="handleRowClick(props.row)"
-          class="table-row">
+        <q-tr :props="props"
+              :class="{ 'row-selected': props.selected }"
+              @click="handleRowClick(props.row)"
+              class="table-row">
           <q-td key="partType" :props="props">
-            <q-chip :label="props.row.partType" color="primary" text-color="white" size="sm" />
+            <q-chip :label="props.row.partType"
+                    color="primary"
+                    text-color="white"
+                    size="sm" />
           </q-td>
           <q-td key="name" :props="props">
             <div class="part-name-cell">
@@ -46,24 +66,37 @@
               {{ getRemainingText(props.row) }}
             </span>
           </q-td>
-          <q-td key="actions" :props="props" auto-width>
-            <q-btn flat round dense icon="more_vert" color="primary">
+          <q-td key="actions"
+                :props="props"
+                auto-width>
+            <q-btn flat
+                   round
+                   dense
+                   icon="more_vert"
+                   color="primary">
               <q-menu>
                 <q-list style="min-width: 150px">
-                  <q-item clickable v-close-popup @click="$emit('fullDetails', props.row.id)">
+                  <q-item clickable
+                          v-close-popup
+                          @click="$emit('fullDetails', props.row.id)">
                     <q-item-section avatar>
                       <q-icon name="info" />
                     </q-item-section>
                     <q-item-section>Full Details</q-item-section>
                   </q-item>
-                  <q-item clickable v-close-popup @click="$emit('configure', props.row.id)">
+                  <q-item clickable
+                          v-close-popup
+                          @click="$emit('configure', props.row.id)">
                     <q-item-section avatar>
                       <q-icon name="settings" />
                     </q-item-section>
                     <q-item-section>Configure</q-item-section>
                   </q-item>
                   <q-separator />
-                  <q-item clickable v-close-popup @click="$emit('delete', props.row.id)" class="text-negative">
+                  <q-item clickable
+                          v-close-popup
+                          @click="$emit('delete', props.row.id)"
+                          class="text-negative">
                     <q-item-section avatar>
                       <q-icon name="delete" />
                     </q-item-section>
@@ -78,7 +111,9 @@
 
       <template v-slot:no-data>
         <div class="empty-state">
-          <q-icon name="inventory_2" size="48px" color="grey-5" />
+          <q-icon name="inventory_2"
+                  size="48px"
+                  color="grey-5" />
           <div class="text-grey">No parts available</div>
         </div>
       </template>
@@ -87,8 +122,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
+import type { QTableProps } from 'quasar';
 import type { BikePart } from '@/types';
+
+type QTableRequestProps = Parameters<NonNullable<QTableProps['onRequest']>>[0];
 
 import { defaultPartColumns } from './partsTableColumns';
 import type { TableColumn } from './partsTableColumns';
@@ -137,8 +175,10 @@ const getSelectedString = () => {
   return '';
 };
 
-const onRequest = (tableProps: any) => {
-  const { page, rowsPerPage, sortBy, descending } = tableProps.pagination;
+const onRequest = (tableProps: QTableRequestProps) => {
+  const {
+    page, rowsPerPage, sortBy, descending 
+  } = tableProps.pagination;
   pagination.value.page = page;
   pagination.value.rowsPerPage = rowsPerPage;
   pagination.value.sortBy = sortBy;
@@ -150,6 +190,7 @@ const handleRowClick = (part: BikePart) => {
 };
 
 const getTotalMileage = (part: BikePart): number => {
+  console.log('getTotalMileage', part);
   if (!props.currentBikeMileage || props.currentBikeMileage === 0) {
     return 0;
   }
@@ -157,13 +198,14 @@ const getTotalMileage = (part: BikePart): number => {
 };
 
 const getRemainingKms = (part: BikePart): number | null => {
+  console.log('getRemainingKms', part);
   if (!props.currentBikeMileage || props.currentBikeMileage === 0) {
     return null;
   }
 
 
 
-  const currentMileage = getTotalMileage(part);
+  // const currentMileage = getTotalMileage(part);
   const remaining = 0;
 
   return Math.max(0, remaining);

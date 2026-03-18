@@ -66,7 +66,9 @@
     </main>
 
     <!-- Add Bike Modal -->
-    <div v-if="showAddBikeModal" class="modal-overlay" @click="showAddBikeModal = false">
+    <div v-if="showAddBikeModal"
+         class="modal-overlay"
+         @click="showAddBikeModal = false">
       <div class="modal" @click.stop>
         <h3>Add New Bike</h3>
         <form @submit.prevent="handleAddBike" class="modal-form">
@@ -100,7 +102,9 @@
             </select>
           </div>
           <div class="modal-actions">
-            <button type="button" @click="showAddBikeModal = false" class="cancel-button">
+            <button type="button"
+                    @click="showAddBikeModal = false"
+                    class="cancel-button">
               Cancel
             </button>
             <button type="submit" class="submit-button">Add Bike</button>
@@ -112,7 +116,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import {
+  ref, computed, onMounted 
+} from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
 import { useBikesStore } from '@/stores/bikesStore';
@@ -123,7 +129,9 @@ import { BikeType } from '@/types';
 const router = useRouter();
 const authStore = useAuthStore();
 const bikesStore = useBikesStore();
-const { showSuccess, showError, withAjaxBar, startAjaxBar, stopAjaxBar } = useLayout();
+const {
+  showSuccess, showError, withAjaxBar, startAjaxBar, stopAjaxBar 
+} = useLayout();
 
 // Reactive state
 const showAddBikeModal = ref(false);

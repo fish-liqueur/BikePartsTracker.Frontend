@@ -2,7 +2,9 @@
   <div class="not-found-container">
     <div class="not-found-content">
       <div class="not-found-icon">
-        <q-icon name="error_outline" size="120px" color="grey-6" />
+        <q-icon name="error_outline"
+                size="120px"
+                color="grey-6" />
       </div>
       <h1 class="not-found-title">404</h1>
       <h2 class="not-found-subtitle">Page Not Found</h2>

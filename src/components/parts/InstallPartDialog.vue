@@ -25,10 +25,15 @@
         >
           <template v-slot:append>
             <q-icon name="event" class="cursor-pointer">
-              <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+              <q-popup-proxy cover
+                             transition-show="scale"
+                             transition-hide="scale">
                 <q-date v-model="installationDate" mask="YYYY-MM-DD">
                   <div class="row items-center justify-end">
-                    <q-btn v-close-popup label="Close" color="primary" flat />
+                    <q-btn v-close-popup
+                           label="Close"
+                           color="primary"
+                           flat />
                   </div>
                 </q-date>
               </q-popup-proxy>
@@ -49,7 +54,10 @@
       </q-card-section>
 
       <q-card-actions align="right">
-        <q-btn flat label="Cancel" color="primary" @click="$emit('cancel')" />
+        <q-btn flat
+               label="Cancel"
+               color="primary"
+               @click="$emit('cancel')" />
         <q-btn
           flat
           label="Install"
@@ -63,7 +71,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import {
+  ref, computed, watch 
+} from 'vue';
 
 interface Props {
   modelValue: boolean;
@@ -90,13 +100,15 @@ const installationDate = ref<string>('');
 const mileageAtInstallation = ref<number>(props.currentBikeMileage || 0);
 
 // Set default date to today
-watch(() => props.modelValue, (isOpen) => {
-  if (isOpen) {
-    const today = new Date();
-    installationDate.value = today.toISOString().split('T')[0];
-    mileageAtInstallation.value = props.currentBikeMileage || 0;
-  }
-}, { immediate: true });
+watch(
+  () => props.modelValue, (isOpen) => {
+    if (isOpen) {
+      const today = new Date();
+      installationDate.value = today.toISOString().split('T')[0];
+      mileageAtInstallation.value = props.currentBikeMileage || 0;
+    }
+  }, { immediate: true }
+);
 
 const warningMessage = computed(() => {
   if (props.sourceBikeName && props.targetBikeName) {

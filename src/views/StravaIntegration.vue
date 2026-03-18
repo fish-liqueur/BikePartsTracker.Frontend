@@ -6,7 +6,9 @@
         <p>Connecting to Strava...</p>
       </div>
       <div v-else-if="error" class="callback-status error">
-        <q-icon name="error" size="3em" color="negative" />
+        <q-icon name="error"
+                size="3em"
+                color="negative" />
         <p>{{ error }}</p>
         <q-btn
           label="Go to Settings"
@@ -16,10 +18,12 @@
         />
       </div>
       <div v-else-if="success" class="callback-status success">
-        <q-icon name="check_circle" size="3em" color="positive" />
+        <q-icon name="check_circle"
+                size="3em"
+                color="positive" />
         <p>Successfully connected to Strava!</p>
         <q-btn
-        size="lg"
+          size="lg"
           label="Go to Settings"
           color="primary"
           @click="goToSettings"

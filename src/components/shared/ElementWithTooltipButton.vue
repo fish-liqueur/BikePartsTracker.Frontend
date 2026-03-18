@@ -1,7 +1,9 @@
 <template>
   <div class="element-with-tooltip-button">
     <slot />
-    <TooltipButton v-if="enabled" :text="tooltipText" class="ml-2" />
+    <TooltipButton v-if="enabled"
+                   :text="tooltipText"
+                   class="ml-2" />
   </div>
 </template>
 

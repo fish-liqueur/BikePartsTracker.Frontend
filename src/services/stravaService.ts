@@ -1,5 +1,7 @@
 import { apiService } from './api';
-import type { ApiResponse, StravaAthleteDto, StravaBike } from '@/types';
+import type {
+  ApiResponse, StravaAthleteDto, StravaBike 
+} from '@/types';
 
 // Strava OAuth configuration
 const STRAVA_CLIENT_ID = import.meta.env.VITE_STRAVA_CLIENT_ID || '';

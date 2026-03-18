@@ -1,7 +1,9 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { bikeService } from '@/services/bikeService';
-import type { Bike, CreateBikeDto, UpdateBikeDto } from '@/types';
+import type {
+  Bike, CreateBikeDto, UpdateBikeDto 
+} from '@/types';
 
 export const useBikesStore = defineStore('bikes', () => {
   // State

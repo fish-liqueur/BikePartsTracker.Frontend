@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { computed, ref, provide, onMounted } from 'vue';
+import {
+  computed, ref, provide, onMounted 
+} from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
 import { useLayoutStore } from '@/stores/layoutStore';
@@ -21,8 +23,8 @@ const bikesStore = useBikesStore();
 const partsStore = usePartsStore();
 
 // Provide ajax-bar ref for use in composables
-const ajaxBarRef = ref<QAjaxBar | null>(null)
-provide('ajaxBar', ajaxBarRef)
+const ajaxBarRef = ref<QAjaxBar | null>(null);
+provide('ajaxBar', ajaxBarRef);
 
 onMounted(async () => {
   if (isAuthenticated.value) {
@@ -40,34 +42,37 @@ onMounted(async () => {
 </script>
 
 <template>
-<q-layout view="hHh lpR fFf" class="layout-base">
+  <q-layout view="hHh lpR fFf" class="layout-base">
 
-<q-ajax-bar
-  ref="ajaxBarRef"
-  position="top"
-  color="accent"
-  size="10px"
-  skip-hijack
-/>
+    <q-ajax-bar
+      ref="ajaxBarRef"
+      position="top"
+      color="accent"
+      size="10px"
+      skip-hijack
+    />
 
-<q-notifications position="top" />
+    <q-notifications position="top" />
 
-<q-drawer v-model="layoutStore.drawerOpen" side="right" overlay bordered>
-  <!-- drawer content -->
-</q-drawer>
+    <q-drawer v-model="layoutStore.drawerOpen"
+              side="right"
+              overlay
+              bordered>
+              <!-- drawer content -->
+    </q-drawer>
 
-<Header />
+    <Header />
 
-<q-page-container class="layout-base-content max-width-1200">
-  <router-view />
-</q-page-container>
+    <q-page-container class="layout-base-content max-width-1200">
+      <router-view />
+    </q-page-container>
 
-<q-footer elevated class="bg-grey-8 text-white">
-  <div class="max-width-1200">
-    <QuickMenu />
-  </div>
-</q-footer>
-</q-layout>
+    <q-footer elevated class="bg-grey-8 text-white">
+      <div class="max-width-1200">
+        <QuickMenu />
+      </div>
+    </q-footer>
+  </q-layout>
 </template>
 
 <style scoped>

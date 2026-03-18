@@ -29,8 +29,14 @@
       </q-card-section>
 
       <q-card-actions align="right">
-        <q-btn flat label="Cancel" color="primary" @click="handleCancel" />
-        <q-btn flat label="Add Bike" color="primary" @click="handleSubmit" />
+        <q-btn flat
+               label="Cancel"
+               color="primary"
+               @click="handleCancel" />
+        <q-btn flat
+               label="Add Bike"
+               color="primary"
+               @click="handleSubmit" />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -62,8 +68,6 @@ const newBike = ref<CreateBikeDto>({
   parts: [],
   totalDistance: 0,
   stravaDistance: 0,
-  chainsCycleLength: 0,
-  chainCycleInterval: 0,
 });
 
 const bikeTypeOptions = [
@@ -110,8 +114,6 @@ const resetForm = () => {
     parts: [],
     totalDistance: 0,
     stravaDistance: 0,
-    chainsCycleLength: 0,
-    chainCycleInterval: 0,
   };
 };
 

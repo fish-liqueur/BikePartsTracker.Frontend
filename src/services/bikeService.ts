@@ -1,5 +1,7 @@
 import { apiService } from './api';
-import type { Bike, CreateBikeDto, UpdateBikeDto, ApiResponse, PaginatedResponse, SyncBikeDto } from '@/types';
+import type {
+  Bike, CreateBikeDto, UpdateBikeDto, ApiResponse, PaginatedResponse, SyncBikeDto 
+} from '@/types';
 
 export const bikeService = {
   // Get all bikes for current user

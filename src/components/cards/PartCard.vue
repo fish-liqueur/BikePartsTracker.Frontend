@@ -1,15 +1,26 @@
 <template>
-  <q-card class="part-card" :class="{
-    'part-card--on-other-bike': isInstalledOnOtherBike
-  }">
+  <q-card class="part-card"
+          :class="{
+            'part-card--on-other-bike': isInstalledOnOtherBike
+          }">
     <q-card-section>
       <div class="part-header">
         <div class="part-header__chip-wrapper">
-          <q-chip :label="part.partType" color="primary" text-color="white" size="md" class="part-type-chip" />
-          <q-chip v-if="part.bikeId" :label="bikesStore.getBikeById(part.bikeId)?.name" :color="bikeChipColor"
-            text-color="white" size="md" class="bike-name-chip" />
+          <q-chip :label="part.partType"
+                  color="primary"
+                  text-color="white"
+                  size="md"
+                  class="part-type-chip" />
+          <q-chip v-if="part.bikeId"
+                  :label="bikesStore.getBikeById(part.bikeId)?.name"
+                  :color="bikeChipColor"
+                  text-color="white"
+                  size="md"
+                  class="bike-name-chip" />
         </div>
-        <div class="chain-description" v-if="isChain && bikeContext" :style="chainCycleStatus.style">
+        <div class="chain-description"
+             v-if="isChain && bikeContext"
+             :style="chainCycleStatus.style">
           <ElementWithTooltipButton :tooltip-text="chainCycleStatus.tooltipText" show-always>
             <span>{{ chainCycleStatus.text }}</span>
           </ElementWithTooltipButton>
@@ -19,7 +30,7 @@
         <div v-if="part.description" class="part-brand-model">
           {{ part.description }}
         </div>
-        <div v-else="part.brand || part.model" class="part-brand-model">
+        <div v-else-if="part.brand || part.model" class="part-brand-model">
           {{ part.brand }} {{ part.model }}
         </div>
       </div>
@@ -41,10 +52,17 @@
 
     <!-- Action Buttons -->
     <q-card-actions align="right" class="part-actions">
-      <q-btn flat label="Full Details" color="primary" icon="info" size="sm" @click="handleFullDetails" />
+      <q-btn flat
+             label="Full Details"
+             color="primary"
+             icon="info"
+             size="sm"
+             @click="handleFullDetails" />
       <q-btn-dropdown color="primary" icon="menu">
         <q-list>
-          <q-item clickable v-close-popup @click="handleFullDetails">
+          <q-item clickable
+                  v-close-popup
+                  @click="handleFullDetails">
             <q-item-section avatar>
               <q-icon name="dashboard_2_gear" />
             </q-item-section>
@@ -53,7 +71,9 @@
               <!-- <q-item-label caption>February 22, 2016</q-item-label> -->
             </q-item-section>
           </q-item>
-          <q-item v-if="part.bike" clickable v-close-popup>
+          <q-item v-if="part.bike"
+                  clickable
+                  v-close-popup>
             <q-item-section avatar>
               <q-icon name="build" />
             </q-item-section>
@@ -61,7 +81,10 @@
               <q-item-label>Do maintenance!</q-item-label>
             </q-item-section>
           </q-item>
-          <q-item v-if="part.bike" clickable v-close-popup @click="handleShowBike">
+          <q-item v-if="part.bike"
+                  clickable
+                  v-close-popup
+                  @click="handleShowBike">
             <q-item-section avatar>
               <q-icon name="pedal_bike" />
             </q-item-section>
@@ -71,7 +94,10 @@
             </q-item-section>
           </q-item>
 
-          <q-item v-if="part.bike" clickable v-close-popup @click="handleRemoveFromBike">
+          <q-item v-if="part.bike"
+                  clickable
+                  v-close-popup
+                  @click="handleRemoveFromBike">
             <q-item-section avatar>
               <q-icon name="archive" />
             </q-item-section>
@@ -81,7 +107,9 @@
             </q-item-section>
           </q-item>
 
-          <q-item clickable v-close-popup @click="handlePutOnOtherBike">
+          <q-item clickable
+                  v-close-popup
+                  @click="handlePutOnOtherBike">
             <q-item-section avatar>
               <q-icon name="swap_horiz" />
             </q-item-section>
@@ -100,7 +128,9 @@
               <q-item-label>Pass Part to Other User</q-item-label>
             </q-item-section>
           </q-item> -->
-          <q-item clickable v-close-popup @click="handleDelete">
+          <q-item clickable
+                  v-close-popup
+                  @click="handleDelete">
             <q-item-section avatar>
               <q-icon name="delete" color="negative" />
             </q-item-section>
@@ -118,9 +148,11 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { usePartsStore } from '@/stores/partsStore';
+// import { usePartsStore } from '@/stores/partsStore';
 import { useBikesStore } from '@/stores/bikesStore';
-import { PartType, type Bike, type BikePart } from '@/types';
+import {
+  PartType, type Bike, type BikePart 
+} from '@/types';
 import ElementWithTooltipButton from '@/components/shared/ElementWithTooltipButton.vue';
 
 interface Props {
@@ -157,13 +189,6 @@ const totalMileage = computed((): number => {
   return Math.max(0, props.currentBikeMileage - props.part.mileageAtInstallation);
 });
 
-const remainingDays = computed((): number | null => {
-  if (!props.part.installationDate) {
-    return null;
-  }
-
-  return null;
-});
 
 
 
@@ -175,10 +200,10 @@ const handleFullDetails = () => {
   router.push(`/parts/${props.part.id}`);
 };
 
-const handleRidesHistory = () => {
-  emit('ridesHistory', props.part.id);
-  router.push(`/parts/${props.part.id}/rides`);
-};
+// const handleRidesHistory = () => {
+//   emit('ridesHistory', props.part.id);
+//   router.push(`/parts/${props.part.id}/rides`);
+// };
 
 const handleShowBike = () => {
   if (props.part.bikeId) {
@@ -195,18 +220,18 @@ const handlePutOnOtherBike = () => {
   emit('putOnOtherBike', props.part.id);
 };
 
-const handlePassToOtherUser = () => {
-  emit('passToOtherUser', props.part.id);
-};
+// const handlePassToOtherUser = () => {
+//   emit('passToOtherUser', props.part.id);
+// };
 
 const handleDelete = () => {
   emit('delete', props.part.id);
 };
 
-const handleConfigure = () => {
-  emit('configure', props.part.id);
-  router.push(`/parts/${props.part.id}/configure`);
-};
+// const handleConfigure = () => {
+//   emit('configure', props.part.id);
+//   router.push(`/parts/${props.part.id}/configure`);
+// };
 
 const isInstalledOnOtherBike = computed((): boolean => {
   if (!props.part.bikeId || !props.bikeContext?.id) {
@@ -264,14 +289,14 @@ mileage form every ride will be recorded for all of them.`,
   };
 
   if (isChainInCycleActive.value) {
-    attributes.text = `Chain in cycle \nand active`;
-    attributes.tooltipText = `Chain is currently installed on the bike.\nThe bike's mileage will be added to the mileage of this chain.`;
+    attributes.text = 'Chain in cycle \nand active';
+    attributes.tooltipText = 'Chain is currently installed on the bike.\nThe bike\'s mileage will be added to the mileage of this chain.';
     attributes.style.backgroundColor = 'var(--q-warning)';
     attributes.style.color = 'var(--q-white)';
     attributes.style.borderColor = 'var(--q-negative)';
   } else if (isChainInCycle.value) {
-    attributes.text = `Chain in cycle,\nbut not active now`;
-    attributes.tooltipText = `Chain in cycle, currently not active.\nThis chain is not currently installed on the bike and is waiting for its turn.\nUntil then, the bike's mileage will not be added to the mileage of this chain.`;
+    attributes.text = 'Chain in cycle,\nbut not active now';
+    attributes.tooltipText = 'Chain in cycle, currently not active.\nThis chain is not currently installed on the bike and is waiting for its turn.\nUntil then, the bike\'s mileage will not be added to the mileage of this chain.';
     attributes.style.color = 'var(--q-primary)';
     attributes.style.borderColor = 'var(--q-primary)';
   }

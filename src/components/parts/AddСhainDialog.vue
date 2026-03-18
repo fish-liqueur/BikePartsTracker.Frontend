@@ -5,17 +5,34 @@
         <div class="text-h6">Add Chain to Cycle</div>
       </q-card-section>
 
-      <q-tabs v-model="activeTab" class="text-grey" active-color="primary" indicator-color="primary">
-        <q-tab name="existing" label="Select existing chain" icon="" />
-        <q-tab name="new" label="Add new chain" icon="" />
+      <q-tabs v-model="activeTab"
+              class="text-grey"
+              active-color="primary"
+              indicator-color="primary">
+        <q-tab name="existing"
+               label="Select existing chain"
+               icon="" />
+        <q-tab name="new"
+               label="Add new chain"
+               icon="" />
       </q-tabs>
-      <q-tab-panels v-model="activeTab" animated class="tab-panels">
+      <q-tab-panels v-model="activeTab"
+                    animated
+                    class="tab-panels">
         <q-tab-panel name="existing">
           <q-card-section>
-            <q-toggle v-model="showInstalledToOtherBikes" label="Show chains equipped to other bikes" color="primary"
-              class="toggle-filter" />
-            <q-select v-model="selectedChain" :options="availableChains" label="Select chain" map-options filled
-              class="q-mt-md" option-label="name" option-value="id">
+            <q-toggle v-model="showInstalledToOtherBikes"
+                      label="Show chains equipped to other bikes"
+                      color="primary"
+                      class="toggle-filter" />
+            <q-select v-model="selectedChain"
+                      :options="availableChains"
+                      label="Select chain"
+                      map-options
+                      filled
+                      class="q-mt-md"
+                      option-label="name"
+                      option-value="id">
               <template v-slot:option="scope">
                 <q-item v-bind="getItemAttrs(scope)" :class="getChainOptionClass(scope.opt)">
                   <div class="chain-option__inner-container">
@@ -25,10 +42,14 @@
                     <q-item-section>
                       <q-item-label lines="1">{{ scope.opt.name }}</q-item-label>
                       <q-item-label caption lines="1">{{ scope.opt.description }}</q-item-label>
-                      <q-item-label v-if="isEquippedToOtherBike(scope.opt)" overline lines="1">
+                      <q-item-label v-if="isEquippedToOtherBike(scope.opt)"
+                                    overline
+                                    lines="1">
                         {{ getOtherBikeString(scope.opt.bikeId) }}
                       </q-item-label>
-                      <q-item-label v-else-if="isChainInCycle(scope.opt.id)" overline lines="1">
+                      <q-item-label v-else-if="isChainInCycle(scope.opt.id)"
+                                    overline
+                                    lines="1">
                         This chain is already in the cycle
                       </q-item-label>
                     </q-item-section>
@@ -46,17 +67,31 @@
           </q-card-section>
         </q-tab-panel>
         <q-tab-panel name="new">
-          <PartForm ref="partFormRef" :initial-data="initialFormData" :lock-type="PartType.Chain"
-            @update:isValid="(val) => isValid = val" @submit="handleSubmit" />
+          <PartForm ref="partFormRef"
+                    :initial-data="initialFormData"
+                    :lock-type="PartType.Chain"
+                    @update:isValid="(val) => isValid = val"
+                    @submit="handleSubmit" />
         </q-tab-panel>
       </q-tab-panels>
 
       <q-card-actions align="right">
-        <q-btn flat label="Cancel" color="primary" @click="handleCancel" />
-        <q-btn v-if="activeTab === 'new'" flat label="Add chain" color="primary"
-          @click="() => partFormRef?.handleSubmit()" :disable="!isValid" />
-        <q-btn v-if="activeTab === 'existing'" flat label="Select chain" color="primary" @click="selectChain"
-          :disable="!selectedChain" />
+        <q-btn flat
+               label="Cancel"
+               color="primary"
+               @click="handleCancel" />
+        <q-btn v-if="activeTab === 'new'"
+               flat
+               label="Add chain"
+               color="primary"
+               @click="() => partFormRef?.handleSubmit()"
+               :disable="!isValid" />
+        <q-btn v-if="activeTab === 'existing'"
+               flat
+               label="Select chain"
+               color="primary"
+               @click="selectChain"
+               :disable="!selectedChain" />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -68,7 +103,9 @@ import type { ComponentPublicInstance } from 'vue';
 import { useBikesStore } from '@/stores/bikesStore';
 import { usePartsStore } from '@/stores/partsStore';
 import { useLayout } from '@/composables/useLayout';
-import type { Bike, BikePart, CreatePartDto } from '@/types';
+import type {
+  Bike, BikePart, CreatePartDto 
+} from '@/types';
 import { PartType } from '@/types';
 import PartForm from './PartForm.vue';
 import ElementWithTooltipButton from '@/components/shared/ElementWithTooltipButton.vue';
@@ -94,7 +131,10 @@ const emit = defineEmits<{
   cancel: [];
 }>();
 
-const { showSuccess, showError, withAjaxBar } = useLayout();
+const {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  showSuccess, showError, withAjaxBar 
+} = useLayout();
 
 const bikesStore = useBikesStore();
 const partsStore = usePartsStore();
@@ -164,13 +204,13 @@ const handleSubmit = (formData: FormData) => {
     mileageAtInstallation: formData.mileageAtInstallation
   };
   const dataWithDescription = formData.description
-    ? { ...createData, description: formData.description } as any
+    ? { ...createData, description: formData.description }
     : createData;
   emit('create', dataWithDescription);
   emit('update:modelValue', false);
 };
 
-const createNewChain = ref(false);
+// const createNewChain = ref(false);
 const showInstalledToOtherBikes = ref(false);
 const selectedChain = ref<BikePart | null>(null);
 const availableChains = computed(() => {
@@ -191,17 +231,16 @@ const getChainOptionClass = (chain: BikePart) => {
 };
 
 interface QSelectOptionScope {
-  itemProps: Record<string, any>;
+  itemProps: Record<string, unknown>;
   opt: BikePart;
   index: number;
   selected?: boolean;
 }
 
 const getItemAttrs = (itemScope: QSelectOptionScope) => {
-  const { itemProps, opt } = itemScope;
+  const { itemProps } = itemScope;
   const attrs = {
     ...itemProps,
-    //disable: isChainInCycle(opt.id),
   };
   return attrs;
 };
@@ -211,7 +250,9 @@ const selectChain = () => {
     showError('Please select a chain');
     return;
   }
-  console.log('selectChain', selectedChain.value, typeof selectedChain.value);
+  console.log(
+    'selectChain', selectedChain.value, typeof selectedChain.value
+  );
   emit('select', selectedChain.value.id);
   emit('update:modelValue', false);
 };

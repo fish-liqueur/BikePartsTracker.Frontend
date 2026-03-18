@@ -1,3 +1,4 @@
+<!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <template>
   <div class="parts-widget">
     <!-- View Mode Toggle -->
@@ -6,56 +7,98 @@
         <h2 v-if="title" class="widget-title">{{ title }}</h2>
       </div>
       <div class="header-right">
-        <q-btn label="Add part" color="primary" icon="add" @click="showAddPartDialog = true" />
-        <q-toggle v-model="showInstalledToOtherBikes" label="Show parts equipped to other bikes" color="primary"
-          class="toggle-filter" />
-        <q-btn-toggle v-model="localViewMode" :options="viewModeOptions" toggle-color="primary"
-          @update:model-value="handleViewModeChange" />
+        <q-btn label="Add part"
+               color="primary"
+               icon="add"
+               @click="showAddPartDialog = true" />
+        <q-toggle v-model="showInstalledToOtherBikes"
+                  label="Show parts equipped to other bikes"
+                  color="primary"
+                  class="toggle-filter" />
+        <q-btn-toggle v-model="localViewMode"
+                      :options="viewModeOptions"
+                      toggle-color="primary"
+                      @update:model-value="handleViewModeChange" />
       </div>
     </div>
 
     <!-- Cards View -->
     <div v-if="localViewMode === 'cards'" class="cards-view">
-      <div v-if="computedContainers && computedContainers.length > 0" class="containers-wrapper" :class="{
-        'containers-single': computedContainers.length === 1,
-        'containers-multiple': computedContainers.length > 1
-      }">
-        <PartsDragContainer v-for="container in computedContainers" :key="container.id" :parts="container.parts"
-          :container-id="container.id" :title="container.title" :show-count="showCount"
-          :current-bike-mileage="currentBikeMileage" :empty-text="container.emptyText"
-          :bike-context="container.id === 'available' ? null : bikeContext" @part-dropped="handlePartDropped"
-          @part-moved="handlePartMoved" @add-to-container="handleAddToContainer" @full-details="handleFullDetails"
-          @rides-history="handleRidesHistory" @show-bike="handleShowBike" @remove-from-bike="handleRemoveFromBike"
-          @put-on-other-bike="handlePutOnOtherBike" @pass-to-other-user="handlePassToOtherUser" @delete="handleDelete"
-          @configure="handleConfigure" />
+      <div v-if="computedContainers && computedContainers.length > 0"
+           class="containers-wrapper"
+           :class="{
+             'containers-single': computedContainers.length === 1,
+             'containers-multiple': computedContainers.length > 1
+           }">
+        <PartsDragContainer v-for="container in computedContainers"
+                            :key="container.id"
+                            :parts="container.parts"
+                            :container-id="container.id"
+                            :title="container.title"
+                            :show-count="showCount"
+                            :current-bike-mileage="currentBikeMileage"
+                            :empty-text="container.emptyText"
+                            :bike-context="container.id === 'available' ? null : bikeContext"
+                            @part-dropped="handlePartDropped"
+                            @part-moved="handlePartMoved"
+                            @add-to-container="handleAddToContainer"
+                            @full-details="handleFullDetails"
+                            @rides-history="handleRidesHistory"
+                            @show-bike="handleShowBike"
+                            @remove-from-bike="handleRemoveFromBike"
+                            @put-on-other-bike="handlePutOnOtherBike"
+                            @pass-to-other-user="handlePassToOtherUser"
+                            @delete="handleDelete"
+                            @configure="handleConfigure" />
       </div>
       <div v-else class="no-containers">
-        <q-icon name="error_outline" size="48px" color="grey-5" />
+        <q-icon name="error_outline"
+                size="48px"
+                color="grey-5" />
         <p>No parts available</p>
       </div>
     </div>
-
     <!-- Table View -->
     <div v-else class="table-view">
-      <PartsTableContainer v-for="container in computedContainers" :key="container.id" :parts="container.parts"
-        :container-id="container.id" :title="container.title" :show-count="showCount"
-        :current-bike-mileage="currentBikeMileage" :loading="isLoading" :columns="tableColumns"
-        @part-selected="handlePartSelected" @full-details="handleFullDetails" @rides-history="handleRidesHistory"
-        @show-bike="handleShowBike" @remove-from-bike="handleRemoveFromBike" @put-on-other-bike="handlePutOnOtherBike"
-        @pass-to-other-user="handlePassToOtherUser" @delete="handleDelete" @configure="handleConfigure" />
+      <PartsTableContainer v-for="container in computedContainers" 
+                           :key="container.id" 
+                           :parts="container.parts"
+                           :container-id="container.id"
+                           :title="container.title"
+                           :show-count="showCount"
+                           :current-bike-mileage="currentBikeMileage"
+                           :loading="isLoading"
+                           :columns="tableColumns"
+                           @part-selected="handlePartSelected"
+                           @full-details="handleFullDetails"
+                           @rides-history="handleRidesHistory"
+                           @show-bike="handleShowBike"
+                           @remove-from-bike="handleRemoveFromBike"
+                           @put-on-other-bike="handlePutOnOtherBike"
+                           @pass-to-other-user="handlePassToOtherUser"
+                           @delete="handleDelete"
+                           @configure="handleConfigure" />
     </div>
 
     <!-- Install Part Dialog -->
-    <InstallPartDialog v-model="showInstallDialog" :part-name="partName" :source-bike-name="sourceBikeName"
-      :target-bike-name="targetBikeName" :current-bike-mileage="currentBikeMileage" @install="handleInstallPart"
-      @cancel="handleInstallCancel" />
+    <InstallPartDialog v-model="showInstallDialog"
+                       :part-name="partName"
+                       :source-bike-name="sourceBikeName"
+                       :target-bike-name="targetBikeName"
+                       :current-bike-mileage="currentBikeMileage"
+                       @install="handleInstallPart"
+                       @cancel="handleInstallCancel" />
   </div>
 
-  <AddPartDialog v-model="showAddPartDialog" :targetBikeId="bikeContext?.id" @create="handleAddPart" />
+  <AddPartDialog v-model="showAddPartDialog"
+                 :targetBikeId="bikeContext?.id"
+                 @create="handleAddPart" />
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import {
+  ref, computed, watch 
+} from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { usePartsStore } from '@/stores/partsStore';
@@ -65,7 +108,9 @@ import PartsDragContainer from './PartsDragContainer.vue';
 import PartsTableContainer from './PartsTableContainer.vue';
 import InstallPartDialog from './InstallPartDialog.vue';
 import AddPartDialog from './AddPartDialog.vue';
-import type { Bike, BikePart, CreatePartDto } from '@/types';
+import type {
+  Bike, BikePart, CreatePartDto 
+} from '@/types';
 import { defaultPartColumns } from './partsTableColumns';
 import type { TableColumn } from './partsTableColumns';
 
@@ -79,6 +124,11 @@ interface DropOptions {
   part?: BikePart;
   removeFromTarget?: () => void;
 }
+type PartsChangedEvent =
+  | { type: 'configure' | 'deleted' | 'fullDetails' | 'passToOtherUser' | 'putOnOtherBike' | 'removedFromBike' | 'ridesHistory'; partId: string }
+  | { type: 'moved'; partId: string; data: { sourceContainerId: string; targetContainerId: string } }
+  | { type: 'selected'; partId: string; data: { part: BikePart } }
+  | { type: 'showBike'; partId: string; data: { bikeId: string } };
 interface Props {
   viewMode?: 'cards' | 'table';
   bikeContext?: Bike | null;
@@ -97,7 +147,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 const emit = defineEmits<{
   'update:viewMode': [value: 'cards' | 'table'];
-  partsChanged: [event: { type: string; partId: string; data?: any }];
+  partsChanged: [event: PartsChangedEvent];
   viewModeChanged: [mode: 'cards' | 'table'];
 }>();
 
@@ -105,7 +155,9 @@ const router = useRouter();
 const $q = useQuasar();
 const partsStore = usePartsStore();
 const bikesStore = useBikesStore();
-const { showSuccess, showError, withAjaxBar } = useLayout();
+const {
+  showSuccess, showError, withAjaxBar 
+} = useLayout();
 
 // Dialog state
 const showInstallDialog = ref(false);
@@ -120,8 +172,12 @@ const pendingPartInstall = ref<{
 // Local view mode
 const localViewMode = ref<'cards' | 'table'>(props.viewMode);
 const viewModeOptions = [
-  { label: 'Cards', value: 'cards', icon: 'grid_view' },
-  { label: 'Table', value: 'table', icon: 'table_view' }
+  {
+    label: 'Cards', value: 'cards', icon: 'grid_view' 
+  },
+  {
+    label: 'Table', value: 'table', icon: 'table_view' 
+  }
 ];
 // Default: true if no bikeContext, false if bikeContext is set
 // const showInstalledToOtherBikes = ref<boolean>(props.bikeContext === null);
@@ -146,27 +202,21 @@ const targetBikeName = computed(() => {
   return '';
 });
 const tableColumns = computed(() =>
-  props.tableColumns.length > 0 ? props.tableColumns : defaultPartColumns
-);
+  props.tableColumns.length > 0 ? props.tableColumns : defaultPartColumns);
 
 // containers based on bikeContext
 const computedContainers = computed<ContainerConfig[]>(() => {
   if (props.bikeContext) {
     // Two containers: parts on this bike, and parts not on this bike
     // Parts on bike: always show all parts installed on this bike
-    const partsOnBike = allParts.value.filter(
-      part => part.bikeId === props.bikeContext?.id
-    );
+    const partsOnBike = allParts.value.filter(part => part.bikeId === props.bikeContext?.id);
 
-    let partsNotOnBike = allParts.value.filter(
-      part => part.bikeId !== props.bikeContext?.id
-    );
+    let partsNotOnBike = allParts.value.filter(part => part.bikeId !== props.bikeContext?.id);
 
     if (!showInstalledToOtherBikes.value) {
       // Filter to show only parts installed to nothing (no bikeId)
       partsNotOnBike = partsNotOnBike.filter(part =>
-        part.bikeId === '' || part.bikeId === null || !part.bikeId
-      );
+        part.bikeId === '' || part.bikeId === null || !part.bikeId);
     }
 
     return [
@@ -191,8 +241,7 @@ const computedContainers = computed<ContainerConfig[]>(() => {
     if (!showInstalledToOtherBikes.value) {
       // Filter to show only parts installed to nothing (no bikeId)
       parts = parts.filter(part =>
-        part.bikeId === '' || part.bikeId === null || !part.bikeId
-      );
+        part.bikeId === '' || part.bikeId === null || !part.bikeId);
     }
 
     return [
@@ -206,18 +255,22 @@ const computedContainers = computed<ContainerConfig[]>(() => {
   }
 });
 
-
 // Watch for external viewMode changes
 watch(() => props.viewMode, (newMode) => {
   localViewMode.value = newMode;
 });
 
 // ---- Methods ----
-const addPartToContainer = (partId: string, containerId: string, part: BikePart) => {
+const addPartToContainer = (
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  partId: string, containerId: string, part: BikePart
+) => {
   partsStore.fetchParts();
 };
 
-const confirmRemoveFromBike = (partId: string, onSuccess: () => void, onRollback?: () => void) => {
+const confirmRemoveFromBike = (
+  partId: string, onSuccess: () => void, onRollback?: () => void
+) => {
   $q.dialog({
     title: 'Remove Part from Bike?',
     message: 'Are you sure you want to remove this part from the bike?',
@@ -225,12 +278,14 @@ const confirmRemoveFromBike = (partId: string, onSuccess: () => void, onRollback
     persistent: false,
   }).onOk(async () => {
     try {
-      await withAjaxBar(partsStore.movePartToBike(partId, '', null, 0));
+      await withAjaxBar(partsStore.movePartToBike(
+        partId, '', null, 0
+      ));
       showSuccess('Part removed from bike');
       onSuccess();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to remove part from bike:', err);
-      showError(err.message || 'Failed to remove part from bike');
+      showError((err as Error)?.message || 'Failed to remove part from bike');
       onRollback?.();
     }
   }).onCancel(() => onRollback?.());
@@ -247,18 +302,19 @@ const getBikeName = (bikeId: string | null): string => {
 
 const handleAddPart = async (part: CreatePartDto) => {
   try {
-    await withAjaxBar(
-      partsStore.createPart(part)
-    );
+    await withAjaxBar(partsStore.createPart(part));
     showSuccess('Part created successfully');
 
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Failed to create part:', err);
-    showError(err.message || 'Failed to create part');
+    showError((err as Error)?.message || 'Failed to create part');
   }
 };
 
-const handleAddToContainer = (partId: string, containerId: string, part: BikePart) => {
+const handleAddToContainer = (
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  partId: string, containerId: string, part: BikePart
+) => {
   partsStore.fetchParts();
 };
 
@@ -276,17 +332,15 @@ const handleDelete = async (partId: string) => {
   }
 
   try {
-    await withAjaxBar(
-      partsStore.deletePart(partId)
-    );
+    await withAjaxBar(partsStore.deletePart(partId));
     showSuccess('Part deleted successfully');
     emit('partsChanged', {
       type: 'deleted',
       partId
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Failed to delete part:', err);
-    showError(err.message || 'Failed to delete part');
+    showError((err as Error)?.message || 'Failed to delete part');
   }
 };
 
@@ -319,37 +373,39 @@ const handleInstallPart = async (data: { installationDate: string; mileageAtInst
   if (!pendingPartInstall.value) return;
 
   try {
-    const { partId, sourceContainerId, targetContainerId, part } = pendingPartInstall.value;
+    const {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      partId, sourceContainerId, targetContainerId, part 
+    } = pendingPartInstall.value;
 
     const targetBikeId = extractBikeId(targetContainerId) ?? '';
 
     const installationDateObj = new Date(data.installationDate);
 
-    await withAjaxBar(
-      partsStore.movePartToBike(
-        partId,
-        targetBikeId,
-        installationDateObj,
-        data.mileageAtInstallation
-      )
-    );
+    await withAjaxBar(partsStore.movePartToBike(
+      partId,
+      targetBikeId,
+      installationDateObj,
+      data.mileageAtInstallation
+    ));
 
     showSuccess('Part installed successfully');
     showInstallDialog.value = false;
 
     // Store update will automatically update computedContainers via reactivity
-    const savedPartId = partId;
     pendingPartInstall.value = null;
 
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Failed to install part:', err);
-    showError(err.message || 'Failed to install part');
+    showError((err as Error)?.message || 'Failed to install part');
     // Remove from target on error and add back to source
     if (pendingPartInstall.value?.removeFromTarget) {
       pendingPartInstall.value.removeFromTarget();
     }
     if (pendingPartInstall.value?.part && pendingPartInstall.value?.partId) {
-      addPartToContainer(pendingPartInstall.value.partId, pendingPartInstall.value.sourceContainerId, pendingPartInstall.value.part);
+      addPartToContainer(
+        pendingPartInstall.value.partId, pendingPartInstall.value.sourceContainerId, pendingPartInstall.value.part
+      );
     }
   }
 };
@@ -371,7 +427,9 @@ const handlePartDropped = (
   const targetBikeId = extractBikeId(targetContainerId);
 
   if (targetBikeId) {
-    pendingPartInstall.value = { partId, sourceContainerId, targetContainerId, part, removeFromTarget };
+    pendingPartInstall.value = {
+      partId, sourceContainerId, targetContainerId, part, removeFromTarget 
+    };
     showInstallDialog.value = true;
     return;
   }
@@ -379,13 +437,19 @@ const handlePartDropped = (
   if (targetContainerId === 'available' || targetContainerId === 'all') {
     confirmRemoveFromBike(
       partId,
-      () => emit('partsChanged', { type: 'moved', partId, data: { sourceContainerId, targetContainerId } }),
-      () => revertDrop(partId, sourceContainerId, part, removeFromTarget),
+      () => emit('partsChanged', {
+        type: 'moved', partId, data: { sourceContainerId, targetContainerId } 
+      }),
+      () => revertDrop(
+        partId, sourceContainerId, part, removeFromTarget
+      ),
     );
   }
 };
 
-const handlePartMoved = (partId: string, sourceContainerId: string, targetContainerId: string) => {
+const handlePartMoved = (
+  partId: string, sourceContainerId: string, targetContainerId: string
+) => {
   emit('partsChanged', {
     type: 'moved',
     partId,
@@ -418,10 +482,8 @@ const handlePutOnOtherBike = (partId: string) => {
 };
 
 const handleRemoveFromBike = (partId: string) => {
-  confirmRemoveFromBike(
-    partId,
-    () => emit('partsChanged', { type: 'removedFromBike', partId }),
-  );
+  confirmRemoveFromBike(partId,
+    () => emit('partsChanged', { type: 'removedFromBike', partId }),);
 };
 
 const handleRidesHistory = (partId: string) => {
@@ -447,9 +509,13 @@ const handleViewModeChange = (mode: 'cards' | 'table') => {
   emit('viewModeChanged', mode);
 };
 
-const revertDrop = (partId: string, sourceContainerId: string, part: BikePart, removeFromTarget?: () => void) => {
+const revertDrop = (
+  partId: string, sourceContainerId: string, part: BikePart, removeFromTarget?: () => void
+) => {
   removeFromTarget?.();
-  addPartToContainer(partId, sourceContainerId, part);
+  addPartToContainer(
+    partId, sourceContainerId, part
+  );
 };
 </script>
 

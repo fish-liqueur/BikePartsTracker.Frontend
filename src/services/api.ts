@@ -1,5 +1,7 @@
 import axios from 'axios';
-import type { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
+import type {
+  AxiosInstance, AxiosResponse, AxiosError 
+} from 'axios';
 import type { ApiResponse } from '@/types';
 
 // Get base URL from environment variable with fallback
@@ -20,66 +22,64 @@ const api: AxiosInstance = axios.create({
 });
 
 // Request interceptor for adding auth token
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    
-    // Log request URL in development to help debug
-    if (import.meta.env.DEV) {
-      const fullUrl = config.baseURL ? `${config.baseURL}${config.url}` : config.url;
-      console.log('API Request:', config.method?.toUpperCase(), fullUrl);
-    }
-    
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('authToken');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-);
+    
+  // Log request URL in development to help debug
+  if (import.meta.env.DEV) {
+    const fullUrl = config.baseURL ? `${config.baseURL}${config.url}` : config.url;
+    console.log(
+      'API Request:', config.method?.toUpperCase(), fullUrl
+    );
+  }
+    
+  return config;
+},
+(error) => {
+  return Promise.reject(error);
+});
 
 // Response interceptor for handling common responses
-api.interceptors.response.use(
-  (response: AxiosResponse) => {
-    return response;
-  },
-  (error: AxiosError) => {
-    // Log connection errors in development for debugging
-    if (import.meta.env.DEV && !error.response) {
-      const baseUrl = API_BASE_URL;
-      console.error(`API Connection Error to ${baseUrl}:`, {
-        message: error.message,
-        code: (error as any).code,
-        config: {
-          url: error.config?.url,
-          method: error.config?.method,
-          baseURL: error.config?.baseURL,
-        }
-      });
-    }
-    
-    if (error.response?.status === 401) {
-      // Unauthorized - clear token and redirect to login
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
-    }
-    
-    if (error.response?.status === 403) {
-      // Forbidden - user doesn't have permission
-      console.error('Access denied');
-    }
-    
-    if (error.response && error.response?.status >= 500) {
-      // Server error
-      console.error('Server error occurred');
-    }
-    
-    return Promise.reject(error);
+api.interceptors.response.use((response: AxiosResponse) => {
+  return response;
+},
+(error: AxiosError) => {
+  // Log connection errors in development for debugging
+  if (import.meta.env.DEV && !error.response) {
+    const baseUrl = API_BASE_URL;
+    console.error(`API Connection Error to ${baseUrl}:`, {
+      message: error.message,
+      code: (error as any).code,
+      config: {
+        url: error.config?.url,
+        method: error.config?.method,
+        baseURL: error.config?.baseURL,
+      }
+    });
   }
-);
+    
+  if (error.response?.status === 401) {
+    // Unauthorized - clear token and redirect to login
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
+    window.location.href = '/login';
+  }
+    
+  if (error.response?.status === 403) {
+    // Forbidden - user doesn't have permission
+    console.error('Access denied');
+  }
+    
+  if (error.response && error.response?.status >= 500) {
+    // Server error
+    console.error('Server error occurred');
+  }
+    
+  return Promise.reject(error);
+});
 
 // Helper function to normalize API responses
 // Handles both cases: backend returns ApiResponse<T> or returns T directly

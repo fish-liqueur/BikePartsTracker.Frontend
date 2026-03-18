@@ -1,19 +1,49 @@
 <template>
   <q-form @submit.prevent="handleSubmit" class="form-general">
-    <q-input v-model="formData.name" label="Name *" filled standout
-      :rules="[(val: string) => !!val || 'Name is required']" class="m-0 p-0" />
+    <q-input v-model="formData.name"
+             label="Name *"
+             filled
+             standout
+             :rules="[(val: string) => !!val || 'Name is required']"
+             class="m-0 p-0" />
 
-    <q-input v-model="formData.description" label="Description" type="textarea" filled rows="2" class="m-0 p-0" />
+    <q-input v-model="formData.description"
+             label="Description"
+             type="textarea"
+             filled
+             rows="2"
+             class="m-0 p-0" />
 
-    <q-select v-model="formData.partType" :options="partTypeOptions" label="Part Type" emit-value map-options filled
-      :rules="[(val: PartType | null) => !!val || 'Part type is required']" :disable="!!lockType" class="m-0 p-0" />
+    <q-select v-model="formData.partType"
+              :options="partTypeOptions"
+              label="Part Type"
+              emit-value
+              map-options
+              filled
+              :rules="[(val: PartType | null) => !!val || 'Part type is required']"
+              :disable="!!lockType"
+              class="m-0 p-0" />
     <div class="display-flex gap-2">
-      <q-input v-model="formData.brand" label="Brand" filled class="flex-1" />
+      <q-input v-model="formData.brand"
+               label="Brand"
+               filled
+               class="flex-1" />
 
-      <q-input v-model="formData.model" label="Model" filled class="flex-1" />
+      <q-input v-model="formData.model"
+               label="Model"
+               filled
+               class="flex-1" />
     </div>
-    <q-select v-model="formData.bikeId" :options="bikeOptions" label="Bike" emit-value map-options option-label="name"
-      option-value="id" filled clearable class="m-0 p-0" />
+    <q-select v-model="formData.bikeId"
+              :options="bikeOptions"
+              label="Bike"
+              emit-value
+              map-options
+              option-label="name"
+              option-value="id"
+              filled
+              clearable
+              class="m-0 p-0" />
 
     <!-- <q-input
       v-model.number="formData.mileageAtInstallation"
@@ -35,12 +65,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import {
+  ref, computed, watch 
+} from 'vue';
 import { useBikesStore } from '@/stores/bikesStore';
 import type { CreatePartDto } from '@/types';
 import { PartType } from '@/types';
-import ElementWithTooltipButton from '@/components/shared/ElementWithTooltipButton.vue';
-import DateTimePicker from '@/components/shared/DateTimePicker.vue';
+// import ElementWithTooltipButton from '@/components/shared/ElementWithTooltipButton.vue';
+// import DateTimePicker from '@/components/shared/DateTimePicker.vue';
 
 interface Props {
   initialData?: Partial<FormData>;
@@ -90,6 +122,7 @@ const partTypeOptions = [
 
 const bikeOptions = computed(() => bikesStore.bikes);
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const installationDateTooltip = `The date and time when the part was physically installed on the bike.
 This is used to match your rides history with the part.
 No need to be exact with the time, just put it between the last ride without the part and the first ride with it.`;
@@ -114,21 +147,27 @@ const initializeForm = () => {
 };
 
 // Watch for initialData changes (when parent wants to reset/update form)
-watch(() => props.initialData, () => {
-  initializeForm();
-}, { immediate: true, deep: true });
+watch(
+  () => props.initialData, () => {
+    initializeForm();
+  }, { immediate: true, deep: true }
+);
 
 // Watch for lockType changes
-watch(() => props.lockType, (newLockType) => {
-  if (newLockType) {
-    formData.value.partType = newLockType;
-  }
-}, { immediate: true });
+watch(
+  () => props.lockType, (newLockType) => {
+    if (newLockType) {
+      formData.value.partType = newLockType;
+    }
+  }, { immediate: true }
+);
 
 // Watch formData changes and emit validation updates
-watch(formData, () => {
-  emit('update:isValid', isValid.value);
-}, { deep: true });
+watch(
+  formData, () => {
+    emit('update:isValid', isValid.value);
+  }, { deep: true }
+);
 
 const isValid = computed(() => {
   return !!formData.value.name &&

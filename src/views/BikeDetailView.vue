@@ -8,20 +8,23 @@
       <!-- Bike Header -->
       <div class="bike-header">
         <h1 class="bike-name">{{ bike.name }}</h1>
-        <q-chip :label="bike.type" color="primary" text-color="white" size="md" />
+        <q-chip :label="bike.type"
+                color="primary"
+                text-color="white"
+                size="md" />
         <q-select
-                  v-if="bikes.length"
-                  :model-value="selectedBikeId"
-                  :options="bikes"
-                  dense
-                  outlined
-                  map-options
-                  option-label="name"
-                  option-value="id"
-                  emit-value
-                  @update:model-value="handleBikeChange"
-                  style="min-width: 200px;"
-                />
+          v-if="bikes.length"
+          :model-value="selectedBikeId"
+          :options="bikes"
+          dense
+          outlined
+          map-options
+          option-label="name"
+          option-value="id"
+          emit-value
+          @update:model-value="handleBikeChange"
+          style="min-width: 200px;"
+        />
       </div>
 
       <!-- Tabs -->
@@ -31,16 +34,26 @@
         active-color="primary"
         indicator-color="primary"
       >
-        <q-tab name="parts" label="Parts" icon="hardware" />
-        <q-tab name="rides" label="Rides" icon="directions_bike" />
-        <q-tab name="works" label="Works" icon="build" />
-        <q-tab name="settings" label="Settings" icon="settings" />
+        <q-tab name="parts"
+               label="Parts"
+               icon="hardware" />
+        <q-tab name="rides"
+               label="Rides"
+               icon="directions_bike" />
+        <q-tab name="works"
+               label="Works"
+               icon="build" />
+        <q-tab name="settings"
+               label="Settings"
+               icon="settings" />
       </q-tabs>
 
       <q-separator />
 
       <!-- Tab Panels -->
-      <q-tab-panels v-model="activeTab" animated class="tab-panels">
+      <q-tab-panels v-model="activeTab"
+                    animated
+                    class="tab-panels">
         <!-- Parts Tab -->
         <q-tab-panel name="parts">
           <div class="display-flex flex-column gap-5">
@@ -56,7 +69,9 @@
         <!-- Rides Tab -->
         <q-tab-panel name="rides">
           <div class="empty-tab">
-            <q-icon name="directions_bike" size="64px" color="grey-5" />
+            <q-icon name="directions_bike"
+                    size="64px"
+                    color="grey-5" />
             <p>Rides coming soon</p>
           </div>
         </q-tab-panel>
@@ -64,7 +79,9 @@
         <!-- Works Tab -->
         <q-tab-panel name="works">
           <div class="empty-tab">
-            <q-icon name="build" size="64px" color="grey-5" />
+            <q-icon name="build"
+                    size="64px"
+                    color="grey-5" />
             <p>Works coming soon</p>
           </div>
         </q-tab-panel>
@@ -126,15 +143,21 @@
     </div>
 
     <div v-else class="error-container">
-      <q-icon name="error_outline" size="48px" color="negative" />
+      <q-icon name="error_outline"
+              size="48px"
+              color="negative" />
       <p>Bike not found</p>
-      <q-btn label="Go Back" color="primary" @click="router.push('/bikes')" />
+      <q-btn label="Go Back"
+             color="primary"
+             @click="router.push('/bikes')" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import {
+  ref, computed, watch, onMounted, onUnmounted 
+} from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useBikesStore } from '@/stores/bikesStore';
@@ -150,7 +173,9 @@ const route = useRoute();
 const router = useRouter();
 const bikesStore = useBikesStore();
 const partsStore = usePartsStore();
-const { showSuccess, showError, withAjaxBar } = useLayout();
+const {
+  showSuccess, showError, withAjaxBar 
+} = useLayout();
 const $q = useQuasar();
 const bikeId = computed(() => route.params.id as string);
 const bike = computed(() => bikesStore.getBikeById(bikeId.value));
@@ -172,7 +197,9 @@ const { state: queryState, setParam: setQueryParam } = useQuerySync({
 const activeTab = computed({
   get: () => queryState.tab.value,
   set: (value) => {
-    void setQueryParam('tab', value, { replace: true });
+    void setQueryParam(
+      'tab', value, { replace: true }
+    );
   }
 });
 
@@ -196,14 +223,16 @@ const bikeTypeOptions = [
 ];
 
 // Initialize form data when bike loads
-watch(bike, (newBike) => {
-  if (newBike) {
-    formData.value = {
-      name: newBike.name || '',
-      type: newBike.type || BikeType.Other
-    };
-  }
-}, { immediate: true });
+watch(
+  bike, (newBike) => {
+    if (newBike) {
+      formData.value = {
+        name: newBike.name || '',
+        type: newBike.type || BikeType.Other
+      };
+    }
+  }, { immediate: true }
+);
 
 // Set parts context bike in store when bike changes
 // watch(bike, (newBike) => {
@@ -216,16 +245,18 @@ watch(bike, (newBike) => {
 // });
 
 // Fetch parts when parts tab is accessed, but only if store is empty
-watch(activeTab, async (newTab) => {
-  if (newTab === 'parts' && partsStore.parts.length === 0) {
-    try {
-      await withAjaxBar(partsStore.fetchParts());
-    } catch (error) {
-      console.error('Failed to fetch parts:', error);
-      showError('Failed to load parts');
+watch(
+  activeTab, async (newTab) => {
+    if (newTab === 'parts' && partsStore.parts.length === 0) {
+      try {
+        await withAjaxBar(partsStore.fetchParts());
+      } catch (error) {
+        console.error('Failed to fetch parts:', error);
+        showError('Failed to load parts');
+      }
     }
-  }
-}, { immediate: true });
+  }, { immediate: true }
+);
 
 // Action states
 const isSaving = ref(false);
@@ -269,9 +300,7 @@ const handleSave = async () => {
   
   try {
     isSaving.value = true;
-    await withAjaxBar(
-      bikesStore.updateBike(bike.value.id, formData.value)
-    );
+    await withAjaxBar(bikesStore.updateBike(bike.value.id, formData.value));
     showSuccess('Bike updated successfully');
   } catch (err: any) {
     console.error('Failed to update bike:', err);
@@ -295,9 +324,7 @@ const handleRetire = async () => {
     }).onOk(async () => {
       try {
         isRetiring.value = true;
-        await withAjaxBar(
-          bikesStore.retireBike(bikeId)
-        );
+        await withAjaxBar(bikesStore.retireBike(bikeId));
         showSuccess('Bike retired successfully');
       } catch (err: any) {
         console.error('Failed to retire bike:', err);
@@ -320,24 +347,22 @@ const handleDelete = async () => {
   try {
 
     $q.dialog({
-        title: 'Do you want to delete this bike?',
-        message: 'This action cannot be undone. All data will be lost for good.',
-        cancel: true,
-        persistent: false
-      }).onOk(async () => {
-        try {
-          isDeleting.value = true;  
-        await withAjaxBar(
-            bikesStore.deleteBike(bikeId)
-          );
-          showSuccess('Bike deleted successfully');
-        } catch (err: any) {
-          console.error('Failed to delete bike:', err);
-          showError(err.message || 'Failed to delete bike');
-        } finally {
-          isDeleting.value = false;
-        }
-      })
+      title: 'Do you want to delete this bike?',
+      message: 'This action cannot be undone. All data will be lost for good.',
+      cancel: true,
+      persistent: false
+    }).onOk(async () => {
+      try {
+        isDeleting.value = true;  
+        await withAjaxBar(bikesStore.deleteBike(bikeId));
+        showSuccess('Bike deleted successfully');
+      } catch (err: any) {
+        console.error('Failed to delete bike:', err);
+        showError(err.message || 'Failed to delete bike');
+      } finally {
+        isDeleting.value = false;
+      }
+    });
   } catch (err: any) {
     console.error('Failed to show delete dialog:', err);
     showError('Failed to show confirmation dialog');
