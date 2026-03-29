@@ -1,23 +1,28 @@
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { userSettingsService } from '@/services/userSettingsService';
-import type { UserSettings, UserSettingsDto } from '@/types';
+import type { UserSettings, UserSettingsDto, FetchStatus } from '@/types';
 
 export const useUserSettingsStore = defineStore('userSettings', () => {
   // State
   const userSettings = ref<UserSettings | null>(null);
-
-  // Getters
+  const fetchStatus = ref<FetchStatus>('idle');
 
   // Actions
+  const ensureSettings = async () => {
+    if (fetchStatus.value === 'done' || fetchStatus.value === 'loading') return;
+    return fetchSettings();
+  };
+
   const fetchSettings = async () => {
-    try {      
+    try {
+      fetchStatus.value = 'loading';
       const fetchedSettings = await userSettingsService.getUserSettings();
-      
       userSettings.value = fetchedSettings;
-      
+      fetchStatus.value = 'done';
       return fetchedSettings;
     } catch (err: any) {
+      fetchStatus.value = 'error';
       throw err;
     } 
   };
@@ -31,17 +36,22 @@ export const useUserSettingsStore = defineStore('userSettings', () => {
       throw err;
     }
   };
-  
+
+  const reset = () => {
+    userSettings.value = null;
+    fetchStatus.value = 'idle';
+  };
 
   return {
     // State
     userSettings,
-    
-    // Getters
+    fetchStatus,
     
     // Actions
+    ensureSettings,
     fetchSettings,
     updateSettings,
+    reset,
   };
 });
 

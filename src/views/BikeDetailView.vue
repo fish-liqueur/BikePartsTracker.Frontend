@@ -162,6 +162,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useBikesStore } from '@/stores/bikesStore';
 import { usePartsStore } from '@/stores/partsStore';
+import { useChainCyclesStore } from '@/stores/chainCyclesStore';
 import { useLayout } from '@/composables/useLayout';
 import { useQuerySync } from '@/composables/useQuerySync';
 import PartsWidget from '@/components/parts/PartsWidget.vue';
@@ -173,6 +174,7 @@ const route = useRoute();
 const router = useRouter();
 const bikesStore = useBikesStore();
 const partsStore = usePartsStore();
+const chainCyclesStore = useChainCyclesStore();
 const {
   showSuccess, showError, withAjaxBar 
 } = useLayout();
@@ -244,15 +246,18 @@ watch(
 //   partsStore.setPartsContextBike(null);
 // });
 
-// Fetch parts when parts tab is accessed, but only if store is empty
+// Ensure parts and chain cycles are loaded when parts tab is accessed
 watch(
   activeTab, async (newTab) => {
-    if (newTab === 'parts' && partsStore.parts.length === 0) {
+    if (newTab === 'parts') {
       try {
-        await withAjaxBar(partsStore.fetchParts());
+        await Promise.all([
+          withAjaxBar(partsStore.ensureParts()),
+          bikeId.value ? chainCyclesStore.ensureChainCycles(bikeId.value) : Promise.resolve(),
+        ]);
       } catch (error) {
-        console.error('Failed to fetch parts:', error);
-        showError('Failed to load parts');
+        console.error('Failed to load parts tab data:', error);
+        showError('Failed to load parts data');
       }
     }
   }, { immediate: true }
@@ -266,14 +271,14 @@ const isDeleting = ref(false);
 
 
 onMounted(async () => {
-  if (!bike.value && bikeId.value) {
-    try {
+  try {
+    await withAjaxBar(bikesStore.ensureBikes());
+    if (!bike.value && bikeId.value) {
       await withAjaxBar(bikesStore.fetchBike(bikeId.value));
-      await bikesStore.fetchBikes();
-    } catch (error) {
-      console.error('Failed to fetch bike:', error);
-      showError('Failed to load bike details');
     }
+  } catch (error) {
+    console.error('Failed to fetch bike:', error);
+    showError('Failed to load bike details');
   }
 });
 

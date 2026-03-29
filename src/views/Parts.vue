@@ -28,9 +28,8 @@ const handleViewModeChanged = (mode: 'cards' | 'table') => {
 };
 
 onMounted(async () => {
-  // Fetch parts when component mounts
   try {
-    await partsStore.fetchParts();
+    await partsStore.ensureParts();
   } catch (error) {
     console.error('Failed to fetch parts:', error);
   }

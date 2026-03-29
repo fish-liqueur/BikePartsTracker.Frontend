@@ -63,9 +63,6 @@ const newBike = ref<CreateBikeDto>({
   name: '',
   type: BikeType.Other,
   description: '',
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  parts: [],
   totalDistance: 0,
   stravaDistance: 0,
 });
@@ -109,9 +106,6 @@ const resetForm = () => {
     name: '',
     type: BikeType.Other,
     description: '',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    parts: [],
     totalDistance: 0,
     stravaDistance: 0,
   };

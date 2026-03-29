@@ -217,7 +217,7 @@ onMounted(async () => {
   }
   
   try {
-    await bikesStore.fetchBikes();
+    await bikesStore.ensureBikes();
   } catch (err) {
     console.error('Failed to fetch bikes:', err);
   }

@@ -1,6 +1,6 @@
 import { apiService } from './api';
 import type {
-  BikePart, PartDto, CreatePartDto, PartUsageHistory, ApiResponse, PaginatedResponse 
+  BikePart, CreatePartDto, UpdatePartDto, UpdatePartResponse, DeletePartResponse,
 } from '@/types';
 
 export const partService = {
@@ -39,22 +39,25 @@ export const partService = {
     }
   },
 
-  // Update part
-  async updatePart(id: string, partData: Partial<CreatePartDto>): Promise<BikePart | null> {
+  /** PUT part — returns updated part and chain cycles affected by bike cascade. */
+  async updatePart(
+    id: string,
+    partData: Partial<CreatePartDto> | Partial<UpdatePartDto>,
+  ): Promise<UpdatePartResponse | null> {
     try {
-      const response = await apiService.put<BikePart>(`/api/parts/${id}`, partData);
-      return response.data || null;
+      const response = await apiService.put<UpdatePartResponse>(`/api/parts/${id}`, partData);
+      return response.data ?? null;
     } catch (error) {
       console.error('Failed to update part:', error);
       throw error;
     }
   },
 
-  // Delete part
-  async deletePart(id: string): Promise<boolean> {
+  /** DELETE part — returns success and any chain cycles updated by cascade. */
+  async deletePart(id: string): Promise<DeletePartResponse | null> {
     try {
-      const response = await apiService.delete<{ success: boolean }>(`/api/parts/${id}`);
-      return response.success;
+      const response = await apiService.delete<DeletePartResponse>(`/api/parts/${id}`);
+      return response.data ?? null;
     } catch (error) {
       console.error('Failed to delete part:', error);
       throw error;

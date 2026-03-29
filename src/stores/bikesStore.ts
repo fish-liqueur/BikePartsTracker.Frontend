@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { bikeService } from '@/services/bikeService';
 import type {
-  Bike, CreateBikeDto, UpdateBikeDto 
+  Bike, CreateBikeDto, UpdateBikeDto, FetchStatus 
 } from '@/types';
 
 export const useBikesStore = defineStore('bikes', () => {
@@ -11,26 +11,32 @@ export const useBikesStore = defineStore('bikes', () => {
   const currentBike = ref<Bike | null>(null);
   const isLoading = ref(false);
   const error = ref<string | null>(null);
+  const fetchStatus = ref<FetchStatus>('idle');
 
   // Getters
   const bikesCount = computed(() => bikes.value.length);
   const getBikeById = computed(() => (id: string | null) => id ? bikes.value.find(bike => bike.id === id) : null);
 
   // Actions
+  const ensureBikes = async () => {
+    if (fetchStatus.value === 'done' || fetchStatus.value === 'loading') return;
+    return fetchBikes();
+  };
+
   const fetchBikes = async () => {
     try {
       isLoading.value = true;
+      fetchStatus.value = 'loading';
       error.value = null;
       
       const fetchedBikes = await bikeService.getBikes();
-      bikes.value = fetchedBikes.map(bike => ({
-        ...bike,
-        chainCycle: bike.chainCycles ?? [],
-      }));
+      bikes.value = fetchedBikes;
+      fetchStatus.value = 'done';
       
       return fetchedBikes;
     } catch (err: any) {
       error.value = err.message || 'Failed to fetch bikes';
+      fetchStatus.value = 'error';
       throw err;
     } finally {
       isLoading.value = false;
@@ -199,6 +205,7 @@ export const useBikesStore = defineStore('bikes', () => {
     currentBike.value = null;
     isLoading.value = false;
     error.value = null;
+    fetchStatus.value = 'idle';
   };
 
   return {
@@ -207,12 +214,14 @@ export const useBikesStore = defineStore('bikes', () => {
     currentBike,
     isLoading,
     error,
+    fetchStatus,
     
     // Getters
     bikesCount,
     getBikeById,
     
     // Actions
+    ensureBikes,
     fetchBikes,
     fetchBike,
     createBike,

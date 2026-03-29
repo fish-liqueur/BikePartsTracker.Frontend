@@ -322,7 +322,7 @@ const handleActivate = async (bikeId: string) => {
 
 onMounted(async () => {
   try {
-    await bikesStore.fetchBikes();
+    await bikesStore.ensureBikes();
   } catch (error) {
     console.error('Failed to fetch bikes:', error);
   }

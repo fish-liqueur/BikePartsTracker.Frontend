@@ -102,6 +102,7 @@ import { ref, computed } from 'vue';
 import type { ComponentPublicInstance } from 'vue';
 import { useBikesStore } from '@/stores/bikesStore';
 import { usePartsStore } from '@/stores/partsStore';
+import { useChainCyclesStore } from '@/stores/chainCyclesStore';
 import { useLayout } from '@/composables/useLayout';
 import type {
   Bike, BikePart, CreatePartDto 
@@ -138,6 +139,7 @@ const {
 
 const bikesStore = useBikesStore();
 const partsStore = usePartsStore();
+const chainCyclesStore = useChainCyclesStore();
 interface FormData extends Omit<CreatePartDto, 'description'> {
   description: string;
 }
@@ -262,7 +264,10 @@ const isEquippedToOtherBike = (chain: BikePart) => {
 };
 
 const isChainInCycle = (chainId: string): boolean => {
-  return props.bikeContext.chainCycles?.find(chainCycle => chainCycle.chains.includes(chainId)) !== undefined || false;
+  const chainCycles = chainCyclesStore.getChainCyclesForBike(props.bikeContext.id);
+  return chainCycles.some(c =>
+    (c.chains ?? []).some(cid => cid != null && String(cid) === chainId)
+  );
 };
 
 const getOtherBikeString = (id: string) => {

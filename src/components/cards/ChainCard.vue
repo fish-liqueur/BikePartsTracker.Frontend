@@ -1,43 +1,41 @@
 <template>
-  <template>
-    <q-card class="chain-card"
-            :class="{
-              'chain-card--active bg-primary text-white': isActive && part,
-              'chain-card--draggable bg-secondary text-white': !isActive && part,
-            }">
-      <div class="chain-card__index">
-        {{ index + 1 }}
-      </div>
-      <h4 class="chain-card__name">{{ part.name }}</h4>
-      <p class="chain-card__description">{{ part.description }}</p>
-      <p class="chain-card__third-line" :style="thirdLineStyle">{{ thirdLineText }}</p>
-      <q-menu touch-position>
-        <q-list>
-          <q-item clickable
-                  v-close-popup
-                  @click="handleFullDetails">
-            <q-item-section avatar>
-              <q-icon name="info" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>To detailed page</q-item-label>
-            </q-item-section>
-          </q-item>
-          <q-item clickable
-                  v-close-popup
-                  @click="handleRemoveFromCycle">
-            <q-item-section avatar>
-              <q-icon name="remove_circle" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>Do not use on this bike</q-item-label>
-              <q-item-label caption>{{ props.bikeContext.name }}</q-item-label>
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </q-menu>
-    </q-card>
-  </template>
+<div class="chain-card"
+        :class="{
+          'chain-card--active bg-primary text-white': isActive && part,
+          'chain-card--draggable bg-secondary text-white': !isActive && part,
+        }">
+  <div class="chain-card__index">
+    {{ index + 1 }}
+  </div>
+  <h4 class="chain-card__name">{{ part.name }}</h4>
+  <p class="chain-card__description">{{ part.description }}</p>
+  <p class="chain-card__third-line" :style="thirdLineStyle">{{ thirdLineText }}</p>
+  <q-menu touch-position>
+    <q-list>
+      <q-item clickable
+              v-close-popup
+              @click="handleFullDetails">
+        <q-item-section avatar>
+          <q-icon name="info" />
+        </q-item-section>
+        <q-item-section>
+          <q-item-label>To detailed page</q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item clickable
+              v-close-popup
+              @click="removeChainFromBike">
+        <q-item-section avatar>
+          <q-icon name="remove_circle" />
+        </q-item-section>
+        <q-item-section>
+          <q-item-label>Do not use on this bike</q-item-label>
+          <q-item-label caption>{{ props.bikeContext.name }}</q-item-label>
+        </q-item-section>
+      </q-item>
+    </q-list>
+  </q-menu>
+</div>
 </template>
 
 <script setup lang="ts">
@@ -62,7 +60,7 @@ const props = defineProps<Props>();
 const emit = defineEmits<{
   onSelectChain: [chainId: string, chainCycleId: string, index: number];
   fullDetails: [partId: string];
-  removeFromCycle: [partId: string];
+  onRemoveChainFromBike: [partId: string];
 }>();
 
 // const partsStore = usePartsStore();
@@ -74,7 +72,7 @@ const {
 // const showMenu = ref(false);
 
 const thirdLineText = computed(() => {
-  return props.isActive ? 'Active chain' : `should install in ${kmsBeforeInstallation.value} km`;
+  return props.isActive ? 'Chain installed now' : `should install in ${kmsBeforeInstallation.value} km`;
 });
 
 const kmsBeforeInstallation = computed(() => {
@@ -97,8 +95,8 @@ const handleFullDetails = () => {
   // router.push(`/parts/${props.part?.id}`);
 };
 
-const handleRemoveFromCycle = () => {
-  emit('removeFromCycle', props.part?.id || '');
+const removeChainFromBike = () => {
+  emit('onRemoveChainFromBike', props.part.id);
 };
 
 // const handleCreateChain = async (data: CreatePartDto, index: number) => {
@@ -125,15 +123,15 @@ const handleRemoveFromCycle = () => {
 
 <style scoped lang="css">
 .chain-card {
-  flex: 1 1 50%;
   display: grid;
   grid-template-columns: auto 1fr;
+  grid-template-rows: auto 1fr auto;
   gap: .5rem;
   grid-template-areas:
     "index name"
     "index description"
     "thirdline thirdline";
-  padding: .5rem;
+  padding: 1.25rem;
   transition: box-shadow 0.2s ease;
 }
 

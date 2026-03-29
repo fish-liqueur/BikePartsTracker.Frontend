@@ -33,7 +33,8 @@
                        :bike-context="bikeContext"
                        :index="index"
                        :chain-cycle-id="chainCycle.id"
-                       @on-select-chain="updateBikeChainCycle" />
+                       @on-select-chain="updateBikeChainCycle"
+                       @on-remove-chain-from-bike="handleRemoveChainFromBike" />
             <ChainCardEmpty v-else
                             :key="`empty-${index}`"
                             :index="index"
@@ -46,6 +47,19 @@
         <div class="chain-cycle-item__data-container">
           <div class="chain-cycle-item__data-container-item">
             Swap chain in <span>300</span> km
+            <div class="display-flex flex-row flex-align-center gap-2">
+              <span>Chains:</span>
+              <q-radio
+                v-for="option in chainCycleLengthOptions"
+                :key="option"
+                :value="option"
+                :val="option"
+                :model-value="chainCycle.chains?.length ?? 2"
+                @update:model-value="(val) => handleUpdateChainCycleLength(val, chainCycle.id)"
+              >
+                {{ option }}
+              </q-radio>
+            </div>
             <div class="display-flex flex-column align-center justify-center gap-2">
               <ElementWithTooltipButton :tooltip-text="deleteChainCycleTooltipText">
                 <q-btn label="Delete chain cycle"
@@ -74,8 +88,9 @@
 <script setup lang="ts">
 // ---- Imports ----
 import type {
-  Bike, BikePart, ChainCycle, CreateChainCycleDto, CreatePartDto 
+  Bike, BikePart, CreatePartDto
 } from '@/types';
+import { EMPTY_GUID } from '@/types';
 import {
   computed
 } from 'vue';
@@ -83,7 +98,7 @@ import { useQuasar } from 'quasar';
 // import { VueDraggable, type SortableEvent } from 'vue-draggable-plus';
 import { usePartsStore } from '@/stores/partsStore';
 import { useUserSettingsStore } from '@/stores/userSettingsStore';
-import { useBikesStore } from '@/stores/bikesStore';
+import { useChainCyclesStore } from '@/stores/chainCyclesStore';
 import { useLayout } from '@/composables/useLayout';
 import ChainCard from '@/components/cards/ChainCard.vue';
 import ChainCardEmpty from '@/components/cards/ChainCardEmpty.vue';
@@ -99,7 +114,7 @@ interface Props {
 const props = defineProps<Props>();
 
 // ---- Stores & Composables ----
-const bikesStore = useBikesStore();
+const chainCyclesStore = useChainCyclesStore();
 const partsStore = usePartsStore();
 const userSettingsStore = useUserSettingsStore();
 const {
@@ -116,13 +131,35 @@ In case of multiple chain cycles, each ride of this bike will add mileage for ea
 chain in every cycle.`;
 const deleteChainCycleTooltipText = `Remove this chain cycle from the bike.
 Chains in this cycle will not be deleted, but the cycle configuration will be removed.`;
+const chainCycleLengthOptions = [2, 3];
+
+function mergePartIntoChainsSlots(
+  chainIds: (string | null)[],
+  partId: string,
+  index: number
+): (string | null)[] {
+  const next = [...chainIds].map(id =>
+    id != null && String(id) === String(partId) ? null : id
+  );
+  while (next.length <= index) next.push(null);
+  next[index] = partId;
+  return next;
+}
 
 // ---- Computed ----
+const chainCycles = computed(() => chainCyclesStore.getChainCyclesForBike(props.bikeContext.id));
+
+/** Resolve chain slot IDs to BikePart for display. */
 const chainCyclesDetailed = computed(() => {
-  return props.bikeContext.chainCycles?.map(chainCycle => ({
-    ...chainCycle,
-    chains: chainCycle.chains?.map(id => partsStore.parts.find(part => part.id === id) as BikePart || null)
-  })) || [];
+  const cycles = chainCycles.value;
+  if (!cycles.length) return [];
+
+  return cycles.map(chainCycle => {
+    const chainsResolved: (BikePart | null)[] = (chainCycle.chains ?? []).map(id =>
+      id ? partsStore.parts.find(p => p.id === id) ?? null : null
+    );
+    return { ...chainCycle, chains: chainsResolved };
+  });
 });
 
 
@@ -145,13 +182,19 @@ const updateBikeChainCycle = async (
   newChainId: string, chainCycleId: string, index: number
 ) => {
   try {
-    const newChainCycles: ChainCycle[] = [...props.bikeContext.chainCycles];
-    const targetCycle = newChainCycles.find(chainCycle => chainCycle.id === chainCycleId);
-    if (!targetCycle) {
-      throw new Error('Chain cycle not found');
+    const part = partsStore.getPartById(newChainId);
+    if (part && part.bikeId !== props.bikeContext.id) {
+      await withAjaxBar(
+        partsStore.updatePart(newChainId, { bikeId: props.bikeContext.id })
+      );
     }
-    targetCycle.chains[index] = newChainId;
-    await withAjaxBar(bikesStore.updateBike(props.bikeContext.id, { chainCycles: newChainCycles }));
+    const targetCycle = chainCyclesStore.getChainCyclesForBike(props.bikeContext.id)
+      .find(c => c.id === chainCycleId);
+    if (!targetCycle) throw new Error('Chain cycle not found');
+    const newChains = mergePartIntoChainsSlots(targetCycle.chains ?? [], newChainId, index);
+    await withAjaxBar(
+      chainCyclesStore.updateChainCycle(chainCycleId, props.bikeContext.id, { chains: newChains })
+    );
     showSuccess('Chain added to cycle successfully');
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Failed to update bike with new chain';
@@ -159,17 +202,7 @@ const updateBikeChainCycle = async (
   }
 };
 
-const getNewChainCycles = (): CreateChainCycleDto[] => {
-  const length = userSettingsStore?.userSettings?.defaultChainCycleLength || 3;
-  const newChainCycles = [{
-    chains: new Array(length).fill(null),
-    activeChainId: null,
-    intervalKm: userSettingsStore?.userSettings?.defaultChainCycleIntervalKm || 700,
-    cycleLength: length,
-  }] as CreateChainCycleDto[];
-
-  return newChainCycles;
-};
+const defaultSlotCount = () => userSettingsStore?.userSettings?.defaultChainCycleLength || 3;
 
 const handleAddMoreChainCycle = async () => {
   $q.dialog({
@@ -179,8 +212,11 @@ const handleAddMoreChainCycle = async () => {
     persistent: false,
   }).onOk(async () => {
     try {
-      await withAjaxBar(bikesStore.updateBike(props.bikeContext.id, {
-        chainCycles: [...props.bikeContext.chainCycles, ...getNewChainCycles()]
+      const n = defaultSlotCount();
+      await withAjaxBar(chainCyclesStore.createChainCycle({
+        bikeId: props.bikeContext.id,
+        chains: Array(n).fill(null),
+        intervalKm: userSettingsStore?.userSettings?.defaultChainCycleIntervalKm || 700
       }));
       showSuccess('Extra chain cycle added successfully');
     } catch (error) {
@@ -198,9 +234,8 @@ const handleRemoveAllChainCycles = async () => {
     persistent: false,
   }).onOk(async () => {
     try {
-      await withAjaxBar(bikesStore.updateBike(props.bikeContext.id, {
-        chainCycles: []
-      }));
+      const cycles = chainCycles.value;
+      await withAjaxBar(Promise.all(cycles.map(c => chainCyclesStore.deleteChainCycle(c.id, props.bikeContext.id))));
       showSuccess('Chain cycles removed successfully');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to remove chain cycle';
@@ -216,9 +251,7 @@ const handleRemoveChainCycle = (chainCycleId: string) => {
     persistent: false,
   }).onOk(async () => {
     try {
-      await withAjaxBar(bikesStore.updateBike(props.bikeContext.id, {
-        chainCycles: props.bikeContext.chainCycles?.filter(chainCycle => chainCycle.id !== chainCycleId)
-      }));
+      await withAjaxBar(chainCyclesStore.deleteChainCycle(chainCycleId, props.bikeContext.id));
       showSuccess('Chain cycle removed successfully');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to remove chain cycle';
@@ -229,8 +262,11 @@ const handleRemoveChainCycle = (chainCycleId: string) => {
 
 const handleAddChainCycle = async () => {
   try {
-    await withAjaxBar(bikesStore.updateBike(props.bikeContext.id, {
-      chainCycles: getNewChainCycles()
+    const n = defaultSlotCount();
+    await withAjaxBar(chainCyclesStore.createChainCycle({
+      bikeId: props.bikeContext.id,
+      chains: Array(n).fill(null),
+      intervalKm: userSettingsStore?.userSettings?.defaultChainCycleIntervalKm || 700
     }));
     showSuccess('Chain cycle added successfully! Now you can add chains to the cycle.');
   } catch (error) {
@@ -239,16 +275,60 @@ const handleAddChainCycle = async () => {
   }
 };
 
+const handleUpdateChainCycleLength = async (length: number, chainCycleId: string) => {
+  try {
+    const targetCycle = chainCycles.value.find(c => c.id === chainCycleId);
+    if (!targetCycle) throw new Error('Chain cycle not found');
+
+    const cur = [...(targetCycle.chains ?? [])];
+    let newChains = [...cur];
+    let activeChainId = targetCycle.activeChainId ?? null;
+
+    if (length < newChains.length) {
+      const dropped = newChains.slice(length);
+      newChains = newChains.slice(0, length);
+      const droppedIds = dropped.filter((id): id is string => id != null);
+      if (activeChainId && droppedIds.includes(activeChainId)) {
+        activeChainId = null;
+      }
+    } else {
+      while (newChains.length < length) newChains.push(null);
+    }
+
+    const dto: { chains: (string | null)[]; activeChainId?: string } = { chains: newChains };
+    const prevActive = targetCycle.activeChainId ?? null;
+    if (activeChainId !== prevActive) {
+      dto.activeChainId = activeChainId === null ? EMPTY_GUID : activeChainId;
+    }
+
+    await withAjaxBar(
+      chainCyclesStore.updateChainCycle(chainCycleId, props.bikeContext.id, dto)
+    );
+    showSuccess('Chain cycle length updated successfully');
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to update chain cycle length';
+    showError(errorMessage);
+  }
+};
+
 const handleUserCreateChain = async (
   chain: CreatePartDto, chainCycleId: string, index: number
 ) => {
   try {
-    const newChain = await withAjaxBar(partsStore.createPart(chain));
+    const newChain = await withAjaxBar(partsStore.createPart({
+      ...chain,
+      bikeId: props.bikeContext.id
+    }));
     showSuccess('Chain created successfully');
     if (newChain) {
-      await updateBikeChainCycle(
-        newChain.id, chainCycleId, index
-      );
+      const targetCycle = chainCyclesStore.getChainCyclesForBike(props.bikeContext.id)
+        .find(c => c.id === chainCycleId);
+      if (targetCycle) {
+        const newChains = mergePartIntoChainsSlots(targetCycle.chains ?? [], newChain.id, index);
+        await withAjaxBar(
+          chainCyclesStore.updateChainCycle(chainCycleId, props.bikeContext.id, { chains: newChains })
+        );
+      }
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Failed to create chain';
@@ -256,6 +336,15 @@ const handleUserCreateChain = async (
   }
 };
 
+const handleRemoveChainFromBike = async (chainId: string) => {
+  try {
+    await withAjaxBar(partsStore.movePartToBike(chainId, null));
+    showSuccess('Chain removed from bike successfully');
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to remove chain from bike';
+    showError(errorMessage);
+  }
+};
 // ---- Watchers ----
 
 
@@ -309,7 +398,7 @@ const handleUserCreateChain = async (
 .chain-cycle-item__chains-visualizer {
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: normal;
   justify-content: center;
   gap: 1rem;
   width: 600px;
@@ -318,6 +407,10 @@ const handleUserCreateChain = async (
   border: 1px solid var(--q-positive);
   background-color: rgba(33, 186, 69, 0.1);
   padding: 1rem;
+}
+
+.chain-cycle-item__chains-visualizer > div {
+  flex: 1 1 50%;
 }
 
 .chain-cycle-item__data-container {

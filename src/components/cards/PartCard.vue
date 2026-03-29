@@ -150,6 +150,7 @@ import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 // import { usePartsStore } from '@/stores/partsStore';
 import { useBikesStore } from '@/stores/bikesStore';
+import { useChainCyclesStore } from '@/stores/chainCyclesStore';
 import {
   PartType, type Bike, type BikePart 
 } from '@/types';
@@ -178,8 +179,8 @@ const emit = defineEmits<{
 }>();
 
 const router = useRouter();
-
 const bikesStore = useBikesStore();
+const chainCyclesStore = useChainCyclesStore();
 
 // Calculate total mileage
 const totalMileage = computed((): number => {
@@ -244,18 +245,21 @@ const isChain = computed((): boolean => {
   return props.part.partType === PartType.Chain;
 });
 
+const chainCyclesForBike = computed(() =>
+  props.bikeContext?.id ? chainCyclesStore.getChainCyclesForBike(props.bikeContext.id) : []
+);
+
 const isChainInCycle = computed((): boolean => {
-  if (props.bikeContext?.chainCycles?.length === 0) {
-    return false;
-  }
-  return props.bikeContext?.chainCycles?.find(chainCycle => chainCycle.chains.includes(props.part.id)) !== undefined;
+  if (!chainCyclesForBike.value.length) return false;
+  const pid = props.part.id;
+  return chainCyclesForBike.value.some(c =>
+    (c.chains ?? []).some(cid => cid != null && String(cid) === pid)
+  );
 });
 
 const isChainInCycleActive = computed((): boolean => {
-  if (props.bikeContext?.chainCycles?.length === 0) {
-    return false;
-  }
-  return props.bikeContext?.chainCycles?.find(chainCycle => chainCycle.activeChainId === props.part.id) !== undefined;
+  if (!chainCyclesForBike.value.length) return false;
+  return chainCyclesForBike.value.some(c => c.activeChainId === props.part.id);
 });
 
 const bikeChipColor = computed((): string => {

@@ -7,7 +7,6 @@ import { useAuthStore } from '@/stores/authStore';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useUserSettingsStore } from '@/stores/userSettingsStore';
 import { useBikesStore } from '@/stores/bikesStore';
-import { usePartsStore } from '@/stores/partsStore';
 import type { QAjaxBar } from 'quasar';
 import QuickMenu from '@/components/menus/QuickMenu.vue';
 import Header from '@/components/header/Header.vue';
@@ -20,7 +19,6 @@ const isAuthenticated = computed(() => authStore.isAuthenticated);
 const layoutStore = useLayoutStore();
 const userSettingsStore = useUserSettingsStore();
 const bikesStore = useBikesStore();
-const partsStore = usePartsStore();
 
 // Provide ajax-bar ref for use in composables
 const ajaxBarRef = ref<QAjaxBar | null>(null);
@@ -30,9 +28,8 @@ onMounted(async () => {
   if (isAuthenticated.value) {
     try {
       await Promise.all([
-        userSettingsStore.fetchSettings(),
-        bikesStore.fetchBikes(),
-        partsStore.fetchParts()
+        userSettingsStore.ensureSettings(),
+        bikesStore.ensureBikes(),
       ]);
     } catch (error) {
       console.error('Failed to initialize app data:', error);

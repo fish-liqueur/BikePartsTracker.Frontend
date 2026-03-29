@@ -1,16 +1,17 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { partService } from '@/services/partService';
-import type { BikePart, CreatePartDto } from '@/types';
-import { PartType } from '@/types';
+import { useChainCyclesStore } from '@/stores/chainCyclesStore';
+import type { BikePart, CreatePartDto, UpdatePartDto, FetchStatus } from '@/types';
+import { PartType, EMPTY_GUID } from '@/types';
 
 export const usePartsStore = defineStore('parts', () => {
   // State
   const parts = ref<BikePart[]>([]);
   const currentPart = ref<BikePart | null>(null);
-  // const partsContextBike = ref<Bike | null>(null);
   const isLoading = ref(false);
   const error = ref<string | null>(null);
+  const fetchStatus = ref<FetchStatus>('idle');
 
   // Getters
   const partsCount = computed(() => parts.value.length);
@@ -21,18 +22,25 @@ export const usePartsStore = defineStore('parts', () => {
   const getPartsByPartType = computed(() => (partType: PartType) => parts.value.filter((part) => part.partType === partType),);
 
   // Actions
+  const ensureParts = async () => {
+    if (fetchStatus.value === 'done' || fetchStatus.value === 'loading') return;
+    return fetchParts();
+  };
+
   const fetchParts = async () => {
     try {
       isLoading.value = true;
+      fetchStatus.value = 'loading';
       error.value = null;
 
       const fetchedParts = await partService.getParts();
-      //const fetchedParts = generateMockParts();
       parts.value = fetchedParts;
+      fetchStatus.value = 'done';
 
       return fetchedParts;
     } catch (err: unknown) {
       error.value = (err as Error).message || 'Failed to fetch parts';
+      fetchStatus.value = 'error';
       throw err;
     } finally {
       isLoading.value = false;
@@ -97,29 +105,26 @@ export const usePartsStore = defineStore('parts', () => {
     }
   };
 
-  const updatePart = async (id: string, partData: Partial<CreatePartDto>) => {
+  const updatePart = async (id: string, partData: Partial<CreatePartDto> | Partial<UpdatePartDto>) => {
     try {
       isLoading.value = true;
       error.value = null;
 
-      // TODO: Replace with actual service call
-      // const updatedPart = await partService.updatePart(id, partData);
-
-      const index = parts.value.findIndex((part) => part.id === id);
-      if (index !== -1) {
-        parts.value[index] = {
-          ...parts.value[index],
-          ...partData,
-          updatedAt: new Date(),
-        };
-
-        if (currentPart.value?.id === id) {
-          currentPart.value = parts.value[index];
+      const result = await partService.updatePart(id, partData as Partial<CreatePartDto>);
+      if (result) {
+        const { part: updatedPart, affectedChainCycles } = result;
+        const index = parts.value.findIndex((part) => part.id === id);
+        if (index !== -1) {
+          parts.value[index] = updatedPart;
+        } else {
+          parts.value.push(updatedPart);
         }
-
-        return parts.value[index];
+        if (currentPart.value?.id === id) {
+          currentPart.value = updatedPart;
+        }
+        useChainCyclesStore().applyAffectedChainCycles(affectedChainCycles ?? []);
+        return updatedPart;
       }
-
       return null;
     } catch (err: unknown) {
       error.value = (err as Error).message || 'Failed to update part';
@@ -135,32 +140,16 @@ export const usePartsStore = defineStore('parts', () => {
     installationDate?: Date | null,
     mileageAtInstallation?: number | null,
   ) => {
-    try {
-      isLoading.value = true;
-      error.value = null;
-
-      // Prepare update data
-      const updateData: Partial<CreatePartDto> = {
-        bikeId: bikeId || '',
-      };
-
-      // Add installation date and mileage if provided
-      if (installationDate !== undefined && installationDate !== null) {
-        updateData.installationDate = installationDate;
-      }
-      if (mileageAtInstallation !== undefined && mileageAtInstallation !== null) {
-        updateData.mileageAtInstallation = mileageAtInstallation;
-      }
-
-      // Update part
-      const updatedPart = await updatePart(partId, updateData);
-      return updatedPart;
-    } catch (err: unknown) {
-      error.value = (err as Error).message || 'Failed to move part to bike';
-      throw err;
-    } finally {
-      isLoading.value = false;
+    const updateData: Partial<CreatePartDto> & Partial<UpdatePartDto> = {
+      bikeId: bikeId === null ? EMPTY_GUID : bikeId,
+    };
+    if (installationDate !== undefined && installationDate !== null) {
+      updateData.installationDate = installationDate;
     }
+    if (mileageAtInstallation !== undefined && mileageAtInstallation !== null) {
+      updateData.mileageAtInstallation = mileageAtInstallation;
+    }
+    return await updatePart(partId, updateData);
   };
 
   const deletePart = async (id: string) => {
@@ -168,19 +157,16 @@ export const usePartsStore = defineStore('parts', () => {
       isLoading.value = true;
       error.value = null;
 
-      // TODO: Replace with actual service call
-      // const success = await partService.deletePart(id);
-
-      const success = true; // Mock success
-      if (success) {
+      const result = await partService.deletePart(id);
+      if (result?.success) {
         parts.value = parts.value.filter((part) => part.id !== id);
-
         if (currentPart.value?.id === id) {
           currentPart.value = null;
         }
+        useChainCyclesStore().applyAffectedChainCycles(result.affectedChainCycles ?? []);
+        return true;
       }
-
-      return success;
+      return false;
     } catch (err: unknown) {
       error.value = (err as Error).message || 'Failed to delete part';
       throw err;
@@ -204,18 +190,18 @@ export const usePartsStore = defineStore('parts', () => {
   const reset = () => {
     parts.value = [];
     currentPart.value = null;
-    // partsContextBike.value = null;
     isLoading.value = false;
     error.value = null;
+    fetchStatus.value = 'idle';
   };
 
   return {
     // State
     parts,
     currentPart,
-    // partsContextBike,
     isLoading,
     error,
+    fetchStatus,
 
     // Getters
     partsCount,
@@ -225,6 +211,7 @@ export const usePartsStore = defineStore('parts', () => {
     getPartsByPartType,
 
     // Actions
+    ensureParts,
     fetchParts,
     fetchPart,
     fetchPartsByBike,
@@ -233,7 +220,6 @@ export const usePartsStore = defineStore('parts', () => {
     movePartToBike,
     deletePart,
     setCurrentPart,
-    // setPartsContextBike,
     clearError,
     reset,
   };
