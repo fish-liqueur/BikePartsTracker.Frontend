@@ -130,6 +130,7 @@ const handleSelectChain = async (chainId: string) => {
 }
 
 .chain-card-empty__border {
+  height: 100%;
   border: 1px dashed #666;
   border-radius: 1rem;
   padding: .25rem;

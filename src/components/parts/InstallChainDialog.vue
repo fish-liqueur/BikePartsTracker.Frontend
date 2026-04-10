@@ -18,7 +18,8 @@
                icon="" />
         <q-tab name="without-chain-cycle"
                label="Without Chain Cycle"
-               icon="" />
+               icon=""
+               :disable="isAlreadyInstalled" />
       </q-tabs>
       <q-tab-panels v-model="activeTab"
                     animated
@@ -114,28 +115,11 @@
           <q-btn flat label="Cancel" color="primary" @click="$emit('cancel')" />
           <q-btn flat label="Reset" color="primary" @click="handleReset" />
          </div>
-       
-
-        <!-- <q-btn
-          flat
-          label="Add without chain cycle"
-          color="primary"
-          @click="handleAddWithoutChainCycle"
-        />
-
-        <q-btn
-          flat
-          label="Add within chain cycle"
-          color="primary"
-          :disable="!canAddWithinChainCycle"
-          @click="handleAddWithinChainCycle"
-        /> -->
-        <q-btn
-          
+        <q-btn          
           label="Add chain"
           color="primary"
-          :disable="!canAddWithinChainCycle"
-          @click="handleAddWithinChainCycle"
+          :disable="isAddButtonDisabled"
+          @click="handleClickAddButton"
         />
       </q-card-actions>
     </q-card>
@@ -209,21 +193,12 @@ const chainCyclesStore = useChainCyclesStore();
 const activeTab = ref('with-chain-cycle');
 const formChainCycles = ref<FormChainCycle[]>([]);
 const selectedSlot = ref<{ chainCycleKey: string; slotIndex: number } | null>(null);
-const setAsActive = ref(true);
+const setAsActive = ref(false);
 const installationTime = ref<Date | undefined>(new Date());
 const mileageAtInstallation = ref<number>(props.currentBikeMileage || 0);
 const originalChainsMap = ref<Map<string, Array<string | null>>>(new Map());
 const displacedChain = ref<DisplacedChainInfo | null>(null);
 
-const findEmptySlot = (chains: Array<string | null>, fromIndex: number): number | null => {
-  const len = chains.length;
-  for (let i = 1; i < len; i++) {
-    const idx = (fromIndex + i) % len;
-    if (chains[idx] === null) return idx;
-  }
-  return null;
-};
-  
 const currentStatusText = computed(() => {
   if (activeTab.value !== 'with-chain-cycle') {
     return `Adding chain ${props.chain?.name} without a chain cycle (as an ordinary part)`;
@@ -246,6 +221,29 @@ const currentStatusText = computed(() => {
 
   return text;
 });
+const isAddButtonDisabled = computed(() => {
+  if (activeTab.value === 'without-chain-cycle') return false;
+  if (formChainCycles.value.length === 0) return true;
+  if (!selectedSlot.value) return true;
+  if (setAsActive.value && !installationTime.value) return true;
+  return false;
+});
+const isAlreadyInstalled = computed(() => {
+  return props.chain?.bikeId === props.targetBike?.id;
+});
+
+watch(
+  () => props.modelValue,
+  async (isOpen) => {
+    if (isOpen) {
+      if (props.targetBike?.id) {
+        await chainCyclesStore.fetchChainCycles(props.targetBike.id);
+      }
+      initForm();
+    }
+  },
+  { immediate: true }
+);
 
 /** Build FormChainCycle[] from API chain cycles. */
 const chainCyclesNormalized = (bike: Bike | null, cycles: ChainCycle[]): FormChainCycle[] => {
@@ -266,11 +264,6 @@ const chainCyclesNormalized = (bike: Bike | null, cycles: ChainCycle[]): FormCha
   });
 };
 
-const getChainName = (chainId: string): string => {
-  const chain = partsStore.getPartById(chainId) as BikePart | undefined;
-  return chain?.name || chainId;
-};
-
 const createEmptyChainCycle = (): FormChainCycle => {
   const length = userSettingsStore.userSettings?.defaultChainCycleLength ?? 3;
   const intervalKm = userSettingsStore.userSettings?.defaultChainCycleIntervalKm ?? 700;
@@ -284,6 +277,26 @@ const createEmptyChainCycle = (): FormChainCycle => {
     cycleLength: length
   };
 };
+
+const findEmptySlot = (chains: Array<string | null>, fromIndex: number): number | null => {
+  const len = chains.length;
+  for (let i = 1; i < len; i++) {
+    const idx = (fromIndex + i) % len;
+    if (chains[idx] === null) return idx;
+  }
+  return null;
+};
+
+const getChainName = (chainId: string): string => {
+  const chain = partsStore.getPartById(chainId) as BikePart | undefined;
+  return chain?.name || chainId;
+};
+
+const getSelectedSlotIndexForCycle = (cycleKey: string): number | null => {
+  if (!selectedSlot.value) return null;
+  return selectedSlot.value.chainCycleKey === cycleKey ? selectedSlot.value.slotIndex : null;
+};
+
 
 const initForm = () => {
   const cycles = props.targetBike?.id
@@ -310,19 +323,6 @@ const initForm = () => {
   selectedSlot.value = null;
 };
 
-watch(
-  () => props.modelValue,
-  async (isOpen) => {
-    if (isOpen) {
-      if (props.targetBike?.id) {
-        await chainCyclesStore.fetchChainCycles(props.targetBike.id);
-      }
-      initForm();
-    }
-  },
-  { immediate: true }
-);
-
 const handleAddChainCycleToForm = async () => {
   if (formChainCycles.value.length > 0 || !props.targetBike?.id) return;
   const intervalKm = userSettingsStore.userSettings?.defaultChainCycleIntervalKm ?? 700;
@@ -342,11 +342,6 @@ const handleAddChainCycleToForm = async () => {
       cycleLength: (newCycle.chains ?? []).length
     }];
   }
-};
-
-const getSelectedSlotIndexForCycle = (cycleKey: string): number | null => {
-  if (!selectedSlot.value) return null;
-  return selectedSlot.value.chainCycleKey === cycleKey ? selectedSlot.value.slotIndex : null;
 };
 
 const handleSlotSelect = (cycleKey: string, slotIndex: number) => {
@@ -381,13 +376,6 @@ const handleSlotSelect = (cycleKey: string, slotIndex: number) => {
   selectedSlot.value = { chainCycleKey: cycleKey, slotIndex };
 };
 
-const canAddWithinChainCycle = computed(() => {
-  if (formChainCycles.value.length === 0) return false;
-  if (!selectedSlot.value) return false;
-  if (setAsActive.value && !installationTime.value) return false;
-  return true;
-});
-
 const handleReset = () => {
   initForm();
 };
@@ -415,6 +403,14 @@ const handleAddWithinChainCycle = () => {
     installationTime: setAsActive.value && installationTime.value ? installationTime.value : undefined,
     displacedChain: displacedChain.value ?? null
   });
+};
+
+const handleClickAddButton = () => {
+  if (activeTab.value === 'with-chain-cycle') {
+    handleAddWithinChainCycle();
+  } else {
+    handleAddWithoutChainCycle();
+  }
 };
 </script>
 

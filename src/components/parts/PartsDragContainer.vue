@@ -37,7 +37,7 @@
       <PartCard v-for="element in localParts"
                 :key="element.id"
                 class="draggable-card"
-                :container-id="containerId"
+                :data-container-id="containerId"
                 :part="element"
                 :current-bike-mileage="currentBikeMileage"
                 :bike-context="bikeContext"
@@ -84,7 +84,6 @@ const emit = defineEmits<{
     event: SortableEvent;
     part: BikePart;
     newIndex: number;
-    removeFromTarget: () => void;
   }];
   partMoved: [partId: string, sourceContainerId: string, targetContainerId: string];
   fullDetails: [partId: string];
@@ -95,7 +94,6 @@ const emit = defineEmits<{
   passToOtherUser: [partId: string];
   delete: [partId: string];
   configure: [partId: string];
-  addToContainer: [partId: string, containerId: string, part: BikePart];
 }>();
 
 const { setDraggedPart } = useDragState();
@@ -136,7 +134,6 @@ const handleDragAdd = (event: SortableEvent) => {
   // This fires when an item is added to this container from another
   // The drop has already happened at this point
   // We need to get the part and source container info
-  console.log('! handleDragAdd event', event);
   // Get the part from the event - it should be in the newIndex position
 
   const newIndex = event.newIndex;
@@ -165,14 +162,7 @@ const handleDragAdd = (event: SortableEvent) => {
     'partDropped', part.id, sourceContainerId, props.containerId, {
       event,
       part,
-      newIndex,
-      removeFromTarget: () => {
-      // Remove the part from this container
-        const index = localParts.value.findIndex(p => p.id === part.id);
-        if (index !== -1) {
-          localParts.value.splice(index, 1);
-        }
-      }
+      newIndex
     }
   );
 };

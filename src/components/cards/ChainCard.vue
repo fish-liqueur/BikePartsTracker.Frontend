@@ -129,7 +129,7 @@ const removeChainFromBike = () => {
   gap: .5rem;
   grid-template-areas:
     "index name"
-    "index description"
+    "description description"
     "thirdline thirdline";
   border-radius: 1.25rem;
   padding: 1.25rem;
@@ -151,14 +151,20 @@ const removeChainFromBike = () => {
 }
 
 .chain-card__name {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
   grid-area: name;
   text-align: end;
-  font-size: 1.4rem;
-  line-height: 1.4;
+  font-size: 1.2rem;
+  line-height: 1.2;
 }
 
 .chain-card__description {
   display: -webkit-box;
+  grid-area: description;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
