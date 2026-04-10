@@ -203,6 +203,8 @@ const viewModeOptions = [
 // Default: true if no bikeContext, false if bikeContext is set
 // const showInstalledToOtherBikes = ref<boolean>(props.bikeContext === null);
 
+const showInstalledToOtherBikes = ref(false);
+
 const allParts = computed(() => partsStore.parts);
 const isLoading = computed(() => partsStore.isLoading);
 const partName = computed(() => {
@@ -216,7 +218,6 @@ const targetBikeContext = computed(() => {
   if (!targetBikeId) return null;
   return bikesStore.getBikeById(targetBikeId) ?? null;
 });
-const showInstalledToOtherBikes = computed(() => props.bikeContext === null);
 const sourceBikeName = computed(() => {
   if (!pendingPartInstall.value?.part) return '';
   const sourceBikeId = pendingPartInstall.value.part.bikeId;
