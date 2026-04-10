@@ -96,5 +96,18 @@
     align-items: center;
     gap: 16px;
   }
+
+  .draggable-card {
+    transition: box-shadow 0.2s ease;
+  }
+
+  .draggable-card:hover {
+    cursor: grab;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .draggable-card:active {
+    cursor: grabbing;
+  }
 }
 

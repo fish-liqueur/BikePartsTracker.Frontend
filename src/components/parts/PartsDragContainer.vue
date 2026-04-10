@@ -30,11 +30,13 @@
                   :fallback-tolerance="5"
                   item-key="id"
                   class="parts-grid"
+                  @start="handleDragStart"
                   @end="handleDragEnd"
                   @add="handleDragAdd">
 
       <PartCard v-for="element in localParts"
                 :key="element.id"
+                class="draggable-card"
                 :container-id="containerId"
                 :part="element"
                 :current-bike-mileage="currentBikeMileage"
@@ -56,6 +58,7 @@ import { ref, watch } from 'vue';
 import { VueDraggable } from 'vue-draggable-plus';
 import type { SortableEvent } from 'vue-draggable-plus';
 import PartCard from '@/components/cards/PartCard.vue';
+import { useDragState } from '@/composables/useDragState';
 import type { Bike, BikePart } from '@/types';
 
 interface Props {
@@ -95,6 +98,8 @@ const emit = defineEmits<{
   addToContainer: [partId: string, containerId: string, part: BikePart];
 }>();
 
+const { setDraggedPart } = useDragState();
+
 // Local copy of parts for v-model
 const localParts = ref<BikePart[]>([...props.parts]);
 
@@ -113,8 +118,15 @@ watch(
   }, { deep: true, immediate: true }
 );
 
+const handleDragStart = (event: SortableEvent) => {
+  const oldIndex = event.oldIndex;
+  if (oldIndex !== undefined && oldIndex >= 0 && oldIndex < localParts.value.length) {
+    setDraggedPart(localParts.value[oldIndex]);
+  }
+};
+
 const handleDragEnd = (event: SortableEvent) => {
-  // Handle reordering within the same container - no action needed
+  setDraggedPart(null);
   if (event.from === event.to) {
     return;
   }

@@ -1,5 +1,10 @@
 <template>
-  <div class="chain-card-empty">
+  <div class="chain-card-empty"
+       :class="{ 'chain-card-empty--drag-over': isDragOver, 'chain-card-empty--drag-active': isChainBeingDragged }"
+       @dragenter.prevent="handleDragEnter"
+       @dragover.prevent="handleDragOver"
+       @dragleave="handleDragLeave"
+       @drop.prevent="handleDrop">
     <div class="chain-card-empty__border">
       <div class="chain-card-empty__info chain-card" @click="handleClickCard">
         <div class="chain-card__index">
@@ -20,13 +25,13 @@
 
 <script setup lang="ts">
 import {
-  ref
+  ref, computed
 } from 'vue';
-// import { usePartsStore } from '@/stores/partsStore';
 import { useLayout } from '@/composables/useLayout';
+import { useDragState } from '@/composables/useDragState';
 import AddChainDialog from '@/components/parts/AddСhainDialog.vue';
-import type {
-  Bike, CreatePartDto 
+import {
+  PartType, type Bike, type CreatePartDto 
 } from '@/types';
 
 interface Props {
@@ -39,18 +44,57 @@ const props = defineProps<Props>();
 const emit = defineEmits<{
   onSelectChain: [chainId: string, chainCycleId: string, index: number];
   onCreateChain: [chain: CreatePartDto, chainCycleId: string, index: number];
+  onChainDrop: [chainId: string, chainCycleId: string, index: number];
 }>();
 
-// const partsStore = usePartsStore();
 const {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   showSuccess, showError, withAjaxBar 
 } = useLayout();
 
+const { draggedPart } = useDragState();
+
 const showAddChainDialog = ref(false);
+const isDragOver = ref(false);
+let dragEnterCounter = 0;
+
+const isChainBeingDragged = computed(() =>
+  draggedPart.value?.partType === PartType.Chain
+);
 
 const handleClickCard = () => {
   showAddChainDialog.value = true;
+};
+
+const handleDragEnter = () => {
+  if (!isChainBeingDragged.value) return;
+  dragEnterCounter++;
+  isDragOver.value = true;
+};
+
+const handleDragOver = (event: DragEvent) => {
+  if (!isChainBeingDragged.value) {
+    event.dataTransfer && (event.dataTransfer.dropEffect = 'none');
+    return;
+  }
+  event.dataTransfer && (event.dataTransfer.dropEffect = 'move');
+};
+
+const handleDragLeave = () => {
+  dragEnterCounter--;
+  if (dragEnterCounter <= 0) {
+    dragEnterCounter = 0;
+    isDragOver.value = false;
+  }
+};
+
+const handleDrop = () => {
+  isDragOver.value = false;
+  dragEnterCounter = 0;
+
+  if (!draggedPart.value || draggedPart.value.partType !== PartType.Chain) return;
+
+  emit('onChainDrop', draggedPart.value.id, props.chainCycleId, props.index);
 };
 
 const handleCreateChain = async (chain: CreatePartDto) => {
@@ -70,14 +114,35 @@ const handleSelectChain = async (chainId: string) => {
 .chain-card-empty {
   background-color: #ccc;
   color: #555;
-  border-radius: 1.25rem;
+  border-radius: 1rem;
   padding: .5rem;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.chain-card-empty--drag-active {
+  background-color: #b8e6c8;
+  box-shadow: 0 0 0 2px rgba(33, 186, 69, 0.4);
+}
+
+.chain-card-empty--drag-over {
+  background-color: #90d4a6;
+  box-shadow: 0 0 0 3px var(--q-positive, #21ba45);
 }
 
 .chain-card-empty__border {
   border: 1px dashed #666;
   border-radius: 1rem;
   padding: .25rem;
+  transition: border-color 0.2s ease;
+}
+
+.chain-card-empty--drag-active .chain-card-empty__border {
+  border-color: var(--q-positive, #21ba45);
+}
+
+.chain-card-empty--drag-over .chain-card-empty__border {
+  border-color: var(--q-positive, #21ba45);
+  border-style: solid;
 }
 
 .chain-card-empty__info {

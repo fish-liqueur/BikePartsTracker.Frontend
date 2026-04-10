@@ -1,5 +1,5 @@
 <template>
-<div class="chain-card"
+<div class="chain-card draggable-card"
         :class="{
           'chain-card--active bg-primary text-white': isActive && part,
           'chain-card--draggable bg-secondary text-white': !isActive && part,
@@ -131,17 +131,8 @@ const removeChainFromBike = () => {
     "index name"
     "index description"
     "thirdline thirdline";
+  border-radius: 1.25rem;
   padding: 1.25rem;
-  transition: box-shadow 0.2s ease;
-}
-
-.chain-card:hover {
-  cursor: grab;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.chain-card:active {
-  cursor: grabbing;
 }
 
 .chain-card:first-child {

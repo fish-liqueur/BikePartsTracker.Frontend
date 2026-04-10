@@ -41,7 +41,8 @@
                             :chain-cycle-id="chainCycle.id"
                             :bike-context="bikeContext"
                             @on-select-chain="updateBikeChainCycle"
-                            @on-create-chain="handleUserCreateChain" />
+                            @on-create-chain="handleUserCreateChain"
+                            @on-chain-drop="handleChainDrop" />
           </template>
         </div>
         <div class="chain-cycle-item__data-container">
@@ -82,6 +83,16 @@
         </div>
       </div>
     </div>
+
+    <InstallChainDialog v-model="showInstallChainDialog"
+                        :chain="pendingChainDrop?.chain ?? null"
+                        :target-bike="bikeContext"
+                        :current-bike-mileage="bikeContext.totalDistance ?? 0"
+                        :preselected-chain-cycle-id="pendingChainDrop?.chainCycleId ?? null"
+                        :preselected-slot-index="pendingChainDrop?.index ?? null"
+                        @install-without-chain-cycle="handleInstallChainWithoutCycle"
+                        @install-within-chain-cycle="handleInstallChainWithinCycle"
+                        @cancel="handleInstallChainCancel" />
   </div>
 </template>
 
@@ -92,7 +103,7 @@ import type {
 } from '@/types';
 import { EMPTY_GUID } from '@/types';
 import {
-  computed
+  ref, computed
 } from 'vue';
 import { useQuasar } from 'quasar';
 // import { VueDraggable, type SortableEvent } from 'vue-draggable-plus';
@@ -102,7 +113,7 @@ import { useChainCyclesStore } from '@/stores/chainCyclesStore';
 import { useLayout } from '@/composables/useLayout';
 import ChainCard from '@/components/cards/ChainCard.vue';
 import ChainCardEmpty from '@/components/cards/ChainCardEmpty.vue';
-// import AddChainDialog from '@/components/parts/AddСhainDialog.vue';
+import InstallChainDialog, { type DisplacedChainInfo } from '@/components/parts/InstallChainDialog.vue';
 import ElementWithTooltipButton from '@/components/shared/ElementWithTooltipButton.vue';
 
 // ---- Types / Interfaces ----
@@ -132,6 +143,14 @@ chain in every cycle.`;
 const deleteChainCycleTooltipText = `Remove this chain cycle from the bike.
 Chains in this cycle will not be deleted, but the cycle configuration will be removed.`;
 const chainCycleLengthOptions = [2, 3];
+
+const showInstallChainDialog = ref(false);
+const pendingChainDrop = ref<{
+  chainId: string;
+  chainCycleId: string;
+  index: number;
+  chain: BikePart | null;
+} | null>(null);
 
 function mergePartIntoChainsSlots(
   chainIds: (string | null)[],
@@ -334,6 +353,104 @@ const handleUserCreateChain = async (
     const errorMessage = error instanceof Error ? error.message : 'Failed to create chain';
     showError(errorMessage);
   }
+};
+
+const handleChainDrop = (
+  chainId: string, chainCycleId: string, index: number
+) => {
+  const chain = partsStore.getPartById(chainId) ?? null;
+  pendingChainDrop.value = {
+    chainId, chainCycleId, index, chain
+  };
+  showInstallChainDialog.value = true;
+};
+
+const handleInstallChainWithinCycle = async (
+  data: {
+    chainCycleId: string;
+    position: number;
+    setAsActive: boolean;
+    installationTime?: Date;
+    displacedChain?: DisplacedChainInfo | null;
+  }
+) => {
+  if (!pendingChainDrop.value) return;
+  const { chainId } = pendingChainDrop.value;
+  const bikeId = props.bikeContext.id;
+
+  try {
+    await withAjaxBar(partsStore.movePartToBike(
+      chainId,
+      bikeId,
+      data.setAsActive ? (data.installationTime ?? new Date()) : null,
+      data.setAsActive ? (props.bikeContext.totalDistance ?? 0) : null
+    ));
+
+    const cycle = chainCyclesStore.getChainCyclesForBike(bikeId)
+      .find(c => c.id === data.chainCycleId);
+    if (!cycle) throw new Error('Chain cycle not found');
+
+    const oldSlotId = (cycle.chains ?? [])[data.position] ?? null;
+    const newChains = mergePartIntoChainsSlots(cycle.chains ?? [], chainId, data.position);
+
+    if (data.displacedChain) {
+      if (data.displacedChain.toIndex !== null) {
+        newChains[data.displacedChain.toIndex] = data.displacedChain.chainId;
+      }
+    }
+
+    let activeChainId = cycle.activeChainId ?? null;
+    if (data.setAsActive) {
+      activeChainId = chainId;
+    } else if (activeChainId != null && oldSlotId != null && String(activeChainId) === String(oldSlotId)) {
+      activeChainId = null;
+    }
+
+    const prevActive = cycle.activeChainId == null ? null : String(cycle.activeChainId);
+    const nextActive = activeChainId == null ? null : String(activeChainId);
+    await withAjaxBar(chainCyclesStore.updateChainCycle(data.chainCycleId, bikeId, {
+      chains: newChains,
+      ...(nextActive !== prevActive
+        ? { activeChainId: activeChainId === null ? EMPTY_GUID : activeChainId }
+        : {})
+    }));
+
+    showSuccess('Chain installed into chain cycle successfully');
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to install chain into chain cycle';
+    showError(errorMessage);
+  } finally {
+    showInstallChainDialog.value = false;
+    pendingChainDrop.value = null;
+  }
+};
+
+const handleInstallChainWithoutCycle = async (
+  data: { installationDate: Date; mileageAtInstallation: number }
+) => {
+  if (!pendingChainDrop.value) return;
+  const { chainId } = pendingChainDrop.value;
+
+  try {
+    await withAjaxBar(partsStore.movePartToBike(
+      chainId,
+      props.bikeContext.id,
+      data.installationDate,
+      data.mileageAtInstallation
+    ));
+    showSuccess('Chain installed successfully');
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to install chain';
+    showError(errorMessage);
+  } finally {
+    showInstallChainDialog.value = false;
+    pendingChainDrop.value = null;
+  }
+};
+
+const handleInstallChainCancel = () => {
+  showInstallChainDialog.value = false;
+  pendingChainDrop.value = null;
 };
 
 const handleRemoveChainFromBike = async (chainId: string) => {

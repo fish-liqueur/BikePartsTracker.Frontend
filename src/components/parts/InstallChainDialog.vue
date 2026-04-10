@@ -47,7 +47,7 @@
                 :key="`${cycle._key}-${slotIndex}`"
                 :model-value="getSelectedSlotIndexForCycle(cycle._key)"
                 :val="slotIndex"
-                @update:model-value="(val) => handleSlotSelect(cycle._key, val)"
+                @update:model-value="(val: number) => handleSlotSelect(cycle._key, val)"
               >
                 <div class="chain-cycle-install-slot-label">
                   <span v-if="slotChainId">
@@ -60,6 +60,9 @@
                     <span v-else>
                       {{ getChainName(slotChainId) }}
                     </span>
+                  </span>
+                  <span v-else-if="slotIndex === selectedSlot?.slotIndex" class="chain-cycle-install-slot-label--new">
+                    {{ chain?.name }} (new)
                   </span>
                   <span v-else class="chain-cycle-install-slot-label--empty">
                     empty!
@@ -164,12 +167,23 @@ interface Props {
   chain: BikePart | null;
   targetBike: Bike | null;
   currentBikeMileage?: number;
+  preselectedChainCycleId?: string | null;
+  preselectedSlotIndex?: number | null;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   currentBikeMileage: 0,
-  targetBike: null
+  targetBike: null,
+  preselectedChainCycleId: null,
+  preselectedSlotIndex: null
 });
+
+export interface DisplacedChainInfo {
+  chainId: string;
+  chainName: string;
+  fromIndex: number;
+  toIndex: number | null;
+}
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean];
@@ -183,6 +197,7 @@ const emit = defineEmits<{
       position: number;
       setAsActive: boolean;
       installationTime?: Date;
+      displacedChain?: DisplacedChainInfo | null;
     }
   ];
 }>();
@@ -197,15 +212,39 @@ const selectedSlot = ref<{ chainCycleKey: string; slotIndex: number } | null>(nu
 const setAsActive = ref(true);
 const installationTime = ref<Date | undefined>(new Date());
 const mileageAtInstallation = ref<number>(props.currentBikeMileage || 0);
-  
-  const currentStatusText = computed(() => {
-  let part1 = 'Adding chain without a chain cycle (as an ordinary part)';
-  let part2 = '';
-  if (activeTab.value === 'with-chain-cycle') {
-    part1 = 'Adding chain into Chain Cycle';
-    part2 = `${selectedSlot.value?.slotIndex !== undefined ? 'into slot ' + (selectedSlot.value.slotIndex + 1) : ''}`;
+const originalChainsMap = ref<Map<string, Array<string | null>>>(new Map());
+const displacedChain = ref<DisplacedChainInfo | null>(null);
+
+const findEmptySlot = (chains: Array<string | null>, fromIndex: number): number | null => {
+  const len = chains.length;
+  for (let i = 1; i < len; i++) {
+    const idx = (fromIndex + i) % len;
+    if (chains[idx] === null) return idx;
   }
-  return `${part1}${part2}`;
+  return null;
+};
+  
+const currentStatusText = computed(() => {
+  if (activeTab.value !== 'with-chain-cycle') {
+    return `Adding chain ${props.chain?.name} without a chain cycle (as an ordinary part)`;
+  }
+
+  let text = `Adding chain ${props.chain?.name} into Chain Cycle`;
+  if (selectedSlot.value?.slotIndex !== undefined) {
+    text += ` into slot ${selectedSlot.value.slotIndex + 1}`;
+  }
+  if (setAsActive.value) {
+    text += ' and setting it as active';
+  }2
+  if (displacedChain.value) {
+    if (displacedChain.value.toIndex !== null) {
+      text += `, moving ${displacedChain.value.chainName} to slot ${displacedChain.value.toIndex + 1}`;
+    } else {
+      text += `, removing ${displacedChain.value.chainName} from the chain cycle`;
+    }
+  }
+
+  return text;
 });
 
 /** Build FormChainCycle[] from API chain cycles. */
@@ -251,9 +290,24 @@ const initForm = () => {
     ? chainCyclesStore.getChainCyclesForBike(props.targetBike.id)
     : [];
   formChainCycles.value = chainCyclesNormalized(props.targetBike, cycles);
-  selectedSlot.value = null;
   setAsActive.value = true;
   installationTime.value = new Date();
+  displacedChain.value = null;
+
+  originalChainsMap.value = new Map(
+    formChainCycles.value.map(c => [c._key, [...c.chains]])
+  );
+
+  if (props.preselectedSlotIndex != null && formChainCycles.value.length > 0) {
+    const cycle = props.preselectedChainCycleId
+      ? formChainCycles.value.find(c => c.id === props.preselectedChainCycleId)
+      : formChainCycles.value[0];
+    if (cycle && props.preselectedSlotIndex < cycle.chains.length) {
+      handleSlotSelect(cycle._key, props.preselectedSlotIndex);
+      return;
+    }
+  }
+  selectedSlot.value = null;
 };
 
 watch(
@@ -295,10 +349,36 @@ const getSelectedSlotIndexForCycle = (cycleKey: string): number | null => {
   return selectedSlot.value.chainCycleKey === cycleKey ? selectedSlot.value.slotIndex : null;
 };
 
-const handleSlotSelect = (cycleKey: string, slotIndex: unknown) => {
-  const slot = typeof slotIndex === 'number' ? slotIndex : Number(slotIndex);
-  if (Number.isNaN(slot)) return;
-  selectedSlot.value = { chainCycleKey: cycleKey, slotIndex: slot };
+const handleSlotSelect = (cycleKey: string, slotIndex: number) => {
+  for (const cycle of formChainCycles.value) {
+    const original = originalChainsMap.value.get(cycle._key);
+    if (original) {
+      cycle.chains = [...original];
+    }
+  }
+  displacedChain.value = null;
+
+  const cycle = formChainCycles.value.find(c => c._key === cycleKey);
+  if (!cycle) return;
+
+  const existingChainId = cycle.chains[slotIndex];
+  if (existingChainId) {
+    const emptyIndex = findEmptySlot(cycle.chains, slotIndex);
+
+    if (emptyIndex !== null) {
+      cycle.chains[emptyIndex] = existingChainId;
+    }
+    cycle.chains[slotIndex] = null;
+
+    displacedChain.value = {
+      chainId: existingChainId,
+      chainName: getChainName(existingChainId),
+      fromIndex: slotIndex,
+      toIndex: emptyIndex,
+    };
+  }
+
+  selectedSlot.value = { chainCycleKey: cycleKey, slotIndex };
 };
 
 const canAddWithinChainCycle = computed(() => {
@@ -332,7 +412,8 @@ const handleAddWithinChainCycle = () => {
     chainCycleId: cycle.id,
     position: selectedSlot.value.slotIndex,
     setAsActive: setAsActive.value,
-    installationTime: setAsActive.value && installationTime.value ? installationTime.value : undefined
+    installationTime: setAsActive.value && installationTime.value ? installationTime.value : undefined,
+    displacedChain: displacedChain.value ?? null
   });
 };
 </script>
