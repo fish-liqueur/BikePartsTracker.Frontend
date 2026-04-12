@@ -71,11 +71,12 @@ import {
 import { useBikesStore } from '@/stores/bikesStore';
 import type { CreatePartDto } from '@/types';
 import { PartType } from '@/types';
+import { partTypeOptions } from '../shared/partTypeOptions';
 // import ElementWithTooltipButton from '@/components/shared/ElementWithTooltipButton.vue';
 // import DateTimePicker from '@/components/shared/DateTimePicker.vue';
 
 interface Props {
-  initialData?: Partial<FormData>;
+  initialData?: Partial<CreatePartDto>;
   lockType?: PartType | null;
 }
 
@@ -85,17 +86,13 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-  submit: [data: FormData];
+  submit: [data: CreatePartDto];
   'update:isValid': [value: boolean];
 }>();
 
-interface FormData extends Omit<CreatePartDto, 'description'> {
-  description: string;
-}
-
 const bikesStore = useBikesStore();
 
-const formData = ref<FormData>({
+const formData = ref<CreatePartDto>({
   name: '',
   description: '',
   partType: PartType.Other,
@@ -105,20 +102,6 @@ const formData = ref<FormData>({
   mileageAtInstallation: 0,
   installationDate: new Date()
 });
-
-const partTypeOptions = [
-  { label: 'Chain', value: PartType.Chain },
-  { label: 'Cassette', value: PartType.Cassette },
-  { label: 'Chainring', value: PartType.Chainring },
-  { label: 'Brake Pads', value: PartType.BrakePads },
-  { label: 'Tyre', value: PartType.Tyre },
-  { label: 'Battery', value: PartType.Battery },
-  { label: 'Bottom Bracket', value: PartType.BottomBracket },
-  { label: 'Headset', value: PartType.Headset },
-  { label: 'Hub', value: PartType.Hub },
-  { label: 'Pedals', value: PartType.Pedals },
-  { label: 'Other', value: PartType.Other }
-];
 
 const bikeOptions = computed(() => bikesStore.bikes);
 

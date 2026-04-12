@@ -9,12 +9,6 @@ import BikesWidget from '@/components/bikes/BikesWidget.vue';
 </script>
 
 <style scoped>
-.view-container {
-  min-height: 100%;
-  background-color: #f8fafc;
-  padding: 32px;
-}
-
 .view-content {
   background: white;
   padding: 24px;

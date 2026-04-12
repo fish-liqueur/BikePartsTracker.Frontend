@@ -67,6 +67,12 @@
           </q-card-section>
         </q-tab-panel>
         <q-tab-panel name="new">
+          <PartTemplatePicker
+            :dialog-open="modelValue"
+            :form-part-type="PartType.Chain"
+            class="q-mb-md"
+            @select="onTemplateSelect"
+          />
           <PartForm ref="partFormRef"
                     :initial-data="initialFormData"
                     :lock-type="PartType.Chain"
@@ -98,7 +104,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import type { ComponentPublicInstance } from 'vue';
 import { useBikesStore } from '@/stores/bikesStore';
 import { usePartsStore } from '@/stores/partsStore';
@@ -108,9 +114,17 @@ import type {
   Bike, BikePart, CreatePartDto 
 } from '@/types';
 import { PartType } from '@/types';
-import PartForm from './PartForm.vue';
 import ElementWithTooltipButton from '@/components/shared/ElementWithTooltipButton.vue';
 import DateTimePicker from '@/components/shared/DateTimePicker.vue';
+import PartForm from './PartForm.vue';
+import PartTemplatePicker from './PartTemplatePicker.vue';
+import { mapBikePartToTemplatePrefill } from './partTemplatePrefill';
+
+/** PartForm `defineExpose` — Vue unwraps exposed refs on the parent ref, so `formData` is the DTO, not `Ref<CreatePartDto>`. */
+type PartFormExposed = {
+  formData: CreatePartDto;
+  handleSubmit: () => void;
+};
 
 interface Props {
   modelValue: boolean;
@@ -140,12 +154,35 @@ const {
 const bikesStore = useBikesStore();
 const partsStore = usePartsStore();
 const chainCyclesStore = useChainCyclesStore();
-interface FormData extends Omit<CreatePartDto, 'description'> {
-  description: string;
-}
 
 const isValid = ref(false);
-const partFormRef = ref<ComponentPublicInstance & { handleSubmit: () => void } | null>(null);
+const partFormRef = ref<ComponentPublicInstance & PartFormExposed | null>(null);
+
+const templatePrefill = ref<Partial<CreatePartDto> | null>(null);
+const nameSnapshot = ref<string | undefined>(undefined);
+
+watch(
+  () => props.modelValue,
+  (open) => {
+    if (open) {
+      templatePrefill.value = null;
+      nameSnapshot.value = undefined;
+    }
+  }
+);
+
+function snapshotPartFormName(): string {
+  return partFormRef.value?.formData.name ?? '';
+}
+
+function onTemplateSelect(part: BikePart | null) {
+  nameSnapshot.value = snapshotPartFormName();
+  if (!part) {
+    templatePrefill.value = null;
+    return;
+  }
+  templatePrefill.value = mapBikePartToTemplatePrefill(part, { lockPartType: PartType.Chain });
+}
 
 // Compute initial form data when dialog opens
 const initialFormData = computed(() => {
@@ -153,7 +190,7 @@ const initialFormData = computed(() => {
     return undefined;
   }
 
-  const data: Partial<FormData> = {
+  const data: Partial<CreatePartDto> = {
     name: '',
     description: '',
     partType: PartType.Other,
@@ -183,6 +220,21 @@ const initialFormData = computed(() => {
     }
   }
 
+  data.partType = PartType.Chain;
+
+  if (templatePrefill.value) {
+    return {
+      ...data,
+      ...templatePrefill.value,
+      name: nameSnapshot.value ?? data.name,
+      partType: PartType.Chain
+    };
+  }
+
+  if (nameSnapshot.value !== undefined) {
+    data.name = nameSnapshot.value;
+  }
+
   return data;
 });
 
@@ -196,7 +248,7 @@ const handleCancel = () => {
   emit('update:modelValue', false);
 };
 
-const handleSubmit = (formData: FormData) => {
+const handleSubmit = (formData: CreatePartDto) => {
   const createData: CreatePartDto = {
     name: formData.name,
     partType: formData.partType,

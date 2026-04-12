@@ -84,9 +84,6 @@ onMounted(async () => {
 
 <style scoped>
 .view-container {
-  min-height: 100%;
-  background-color: #f8fafc;
-  padding: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -128,10 +125,6 @@ onMounted(async () => {
 }
 
 @media (max-width: 768px) {
-  .view-container {
-    padding: 20px;
-  }
-
   .view-content {
     padding: 32px 24px;
   }

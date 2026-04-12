@@ -169,6 +169,7 @@ import PartsWidget from '@/components/parts/PartsWidget.vue';
 import ChainCycleWidget from '@/components/parts/ChainCycleWidget.vue';
 import type { UpdateBikeDto } from '@/types';
 import { BikeType } from '@/types';
+import { bikeTypeOptions } from '@/components/shared/bikeTypeOptions';
 
 const route = useRoute();
 const router = useRouter();
@@ -210,19 +211,6 @@ const formData = ref<UpdateBikeDto>({
   name: '',
   type: BikeType.Other
 });
-
-const bikeTypeOptions = [
-  { label: 'Road', value: BikeType.Road },
-  { label: 'Mountain', value: BikeType.Mountain },
-  { label: 'Gravel', value: BikeType.Gravel },
-  { label: 'E-Bike', value: BikeType.EBike },
-  { label: 'City', value: BikeType.City },
-  { label: 'Touring', value: BikeType.Touring },
-  { label: 'Cargo', value: BikeType.Cargo },
-  { label: 'Fixed', value: BikeType.Fixed },
-  { label: 'Rat', value: BikeType.Rat },
-  { label: 'Other', value: BikeType.Other },
-];
 
 // Initialize form data when bike loads
 watch(
@@ -378,12 +366,6 @@ const handleDelete = async () => {
 </script>
 
 <style scoped lang="css">
-.view-container {
-  min-height: 100%;
-  background-color: #f8fafc;
-  padding: 32px;
-}
-
 .loading-container {
   display: flex;
   justify-content: center;
@@ -482,11 +464,7 @@ height: 100%;
 }
 
 @media (max-width: 768px) {
-  .view-container {
-    padding: 20px;
-  }
-
-  .bike-header {
+.bike-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;

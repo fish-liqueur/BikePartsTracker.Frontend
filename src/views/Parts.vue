@@ -36,17 +36,3 @@ onMounted(async () => {
 });
 </script>
 
-<style scoped>
-.view-container {
-  min-height: 100%;
-  background-color: #f8fafc;
-  padding: 32px;
-}
-
-@media (max-width: 768px) {
-  .view-container {
-    padding: 20px;
-  }
-}
-</style>
-

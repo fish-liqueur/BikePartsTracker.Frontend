@@ -9,6 +9,12 @@
       </q-card-section>
 
       <q-card-section>
+        <PartTemplatePicker
+          :dialog-open="modelValue"
+          :form-part-type="formPartTypeForTemplate"
+          class="q-mb-md"
+          @select="onTemplateSelect"
+        />
         <PartForm
           ref="partFormRef"
           :initial-data="initialFormData"
@@ -35,12 +41,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import type { ComponentPublicInstance } from 'vue';
 import { useBikesStore } from '@/stores/bikesStore';
 import type { BikePart, CreatePartDto } from '@/types';
 import { PartType } from '@/types';
 import PartForm from './PartForm.vue';
+import PartTemplatePicker from './PartTemplatePicker.vue';
+import { mapBikePartToTemplatePrefill } from './partTemplatePrefill';
+
+type PartFormExposed = {
+  formData: CreatePartDto;
+  handleSubmit: () => void;
+};
 
 interface Props {
   modelValue: boolean;
@@ -61,12 +74,42 @@ const emit = defineEmits<{
 
 const bikesStore = useBikesStore();
 
-interface FormData extends Omit<CreatePartDto, 'description'> {
-  description: string;
+const isValid = ref(false);
+const partFormRef = ref<ComponentPublicInstance & PartFormExposed | null>(null);
+
+const templatePrefill = ref<Partial<CreatePartDto> | null>(null);
+/** Preserves the name field when applying or clearing a template. */
+const nameSnapshot = ref<string | undefined>(undefined);
+const typeSnapshot = ref<PartType | null>(null);
+
+watch(
+  () => props.modelValue,
+  (open) => {
+    if (open) {
+      templatePrefill.value = null;
+      nameSnapshot.value = undefined;
+      typeSnapshot.value = null;
+    }
+  }
+);
+
+const formPartTypeForTemplate = computed(
+  () => partFormRef.value?.formData.partType ?? PartType.Other
+);
+
+function snapshotPartFormName(): string {
+  return partFormRef.value?.formData.name ?? '';
 }
 
-const isValid = ref(false);
-const partFormRef = ref<ComponentPublicInstance & { handleSubmit: () => void } | null>(null);
+function onTemplateSelect(part: BikePart | null) {
+  nameSnapshot.value = snapshotPartFormName();
+  typeSnapshot.value = part?.partType ?? null;
+  if (!part) {
+    templatePrefill.value = null;
+    return;
+  }
+  templatePrefill.value = mapBikePartToTemplatePrefill(part, {});
+}
 
 // Compute initial form data when dialog opens
 const initialFormData = computed(() => {
@@ -74,7 +117,7 @@ const initialFormData = computed(() => {
     return undefined;
   }
 
-  const data: Partial<FormData> = {
+  const data: Partial<CreatePartDto> = {
     name: '',
     description: '',
     partType: PartType.Other,
@@ -102,7 +145,23 @@ const initialFormData = computed(() => {
       data.bikeId = props.targetBikeId;
     }
   }
-  
+
+  if (templatePrefill.value) {
+    return {
+      ...data,
+      ...templatePrefill.value,
+      name: nameSnapshot.value ?? data.name
+    };
+  }
+
+  if (nameSnapshot.value !== undefined) {
+    data.name = nameSnapshot.value;
+  }
+
+  if (typeSnapshot.value !== null) {
+    data.partType = typeSnapshot.value;
+  }
+
   return data;
 });
 
@@ -110,7 +169,7 @@ const handleCancel = () => {
   emit('update:modelValue', false);
 };
 
-const handleSubmit = (formData: FormData) => {
+const handleSubmit = (formData: CreatePartDto) => {
   // Create CreatePartDto - include all form fields
   // Note: description is included even though not in CreatePartDto type
   // as BikePart requires it and backend may accept it
