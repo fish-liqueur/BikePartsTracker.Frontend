@@ -44,16 +44,11 @@
 import { ref, computed, watch } from 'vue';
 import type { ComponentPublicInstance } from 'vue';
 import { useBikesStore } from '@/stores/bikesStore';
-import type { BikePart, CreatePartDto } from '@/types';
+import type { BikePart, CreatePartDto, PartFormExposed } from '@/types';
 import { PartType } from '@/types';
 import PartForm from './PartForm.vue';
 import PartTemplatePicker from './PartTemplatePicker.vue';
 import { mapBikePartToTemplatePrefill } from './partTemplatePrefill';
-
-type PartFormExposed = {
-  formData: CreatePartDto;
-  handleSubmit: () => void;
-};
 
 interface Props {
   modelValue: boolean;

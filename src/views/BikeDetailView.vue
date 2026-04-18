@@ -113,11 +113,12 @@
 
               <div class="form-actions">
                 <q-btn
-                  type="submit"
-                  label="Save"
-                  color="primary"
-                  icon="save"
-                  :loading="isSaving"
+                  label="Delete Bike"
+                  color="negative"
+                  icon="delete"
+                  outline
+                  @click="handleDelete"
+                  :loading="isDeleting"
                 />
                 <q-btn
                   label="Retire Bike"
@@ -128,12 +129,11 @@
                   :loading="isRetiring"
                 />
                 <q-btn
-                  label="Delete Bike"
-                  color="negative"
-                  icon="delete"
-                  outline
-                  @click="handleDelete"
-                  :loading="isDeleting"
+                  type="submit"
+                  label="Save"
+                  color="primary"
+                  icon="save"
+                  :loading="isSaving"
                 />
               </div>
             </q-form>
@@ -436,12 +436,6 @@ height: 100%;
   flex-direction: column;
   gap: 16px;
   margin-bottom: 32px;
-}
-
-.form-actions {
-  display: flex;
-  gap: 16px;
-  justify-content: flex-start;
 }
 
 .error-container {

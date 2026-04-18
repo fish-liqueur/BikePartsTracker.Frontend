@@ -121,5 +121,11 @@
       padding: 20px;
     }
   }
+
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-start;
+  }
 }
 

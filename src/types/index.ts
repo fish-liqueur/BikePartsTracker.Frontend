@@ -66,6 +66,7 @@ export interface BikePart {
   usageHistory?: PartUsageHistory[];
   createdAt?: Date;
   updatedAt?: Date;
+  isActive?: boolean;
 }
 
 export interface PartDto {
@@ -328,3 +329,8 @@ export interface DeletePartResponse {
 
 /** Send Guid.Empty to clear BikeId on the backend. */
 export const EMPTY_GUID = '00000000-0000-0000-0000-000000000000';
+
+export type PartFormExposed = {
+  formData: CreatePartDto;
+  handleSubmit: () => void;
+};
