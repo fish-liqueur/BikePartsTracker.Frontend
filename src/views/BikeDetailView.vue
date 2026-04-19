@@ -154,9 +154,9 @@ import { usePartsStore } from '@/stores/partsStore';
 import { useChainCyclesStore } from '@/stores/chainCyclesStore';
 import { useLayout } from '@/composables/useLayout';
 import { useQuerySync } from '@/composables/useQuerySync';
-import PartsWidget from '@/components/parts/PartsWidget.vue';
-import ChainCycleWidget from '@/components/parts/ChainCycleWidget.vue';
-import BikeForm from '@/components/bikes/BikeForm.vue';
+import PartsWidget from '@/components/widgets/PartsWidget.vue';
+import ChainCycleWidget from '@/components/widgets/ChainCycleWidget.vue';
+import BikeForm from '@/components/forms/BikeForm.vue';
 import type { CreateBikeDto, UpdateBikeDto, BikeFormExposed } from '@/types';
 import { BikeType } from '@/types';
 

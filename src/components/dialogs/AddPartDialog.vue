@@ -46,9 +46,9 @@ import type { ComponentPublicInstance } from 'vue';
 import { useBikesStore } from '@/stores/bikesStore';
 import type { BikePart, CreatePartDto, PartFormExposed } from '@/types';
 import { PartType } from '@/types';
-import PartForm from './PartForm.vue';
-import PartTemplatePicker from './PartTemplatePicker.vue';
-import { mapBikePartToTemplatePrefill } from './partTemplatePrefill';
+import PartForm from '@/components/forms/PartForm.vue';
+import PartTemplatePicker from '@/components/parts/PartTemplatePicker.vue';
+import { mapBikePartToTemplatePrefill } from '@/components/parts/partTemplatePrefill';
 
 interface Props {
   modelValue: boolean;

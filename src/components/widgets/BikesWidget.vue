@@ -102,8 +102,8 @@ import { useLayout } from '@/composables/useLayout';
 import { useQuerySync } from '@/composables/useQuerySync';
 import BikeCard from '@/components/cards/BikeCard.vue';
 import BikesTableContainer from '@/components/bikes/BikesTableContainer.vue';
-import AddBikeDialog from '@/components/bikes/AddBikeDialog.vue';
-import ImportBikesDialog from '@/components/bikes/ImportBikesDialog.vue';
+import AddBikeDialog from '@/components/dialogs/AddBikeDialog.vue';
+import ImportBikesDialog from '@/components/dialogs/ImportBikesDialog.vue';
 import type { Bike, CreateBikeDto } from '@/types';
 
 export interface TableColumn {

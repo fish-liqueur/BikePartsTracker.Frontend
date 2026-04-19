@@ -136,7 +136,7 @@ import { computed, ref, watch, type ComponentPublicInstance } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { bikeTypeOptions } from '@/components/shared/bikeTypeOptions';
 import { partTypeOptions } from '@/components/shared/partTypeOptions';
-import PartForm from '@/components/parts/PartForm.vue';
+import PartForm from '@/components/forms/PartForm.vue';
 
 const route = useRoute();
 const router = useRouter();

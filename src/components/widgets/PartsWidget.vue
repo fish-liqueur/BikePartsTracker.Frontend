@@ -111,16 +111,16 @@ import { usePartsStore } from '@/stores/partsStore';
 import { useBikesStore } from '@/stores/bikesStore';
 import { useChainCyclesStore } from '@/stores/chainCyclesStore';
 import { useLayout } from '@/composables/useLayout';
-import PartsDragContainer from './PartsDragContainer.vue';
-import PartsTableContainer from './PartsTableContainer.vue';
-import InstallPartDialog from './InstallPartDialog.vue';
-import InstallChainDialog from './InstallChainDialog.vue';
-import AddPartDialog from './AddPartDialog.vue';
+import PartsDragContainer from '@/components/parts/PartsDragContainer.vue';
+import PartsTableContainer from '@/components/parts/PartsTableContainer.vue';
+import InstallPartDialog from '@/components/dialogs/InstallPartDialog.vue';
+import InstallChainDialog from '@/components/dialogs/InstallChainDialog.vue';
+import AddPartDialog from '@/components/dialogs/AddPartDialog.vue';
 import type { Bike, BikePart, CreatePartDto } from '@/types';
 import { EMPTY_GUID } from '@/types';
 import { PartType } from '@/types';
-import { defaultPartColumns } from './partsTableColumns';
-import type { TableColumn } from './partsTableColumns';
+import { defaultPartColumns } from '../parts/partsTableColumns';
+import type { TableColumn } from '../parts/partsTableColumns';
 
 function mergePartIntoCycleChains(
   chainIds: (string | null)[],

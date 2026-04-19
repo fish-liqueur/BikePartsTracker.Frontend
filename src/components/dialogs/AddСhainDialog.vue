@@ -116,9 +116,9 @@ import type {
 import { PartType } from '@/types';
 import ElementWithTooltipButton from '@/components/shared/ElementWithTooltipButton.vue';
 import DateTimePicker from '@/components/shared/DateTimePicker.vue';
-import PartForm from './PartForm.vue';
-import PartTemplatePicker from './PartTemplatePicker.vue';
-import { mapBikePartToTemplatePrefill } from './partTemplatePrefill';
+import PartForm from '@/components/forms/PartForm.vue';
+import PartTemplatePicker from '@/components/parts/PartTemplatePicker.vue';
+import { mapBikePartToTemplatePrefill } from '../parts/partTemplatePrefill';
 
 /** PartForm `defineExpose` — Vue unwraps exposed refs on the parent ref, so `formData` is the DTO, not `Ref<CreatePartDto>`. */
 type PartFormExposed = {

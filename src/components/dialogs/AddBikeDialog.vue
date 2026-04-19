@@ -34,7 +34,7 @@ import { ref, watch, computed } from 'vue';
 import type { ComponentPublicInstance } from 'vue';
 import type { CreateBikeDto, BikeFormExposed } from '@/types';
 import { BikeType } from '@/types';
-import BikeForm from './BikeForm.vue';
+import BikeForm from '@/components/forms/BikeForm.vue';
 
 interface Props {
   modelValue: boolean;

@@ -6,8 +6,8 @@
 </template>
 
 <script setup lang="ts">
-import StravaWidget from '@/components/stravaWidget/StravaWidget.vue';
-import UserSettingsWidget from '@/components/settings/UserSettingsWidget.vue';
+import StravaWidget from '@/components/widgets/StravaWidget.vue';
+import UserSettingsWidget from '@/components/widgets/UserSettingsWidget.vue';
 </script>
 
 <style scoped>

@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import BikesWidget from '@/components/bikes/BikesWidget.vue';
+import BikesWidget from '@/components/widgets/BikesWidget.vue';
 </script>
 
 <style scoped>
