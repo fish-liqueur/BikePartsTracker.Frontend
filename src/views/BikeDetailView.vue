@@ -1,136 +1,136 @@
 <template>
-  <div class="view-container">
-    <div v-if="isLoading" class="loading-container">
-      <q-spinner color="primary" size="3em" />
-    </div>
-    
-    <div v-else-if="bike" class="bike-detail-container">
-      <!-- Bike Header -->
-      <div class="bike-header">
-        <h1 class="bike-name">{{ bike.name }}</h1>
-        <q-chip :label="bike.type"
-                color="primary"
-                text-color="white"
-                size="md" />
-        <q-select
-          v-if="bikes.length"
-          :model-value="selectedBikeId"
-          :options="bikes"
-          dense
-          outlined
-          map-options
-          option-label="name"
-          option-value="id"
-          emit-value
-          @update:model-value="handleBikeChange"
-          style="min-width: 200px;"
-        />
+  <LayoutViewGeneral
+    :is-loading="isLoading"
+    loading-message="Loading bike details..."
+  >
+    <template v-if="bike" #header>
+      <h1 class="bike-name">{{ bike.name }}</h1>
+      <q-chip :label="bike.type"
+              color="primary"
+              text-color="white"
+              size="md" />
+      <q-select
+        v-if="bikes.length"
+        :model-value="selectedBikeId"
+        :options="bikes"
+        dense
+        outlined
+        map-options
+        option-label="name"
+        option-value="id"
+        emit-value
+        @update:model-value="handleBikeChange"
+        style="min-width: 200px;"
+      />
+    </template>
+
+    <template v-if="bike" #default>
+      <div v-if="bike" class="bike-detail-container">
+        <!-- Tabs -->
+        <q-tabs
+          v-model="activeTab"
+          class="text-grey"
+          active-color="primary"
+          indicator-color="primary"
+        >
+          <q-tab name="parts"
+                 label="Parts"
+                 icon="hardware" />
+          <q-tab name="rides"
+                 label="Rides"
+                 icon="directions_bike" />
+          <q-tab name="works"
+                 label="Works"
+                 icon="build" />
+          <q-tab name="settings"
+                 label="Settings"
+                 icon="settings" />
+        </q-tabs>
+
+        <q-separator />
+
+        <!-- Tab Panels -->
+        <q-tab-panels v-model="activeTab"
+                      animated
+                      class="tab-panels">
+          <!-- Parts Tab -->
+          <q-tab-panel name="parts">
+            <div class="display-flex flex-column gap-5">
+              <ChainCycleWidget  
+                :bike-context="bike" />
+              <PartsWidget
+                :bike-context="bike"
+                title="Parts"
+              />
+            </div>
+          </q-tab-panel>
+
+          <!-- Rides Tab -->
+          <q-tab-panel name="rides">
+            <div class="empty-tab">
+              <q-icon name="directions_bike"
+                      size="64px"
+                      color="grey-5" />
+              <p>Rides coming soon</p>
+            </div>
+          </q-tab-panel>
+
+          <!-- Works Tab -->
+          <q-tab-panel name="works">
+            <div class="empty-tab">
+              <q-icon name="build"
+                      size="64px"
+                      color="grey-5" />
+              <p>Works coming soon</p>
+            </div>
+          </q-tab-panel>
+
+          <!-- Settings Tab -->
+          <q-tab-panel name="settings">
+            <div class="settings-panel">
+              <div class="settings-form">
+                <BikeForm
+                  :key="bikeId"
+                  ref="bikeFormRef"
+                  :initial-data="bikeFormInitialData"
+                  @update:isValid="(v) => (bikeFormIsValid = v)"
+                  @submit="handleSave"
+                />
+              </div>
+
+              <div class="form-actions">
+                <q-btn
+                  label="Delete Bike"
+                  color="negative"
+                  icon="delete"
+                  outline
+                  @click="handleDelete"
+                  :loading="isDeleting"
+                />
+                <q-btn
+                  label="Retire Bike"
+                  color="orange"
+                  icon="archive"
+                  outline
+                  @click="handleRetire"
+                  :loading="isRetiring"
+                />
+                <q-btn
+                  label="Save"
+                  color="primary"
+                  icon="save"
+                  :loading="isSaving"
+                  :disable="!bikeFormIsValid"
+                  @click="() => bikeFormRef?.handleSubmit()"
+                />
+              </div>
+            </div>
+          </q-tab-panel>
+        </q-tab-panels>
       </div>
+    </template> 
 
-      <!-- Tabs -->
-      <q-tabs
-        v-model="activeTab"
-        class="text-grey"
-        active-color="primary"
-        indicator-color="primary"
-      >
-        <q-tab name="parts"
-               label="Parts"
-               icon="hardware" />
-        <q-tab name="rides"
-               label="Rides"
-               icon="directions_bike" />
-        <q-tab name="works"
-               label="Works"
-               icon="build" />
-        <q-tab name="settings"
-               label="Settings"
-               icon="settings" />
-      </q-tabs>
-
-      <q-separator />
-
-      <!-- Tab Panels -->
-      <q-tab-panels v-model="activeTab"
-                    animated
-                    class="tab-panels">
-        <!-- Parts Tab -->
-        <q-tab-panel name="parts">
-          <div class="display-flex flex-column gap-5">
-            <ChainCycleWidget  
-              :bike-context="bike" />
-            <PartsWidget
-              :bike-context="bike"
-              title="Parts"
-            />
-          </div>
-        </q-tab-panel>
-
-        <!-- Rides Tab -->
-        <q-tab-panel name="rides">
-          <div class="empty-tab">
-            <q-icon name="directions_bike"
-                    size="64px"
-                    color="grey-5" />
-            <p>Rides coming soon</p>
-          </div>
-        </q-tab-panel>
-
-        <!-- Works Tab -->
-        <q-tab-panel name="works">
-          <div class="empty-tab">
-            <q-icon name="build"
-                    size="64px"
-                    color="grey-5" />
-            <p>Works coming soon</p>
-          </div>
-        </q-tab-panel>
-
-        <!-- Settings Tab -->
-        <q-tab-panel name="settings">
-          <div class="settings-panel">
-            <div class="settings-form">
-              <BikeForm
-                :key="bikeId"
-                ref="bikeFormRef"
-                :initial-data="bikeFormInitialData"
-                @update:isValid="(v) => (bikeFormIsValid = v)"
-                @submit="handleSave"
-              />
-            </div>
-
-            <div class="form-actions">
-              <q-btn
-                label="Delete Bike"
-                color="negative"
-                icon="delete"
-                outline
-                @click="handleDelete"
-                :loading="isDeleting"
-              />
-              <q-btn
-                label="Retire Bike"
-                color="orange"
-                icon="archive"
-                outline
-                @click="handleRetire"
-                :loading="isRetiring"
-              />
-              <q-btn
-                label="Save"
-                color="primary"
-                icon="save"
-                :loading="isSaving"
-                :disable="!bikeFormIsValid"
-                @click="() => bikeFormRef?.handleSubmit()"
-              />
-            </div>
-          </div>
-        </q-tab-panel>
-      </q-tab-panels>
-    </div>
-
-    <div v-else class="error-container">
+    <div v-if="!bike" class="error-container">
       <q-icon name="error_outline"
               size="48px"
               color="negative" />
@@ -139,7 +139,7 @@
              color="primary"
              @click="router.push('/bikes')" />
     </div>
-  </div>
+  </LayoutViewGeneral>
 </template>
 
 <script setup lang="ts">
@@ -157,8 +157,12 @@ import { useQuerySync } from '@/composables/useQuerySync';
 import PartsWidget from '@/components/widgets/PartsWidget.vue';
 import ChainCycleWidget from '@/components/widgets/ChainCycleWidget.vue';
 import BikeForm from '@/components/forms/BikeForm.vue';
-import type { CreateBikeDto, UpdateBikeDto, BikeFormExposed } from '@/types';
+import LayoutViewGeneral from '@/components/layouts/LayoutViewGeneral.vue';
+import type {
+  CreateBikeDto, UpdateBikeDto, BikeFormExposed 
+} from '@/types';
 import { BikeType } from '@/types';
+import { getErrorMessage } from '@/utils/error';
 
 const route = useRoute();
 const router = useRouter();
@@ -288,9 +292,9 @@ const handleSave = async (data: CreateBikeDto) => {
     isSaving.value = true;
     await withAjaxBar(bikesStore.updateBike(bike.value.id, payload));
     showSuccess('Bike updated successfully');
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Failed to update bike:', err);
-    showError(err.message || 'Failed to update bike');
+    showError(getErrorMessage(err, 'Failed to update bike'));
   } finally {
     isSaving.value = false;
   }
@@ -312,14 +316,14 @@ const handleRetire = async () => {
         isRetiring.value = true;
         await withAjaxBar(bikesStore.retireBike(bikeId));
         showSuccess('Bike retired successfully');
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Failed to retire bike:', err);
-        showError(err.message || 'Failed to retire bike');
+        showError(getErrorMessage(err, 'Failed to retire bike'));
       } finally {
         isRetiring.value = false;
       }
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Failed to show retire dialog:', err);
     showError('Failed to show confirmation dialog');
   }
@@ -342,14 +346,14 @@ const handleDelete = async () => {
         isDeleting.value = true;  
         await withAjaxBar(bikesStore.deleteBike(bikeId));
         showSuccess('Bike deleted successfully');
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Failed to delete bike:', err);
-        showError(err.message || 'Failed to delete bike');
+        showError(getErrorMessage(err, 'Failed to delete bike'));
       } finally {
         isDeleting.value = false;
       }
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Failed to show delete dialog:', err);
     showError('Failed to show confirmation dialog');
   }
@@ -359,37 +363,22 @@ const handleDelete = async () => {
 </script>
 
 <style scoped lang="css">
-.loading-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 400px;
-}
-
 .bike-detail-container {
-display: flex;
-flex-direction: column;
-height: 100%;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   background: white;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
-
-.bike-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 24px 32px;
-  border-bottom: 1px solid #e2e8f0;
-}
-
+/* 
 .bike-name {
   margin: 0;
   font-size: 2rem;
   line-height: normal;
   font-weight: 600;
   color: #1a202c;
-}
+} */
 
 .bike-details {
   padding: 16px 32px;
@@ -445,13 +434,6 @@ height: 100%;
 }
 
 @media (max-width: 768px) {
-.bike-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-    padding: 20px;
-  }
-
   .bike-details {
     padding: 12px 20px;
   }

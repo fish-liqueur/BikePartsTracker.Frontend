@@ -1,89 +1,86 @@
 <template>
-  <div class="view-container">
-    <div v-if="isLoading" class="loading-container">
-      <q-spinner color="primary" size="3em" />
-    </div>
-    
-    <div v-else-if="part" class="bike-detail-container">
-      <!-- Bike Header -->
-      <div class="part-header">
-        <h1 class="part-name">{{ part.name }}</h1>
-        <q-chip :label="part.partType"
-                color="primary"
-                text-color="white"
-                size="md" />
-        <q-select
-          v-if="parts.length"
-          :model-value="selectedBikeId"
-          :options="parts"
-          dense
-          outlined
-          map-options
-          option-label="name"
-          option-value="id"
-          emit-value
-          @update:model-value="handlePartChange"
-          style="min-width: 200px;"
-        />
-      </div>
+  <LayoutViewGeneral
+    :is-loading="isLoading"
+  >
+    <template v-if="part" #header>
+      <h1 class="part-name">{{ part.name }}</h1>
+      <q-chip :label="part.partType"
+              color="primary"
+              text-color="white"
+              size="md" />
+      <q-select
+        v-if="parts.length"
+        :model-value="selectedBikeId"
+        :options="parts"
+        dense
+        outlined
+        map-options
+        option-label="name"
+        option-value="id"
+        emit-value
+        @update:model-value="handlePartChange"
+        style="min-width: 200px;"
+      />
+    </template>
+    <template #default>
+      <template v-if="part">
+        <!-- Tabs -->
+        <q-tabs
+          v-model="activeTab"
+          class="text-grey"
+          active-color="primary"
+          indicator-color="primary"
+        >
+          <q-tab name="rides"
+                 label="Rides"
+                 icon="directions_bike" />
+          <q-tab name="works"
+                 label="Works"
+                 icon="build" />
+          <q-tab name="settings"
+                 label="Settings"
+                 icon="settings" />
+        </q-tabs>
 
-      <!-- Tabs -->
-      <q-tabs
-        v-model="activeTab"
-        class="text-grey"
-        active-color="primary"
-        indicator-color="primary"
-      >
-        <q-tab name="rides"
-               label="Rides"
-               icon="directions_bike" />
-        <q-tab name="works"
-               label="Works"
-               icon="build" />
-        <q-tab name="settings"
-               label="Settings"
-               icon="settings" />
-      </q-tabs>
+        <q-separator />
 
-      <q-separator />
+        <!-- Tab Panels -->
+        <q-tab-panels v-model="activeTab"
+                      animated
+                      class="tab-panels">
 
-      <!-- Tab Panels -->
-      <q-tab-panels v-model="activeTab"
-                    animated
-                    class="tab-panels">
+          <!-- Rides Tab -->
+          <q-tab-panel name="rides">
+            <div class="empty-tab">
+              <q-icon name="directions_bike"
+                      size="64px"
+                      color="grey-5" />
+              <p>Rides coming soon</p>
+            </div>
+          </q-tab-panel>
 
-        <!-- Rides Tab -->
-        <q-tab-panel name="rides">
-          <div class="empty-tab">
-            <q-icon name="directions_bike"
-                    size="64px"
-                    color="grey-5" />
-            <p>Rides coming soon</p>
-          </div>
-        </q-tab-panel>
+          <!-- Works Tab -->
+          <q-tab-panel name="works">
+            <div class="empty-tab">
+              <q-icon name="build"
+                      size="64px"
+                      color="grey-5" />
+              <p>Works coming soon</p>
+            </div>
+          </q-tab-panel>
 
-        <!-- Works Tab -->
-        <q-tab-panel name="works">
-          <div class="empty-tab">
-            <q-icon name="build"
-                    size="64px"
-                    color="grey-5" />
-            <p>Works coming soon</p>
-          </div>
-        </q-tab-panel>
-
-        <!-- Settings Tab -->
-        <q-tab-panel name="settings">
-          <div class="settings-panel">
-            <PartForm
-              ref="partFormRef"
-              :initial-data="initialFormData"
-              @update:isValid="(val: boolean) => isValid = val"
-              @submit="handleSave"
-            />
-            <div class="display-flex flex-align-center gap-4 p-2 mt-2">
-              <span class="text-body2">Active: {{ part.isActive ? 'Yes' : 'No' }}</span>
-              <q-btn
+          <!-- Settings Tab -->
+          <q-tab-panel name="settings">
+            <div class="settings-panel">
+              <PartForm
+                ref="partFormRef"
+                :initial-data="initialFormData"
+                @update:isValid="(val: boolean) => isValid = val"
+                @submit="handleSave"
+              />
+              <div class="display-flex flex-align-center gap-4 p-2 mt-2">
+                <span class="text-body2">Active: {{ part.isActive ? 'Yes' : 'No' }}</span>
+                <q-btn
                   :label="part.isActive ? 'Retire Part' : 'Activate Part'"
                   color="orange"
                   icon="archive"
@@ -91,8 +88,8 @@
                   @click="handleRetire"
                   :loading="isRetiring"
                 />
-            </div>
-           <div class="form-actions q-mt-xl">
+              </div>
+              <div class="form-actions q-mt-xl">
                 <q-btn
                   label="Delete Part"
                   color="negative"
@@ -109,34 +106,39 @@
                   :loading="isSaving"
                 />
               </div>
-          </div>
-        </q-tab-panel>
-      </q-tab-panels>
-    </div>
+            </div>
+          </q-tab-panel>
+        </q-tab-panels>
+      </template>
 
-    <div v-else class="error-container">
-      <q-icon name="error_outline"
-              size="48px"
-              color="negative" />
-      <p>Part not found</p>
-      <q-btn label="Go Back"
-             color="primary"
-             @click="router.push('/parts')" />
-    </div>
-  </div>
+      <div v-else class="error-container">
+        <q-icon name="error_outline"
+                size="48px"
+                color="negative" />
+        <p>Part not found</p>
+        <q-btn label="Go Back"
+               color="primary"
+               @click="router.push('/parts')" />
+      </div>
+    </template>
+  </LayoutViewGeneral>
 </template>
 
 <script setup lang="ts">
 import { useLayout } from '@/composables/useLayout';
 import { useQuerySync } from '@/composables/useQuerySync';
 import { usePartsStore } from '@/stores/partsStore';
-import { PartScheduleType, PartType, type BikeType, type CreatePartDto, type PartFormExposed, type UpdatePartDto } from '@/types';
+import {
+  PartScheduleType, PartType, type CreatePartDto, type PartFormExposed, type UpdatePartDto 
+} from '@/types';
 import { useQuasar } from 'quasar';
-import { computed, ref, watch, type ComponentPublicInstance } from 'vue';
+import {
+  computed, ref, watch, type ComponentPublicInstance 
+} from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { bikeTypeOptions } from '@/components/shared/bikeTypeOptions';
-import { partTypeOptions } from '@/components/shared/partTypeOptions';
 import PartForm from '@/components/forms/PartForm.vue';
+import LayoutViewGeneral from '@/components/layouts/LayoutViewGeneral.vue';
+import { getErrorMessage } from '@/utils/error';
 
 const route = useRoute();
 const router = useRouter();
@@ -248,16 +250,16 @@ const handleDelete = async () => {
         isDeleting.value = true;  
         await withAjaxBar(partsStore.deletePart(partId.value));
         showSuccess(`Part ${part.value?.name} deleted successfully`);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Failed to delete part:', err);
-        showError(err.message || `Failed to delete part ${part.value?.name}`);
+        showError(getErrorMessage(err, `Failed to delete part ${part.value?.name}`));
       } finally {
         isDeleting.value = false;
       }
     });
-    } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Failed to show delete dialog:', err);
-    showError('Failed to show confirmation dialog');
+    showError(getErrorMessage(err, 'Failed to show confirmation dialog'));
   }
 };
 
@@ -291,15 +293,15 @@ const handleRetire = async () => {
         isRetiring.value = true;
         await withAjaxBar(partsStore.updatePart(partId.value, { isActive: !part.value?.isActive } as UpdatePartDto));
         showSuccess(dialogSuccessMessage);
-      } catch (err: any) {
-        showError(err.message || dialogErrorMessage);
+      } catch (err: unknown) {
+        showError(getErrorMessage(err, dialogErrorMessage));
       } finally {
         isRetiring.value = false;
       }
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Failed to show retire dialog:', err);
-    showError('Failed to show confirmation dialog');
+    showError(getErrorMessage(err, 'Failed to show confirmation dialog'));
   }
 };
 
@@ -314,9 +316,9 @@ const handleSave = async () => {
     isSaving.value = true;
     await withAjaxBar(partsStore.updatePart(part.value.id, formData.value));
     showSuccess('Part updated successfully');
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Failed to update part:', err);
-    showError(err.message || 'Failed to update part');
+    showError(getErrorMessage(err, 'Failed to update part'));
   } finally {
     isSaving.value = false;
   }
