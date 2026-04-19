@@ -6,26 +6,12 @@
       </q-card-section>
 
       <q-card-section>
-        <q-form @submit.prevent="handleSubmit" class="bike-form">
-          <q-input
-            v-model="newBike.name"
-            label="Bike Name *"
-            placeholder="e.g., Road Bike, Mountain Bike"
-            :rules="[val => !!val || 'Bike name is required']"
-            outlined
-            dense
-          />
-          <q-select
-            v-model="newBike.type"
-            :options="bikeTypeOptions"
-            label="Bike Type *"
-            emit-value
-            map-options
-            :rules="[val => !!val || 'Bike type is required']"
-            outlined
-            dense
-          />
-        </q-form>
+        <BikeForm
+          ref="bikeFormRef"
+          :initial-data="initialFormData"
+          @update:isValid="(val) => isValid = val"
+          @submit="handleSubmit"
+        />
       </q-card-section>
 
       <q-card-actions align="right">
@@ -36,16 +22,19 @@
         <q-btn flat
                label="Add Bike"
                color="primary"
-               @click="handleSubmit" />
+               @click="() => bikeFormRef?.handleSubmit()"
+               :disable="!isValid" />
       </q-card-actions>
     </q-card>
   </q-dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import type { CreateBikeDto } from '@/types';
+import { ref, watch, computed } from 'vue';
+import type { ComponentPublicInstance } from 'vue';
+import type { CreateBikeDto, BikeFormExposed } from '@/types';
 import { BikeType } from '@/types';
+import BikeForm from './BikeForm.vue';
 
 interface Props {
   modelValue: boolean;
@@ -59,79 +48,39 @@ const emit = defineEmits<{
 }>();
 
 const localShow = ref(props.modelValue);
-const newBike = ref<CreateBikeDto>({
-  name: '',
-  type: BikeType.Other,
-  description: '',
-  totalDistance: 0,
-  stravaDistance: 0,
-});
+const isValid = ref(false);
+const bikeFormRef = ref<ComponentPublicInstance & BikeFormExposed | null>(null);
 
-const bikeTypeOptions = [
-  { label: 'Road', value: BikeType.Road },
-  { label: 'Mountain', value: BikeType.Mountain },
-  { label: 'Gravel', value: BikeType.Gravel },
-  { label: 'E-Bike', value: BikeType.EBike },
-  { label: 'City', value: BikeType.City },
-  { label: 'Touring', value: BikeType.Touring },
-  { label: 'Cargo', value: BikeType.Cargo },
-  { label: 'Fixed', value: BikeType.Fixed },
-  { label: 'Rat', value: BikeType.Rat },
-  { label: 'Other', value: BikeType.Other },
-];
-
-// Watch for external changes to modelValue
-watch(() => props.modelValue, (newValue) => {
-  localShow.value = newValue;
-  if (newValue) {
-    // Reset form when dialog opens
-    resetForm();
+const initialFormData = computed(() => {
+  if (!props.modelValue) {
+    return undefined;
   }
-});
-
-// Watch for internal changes to localShow
-watch(localShow, (newValue) => {
-  emit('update:modelValue', newValue);
-});
-
-const handleDialogUpdate = (value: boolean) => {
-  localShow.value = value;
-  if (!value) {
-    resetForm();
-  }
-};
-
-const resetForm = () => {
-  newBike.value = {
+  return {
     name: '',
     type: BikeType.Other,
     description: '',
     totalDistance: 0,
     stravaDistance: 0,
   };
+});
+
+watch(() => props.modelValue, (newValue) => {
+  localShow.value = newValue;
+});
+
+watch(localShow, (newValue) => {
+  emit('update:modelValue', newValue);
+});
+
+const handleDialogUpdate = (value: boolean) => {
+  localShow.value = value;
 };
 
 const handleCancel = () => {
   localShow.value = false;
-  resetForm();
 };
 
-const handleSubmit = () => {
-  // Validate form
-  if (!newBike.value.name || !newBike.value.type) {
-    return;
-  }
-
-  emit('submit', { ...newBike.value });
-  resetForm();
+const handleSubmit = (bikeData: CreateBikeDto) => {
+  emit('submit', { ...bikeData });
 };
 </script>
-
-<style scoped lang="css">
-.bike-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-</style>
-

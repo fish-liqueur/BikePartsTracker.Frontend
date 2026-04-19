@@ -89,54 +89,42 @@
         <!-- Settings Tab -->
         <q-tab-panel name="settings">
           <div class="settings-panel">
-            <q-form @submit.prevent="handleSave" class="settings-form">
-              <div class="form-fields">
-                <q-input
-                  v-model="formData.name"
-                  label="Bike Name"
-                  outlined
-                  dense
-                  :rules="[(val: string) => !!val || 'Bike name is required']"
-                />
-                
-                <q-select
-                  v-model="formData.type"
-                  :options="bikeTypeOptions"
-                  label="Bike Type"
-                  emit-value
-                  map-options
-                  outlined
-                  dense
-                  :rules="[(val: BikeType | null) => !!val || 'Bike type is required']"
-                />
-              </div>
+            <div class="settings-form">
+              <BikeForm
+                :key="bikeId"
+                ref="bikeFormRef"
+                :initial-data="bikeFormInitialData"
+                @update:isValid="(v) => (bikeFormIsValid = v)"
+                @submit="handleSave"
+              />
+            </div>
 
-              <div class="form-actions">
-                <q-btn
-                  label="Delete Bike"
-                  color="negative"
-                  icon="delete"
-                  outline
-                  @click="handleDelete"
-                  :loading="isDeleting"
-                />
-                <q-btn
-                  label="Retire Bike"
-                  color="orange"
-                  icon="archive"
-                  outline
-                  @click="handleRetire"
-                  :loading="isRetiring"
-                />
-                <q-btn
-                  type="submit"
-                  label="Save"
-                  color="primary"
-                  icon="save"
-                  :loading="isSaving"
-                />
-              </div>
-            </q-form>
+            <div class="form-actions">
+              <q-btn
+                label="Delete Bike"
+                color="negative"
+                icon="delete"
+                outline
+                @click="handleDelete"
+                :loading="isDeleting"
+              />
+              <q-btn
+                label="Retire Bike"
+                color="orange"
+                icon="archive"
+                outline
+                @click="handleRetire"
+                :loading="isRetiring"
+              />
+              <q-btn
+                label="Save"
+                color="primary"
+                icon="save"
+                :loading="isSaving"
+                :disable="!bikeFormIsValid"
+                @click="() => bikeFormRef?.handleSubmit()"
+              />
+            </div>
           </div>
         </q-tab-panel>
       </q-tab-panels>
@@ -156,8 +144,9 @@
 
 <script setup lang="ts">
 import {
-  ref, computed, watch, onMounted, onUnmounted 
+  ref, computed, watch, onMounted 
 } from 'vue';
+import type { ComponentPublicInstance } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useBikesStore } from '@/stores/bikesStore';
@@ -167,9 +156,9 @@ import { useLayout } from '@/composables/useLayout';
 import { useQuerySync } from '@/composables/useQuerySync';
 import PartsWidget from '@/components/parts/PartsWidget.vue';
 import ChainCycleWidget from '@/components/parts/ChainCycleWidget.vue';
-import type { UpdateBikeDto } from '@/types';
+import BikeForm from '@/components/bikes/BikeForm.vue';
+import type { CreateBikeDto, UpdateBikeDto, BikeFormExposed } from '@/types';
 import { BikeType } from '@/types';
-import { bikeTypeOptions } from '@/components/shared/bikeTypeOptions';
 
 const route = useRoute();
 const router = useRouter();
@@ -206,23 +195,22 @@ const activeTab = computed({
   }
 });
 
-// Form data
-const formData = ref<UpdateBikeDto>({
-  name: '',
-  type: BikeType.Other
-});
+const bikeFormRef = ref<ComponentPublicInstance & BikeFormExposed | null>(null);
+const bikeFormIsValid = ref(false);
 
-// Initialize form data when bike loads
-watch(
-  bike, (newBike) => {
-    if (newBike) {
-      formData.value = {
-        name: newBike.name || '',
-        type: newBike.type || BikeType.Other
-      };
-    }
-  }, { immediate: true }
-);
+const bikeFormInitialData = computed(() => {
+  const b = bike.value;
+  if (!b) {
+    return undefined;
+  }
+  return {
+    name: b.name || '',
+    type: b.type || BikeType.Other,
+    description: b.description || '',
+    totalDistance: b.totalDistance ?? 0,
+    stravaDistance: b.stravaDistance ?? 0,
+  };
+});
 
 // Set parts context bike in store when bike changes
 // watch(bike, (newBike) => {
@@ -288,12 +276,17 @@ const handleBikeChange = (newBikeId: string) => {
 };
 
 // Handlers
-const handleSave = async () => {
+const handleSave = async (data: CreateBikeDto) => {
   if (!bike.value) return;
-  
+
+  const payload: UpdateBikeDto = {
+    name: data.name,
+    type: data.type,
+  };
+
   try {
     isSaving.value = true;
-    await withAjaxBar(bikesStore.updateBike(bike.value.id, formData.value));
+    await withAjaxBar(bikesStore.updateBike(bike.value.id, payload));
     showSuccess('Bike updated successfully');
   } catch (err: any) {
     console.error('Failed to update bike:', err);
@@ -429,12 +422,6 @@ height: 100%;
 
 .settings-form {
   max-width: 600px;
-}
-
-.form-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
   margin-bottom: 32px;
 }
 

@@ -176,7 +176,7 @@ export enum BikeType {
   Road = 'Road',
   Mountain = 'Mountain',
   Gravel = 'Gravel',
-  EBike = 'E-Bike',
+  EBike = 'EBike',
   City = 'City',
   Touring = 'Touring',
   Cargo = 'Cargo',
@@ -332,5 +332,10 @@ export const EMPTY_GUID = '00000000-0000-0000-0000-000000000000';
 
 export type PartFormExposed = {
   formData: CreatePartDto;
+  handleSubmit: () => void;
+};
+
+export type BikeFormExposed = {
+  formData: CreateBikeDto;
   handleSubmit: () => void;
 };
