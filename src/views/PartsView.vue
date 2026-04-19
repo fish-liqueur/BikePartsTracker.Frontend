@@ -12,7 +12,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { usePartsStore } from '@/stores/partsStore';
-import PartsWidget from '@/components/parts/PartsWidget.vue';
+import PartsWidget from '@/components/widgets/PartsWidget.vue';
 
 const partsStore = usePartsStore();
 const viewMode = ref<'cards' | 'table'>('cards');

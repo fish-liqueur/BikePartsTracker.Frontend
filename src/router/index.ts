@@ -22,13 +22,13 @@ const router = createRouter({
     {
       path: '/home',
       name: 'home',
-      component: () => import('@/views/Home.vue'),
+      component: () => import('@/views/HomeView.vue'),
       meta: { requiresAuth: true }
     },
     {
       path: '/bikes',
       name: 'bikes',
-      component: () => import('@/views/Bikes.vue'),
+      component: () => import('@/views/BikesView.vue'),
       meta: { requiresAuth: true }
     },
     {
@@ -40,7 +40,7 @@ const router = createRouter({
     {
       path: '/parts',
       name: 'parts',
-      component: () => import('@/views/Parts.vue'),
+      component: () => import('@/views/PartsView.vue'),
       meta: { requiresAuth: true }
     },
     {
@@ -52,31 +52,31 @@ const router = createRouter({
     {
       path: '/rides',
       name: 'rides',
-      component: () => import('@/views/Rides.vue'),
+      component: () => import('@/views/RidesView.vue'),
       meta: { requiresAuth: true }
     },
     {
       path: '/works',
       name: 'works',
-      component: () => import('@/views/Works.vue'),
+      component: () => import('@/views/WorksView.vue'),
       meta: { requiresAuth: true }
     },    
     {
       path: '/settings',
       name: 'settings',
-      component: () => import('@/views/Settings.vue'),
+      component: () => import('@/views/SettingsView.vue'),
       meta: { requiresAuth: true }
     },
     {
       path: '/strava/integration',
       name: 'strava integration',
-      component: () => import('@/views/StravaIntegration.vue'),
+      component: () => import('@/views/StravaIntegrationView.vue'),
       meta: { requiresAuth: true }
     },
     {
       path: '/:pathMatch(.*)*',
       name: '404',
-      component: () => import('@/views/NotFound.vue')
+      component: () => import('@/views/NotFoundView.vue')
     }
   ],
 });
