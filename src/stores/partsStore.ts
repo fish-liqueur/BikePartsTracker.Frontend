@@ -2,7 +2,9 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { partService } from '@/services/partService';
 import { useChainCyclesStore } from '@/stores/chainCyclesStore';
-import type { BikePart, CreatePartDto, UpdatePartDto, FetchStatus } from '@/types';
+import type {
+  BikePart, CreatePartDto, UpdatePartDto, FetchStatus 
+} from '@/types';
 import { PartType, EMPTY_GUID } from '@/types';
 
 export const usePartsStore = defineStore('parts', () => {

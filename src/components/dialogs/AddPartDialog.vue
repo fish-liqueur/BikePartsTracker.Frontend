@@ -41,10 +41,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import {
+  ref, computed, watch 
+} from 'vue';
 import type { ComponentPublicInstance } from 'vue';
 import { useBikesStore } from '@/stores/bikesStore';
-import type { BikePart, CreatePartDto, PartFormExposed } from '@/types';
+import type {
+  BikePart, CreatePartDto, PartFormExposed 
+} from '@/types';
 import { PartType } from '@/types';
 import PartForm from '@/components/forms/PartForm.vue';
 import PartTemplatePicker from '@/components/parts/PartTemplatePicker.vue';
@@ -77,20 +81,16 @@ const templatePrefill = ref<Partial<CreatePartDto> | null>(null);
 const nameSnapshot = ref<string | undefined>(undefined);
 const typeSnapshot = ref<PartType | null>(null);
 
-watch(
-  () => props.modelValue,
+watch(() => props.modelValue,
   (open) => {
     if (open) {
       templatePrefill.value = null;
       nameSnapshot.value = undefined;
       typeSnapshot.value = null;
     }
-  }
-);
+  });
 
-const formPartTypeForTemplate = computed(
-  () => partFormRef.value?.formData.partType ?? PartType.Other
-);
+const formPartTypeForTemplate = computed(() => partFormRef.value?.formData.partType ?? PartType.Other);
 
 function snapshotPartFormName(): string {
   return partFormRef.value?.formData.name ?? '';
@@ -178,7 +178,7 @@ const handleSubmit = (formData: CreatePartDto) => {
   };
   // Include description if provided (backend may accept it)
   const dataWithDescription = formData.description 
-    ? { ...createData, description: formData.description } as any
+    ? { ...createData, description: formData.description } as CreatePartDto
     : createData;
   emit('create', dataWithDescription);
   emit('update:modelValue', false);

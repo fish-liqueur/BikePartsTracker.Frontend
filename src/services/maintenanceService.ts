@@ -1,6 +1,6 @@
 import { apiService } from './api';
 import type {
-  Maintenance, MaintenanceDto, CreateMaintenanceDto, ApiResponse, PaginatedResponse 
+  Maintenance, CreateMaintenanceDto, PaginatedResponse 
 } from '@/types';
 
 export const maintenanceService = {
@@ -98,7 +98,7 @@ export const maintenanceService = {
     maintenanceCount: number;
     averageCost: number;
   }> {
-    const params: any = { bikeId };
+    const params: Record<string, string> = { bikeId };
     if (startDate) params.startDate = startDate.toISOString();
     if (endDate) params.endDate = endDate.toISOString();
     

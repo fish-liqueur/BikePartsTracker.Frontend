@@ -1,7 +1,9 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { chainCyclesService } from '@/services/chainCyclesService';
-import type { ChainCycle, CreateChainCycleDto, UpdateChainCycleDto, FetchStatus } from '@/types';
+import type {
+  ChainCycle, CreateChainCycleDto, UpdateChainCycleDto, FetchStatus 
+} from '@/types';
 
 export const useChainCyclesStore = defineStore('chainCycles', () => {
   const chainCyclesByBikeId = ref<Record<string, ChainCycle[]>>({});
@@ -61,7 +63,9 @@ export const useChainCyclesStore = defineStore('chainCycles', () => {
     }
   };
 
-  const updateChainCycle = async (id: string, bikeId: string, dto: UpdateChainCycleDto) => {
+  const updateChainCycle = async (
+    id: string, bikeId: string, dto: UpdateChainCycleDto
+  ) => {
     try {
       isLoading.value = true;
       error.value = null;

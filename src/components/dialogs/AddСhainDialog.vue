@@ -104,7 +104,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import {
+  ref, computed, watch 
+} from 'vue';
 import type { ComponentPublicInstance } from 'vue';
 import { useBikesStore } from '@/stores/bikesStore';
 import { usePartsStore } from '@/stores/partsStore';
@@ -161,15 +163,13 @@ const partFormRef = ref<ComponentPublicInstance & PartFormExposed | null>(null);
 const templatePrefill = ref<Partial<CreatePartDto> | null>(null);
 const nameSnapshot = ref<string | undefined>(undefined);
 
-watch(
-  () => props.modelValue,
+watch(() => props.modelValue,
   (open) => {
     if (open) {
       templatePrefill.value = null;
       nameSnapshot.value = undefined;
     }
-  }
-);
+  });
 
 function snapshotPartFormName(): string {
   return partFormRef.value?.formData.name ?? '';
@@ -318,8 +318,7 @@ const isEquippedToOtherBike = (chain: BikePart) => {
 const isChainInCycle = (chainId: string): boolean => {
   const chainCycles = chainCyclesStore.getChainCyclesForBike(props.bikeContext.id);
   return chainCycles.some(c =>
-    (c.chains ?? []).some(cid => cid != null && String(cid) === chainId)
-  );
+    (c.chains ?? []).some(cid => cid != null && String(cid) === chainId));
 };
 
 const getOtherBikeString = (id: string) => {

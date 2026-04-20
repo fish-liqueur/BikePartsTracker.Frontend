@@ -1,7 +1,9 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { userSettingsService } from '@/services/userSettingsService';
-import type { UserSettings, UserSettingsDto, FetchStatus } from '@/types';
+import type {
+  UserSettings, UserSettingsDto, FetchStatus 
+} from '@/types';
 
 export const useUserSettingsStore = defineStore('userSettings', () => {
   // State
@@ -21,7 +23,7 @@ export const useUserSettingsStore = defineStore('userSettings', () => {
       userSettings.value = fetchedSettings;
       fetchStatus.value = 'done';
       return fetchedSettings;
-    } catch (err: any) {
+    } catch (err: unknown) {
       fetchStatus.value = 'error';
       throw err;
     } 
@@ -32,7 +34,7 @@ export const useUserSettingsStore = defineStore('userSettings', () => {
       const updatedSettings = await userSettingsService.updateUserSettings(settings);
       userSettings.value = updatedSettings as UserSettings;
       return updatedSettings;
-    } catch (err: any) {
+    } catch (err: unknown) {
       throw err;
     }
   };

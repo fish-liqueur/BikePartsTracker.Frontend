@@ -3,12 +3,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useAuthStore } from '@/stores/authStore';
 import LayoutBase from '@/components/layouts/LayoutBase.vue';
 
-const authStore = useAuthStore(); 
-const isAuthenticated = computed(() => authStore.isAuthenticated);
 
 </script>
 

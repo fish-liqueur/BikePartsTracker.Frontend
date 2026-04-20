@@ -29,7 +29,7 @@ import {
 } from 'vue';
 import { useLayout } from '@/composables/useLayout';
 import { useDragState } from '@/composables/useDragState';
-import AddChainDialog from '@/components/parts/AddСhainDialog.vue';
+import AddChainDialog from '@/components/dialogs/AddСhainDialog.vue';
 import {
   PartType, type Bike, type CreatePartDto 
 } from '@/types';
@@ -59,8 +59,7 @@ const isDragOver = ref(false);
 let dragEnterCounter = 0;
 
 const isChainBeingDragged = computed(() =>
-  draggedPart.value?.partType === PartType.Chain
-);
+  draggedPart.value?.partType === PartType.Chain);
 
 const handleClickCard = () => {
   showAddChainDialog.value = true;
@@ -74,10 +73,14 @@ const handleDragEnter = () => {
 
 const handleDragOver = (event: DragEvent) => {
   if (!isChainBeingDragged.value) {
-    event.dataTransfer && (event.dataTransfer.dropEffect = 'none');
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'none';
+    }
     return;
   }
-  event.dataTransfer && (event.dataTransfer.dropEffect = 'move');
+  if (event.dataTransfer) {
+    event.dataTransfer.dropEffect = 'move';
+  }
 };
 
 const handleDragLeave = () => {
@@ -94,7 +97,9 @@ const handleDrop = () => {
 
   if (!draggedPart.value || draggedPart.value.partType !== PartType.Chain) return;
 
-  emit('onChainDrop', draggedPart.value.id, props.chainCycleId, props.index);
+  emit(
+    'onChainDrop', draggedPart.value.id, props.chainCycleId, props.index
+  );
 };
 
 const handleCreateChain = async (chain: CreatePartDto) => {

@@ -34,14 +34,20 @@ Object.defineProperty(
 );
 
 // Mock window.location
-delete (window as any).location;
-window.location = {
-  ...window.location,
-  href: '',
-  assign: vi.fn(),
-  replace: vi.fn(),
-  reload: vi.fn()
-} as any;
+Object.defineProperty(
+  window,
+  'location',
+  {
+    configurable: true,
+    writable: true,
+    value: {
+      href: '',
+      assign: vi.fn(),
+      replace: vi.fn(),
+      reload: vi.fn()
+    } as unknown as Location
+  }
+);
 
 // Mock Quasar plugins
 vi.mock('quasar', async () => {

@@ -4,6 +4,7 @@ import { authService } from '@/services/authService';
 import type {
   User, LoginRequest, RegisterRequest 
 } from '@/types';
+import { getErrorMessage } from '@/utils/error';
 
 export const useAuthStore = defineStore('auth', () => {
   // State
@@ -42,8 +43,8 @@ export const useAuthStore = defineStore('auth', () => {
       }
       
       return response;
-    } catch (err: any) {
-      error.value = err.message || 'Login failed';
+    } catch (err: unknown) {
+      error.value = getErrorMessage(err, 'Login failed');
       throw err;
     } finally {
       isLoading.value = false;
@@ -65,8 +66,8 @@ export const useAuthStore = defineStore('auth', () => {
       }
       
       return response;
-    } catch (err: any) {
-      error.value = err.message || 'Registration failed';
+    } catch (err: unknown) {
+      error.value = getErrorMessage(err, 'Registration failed');
       throw err;
     } finally {
       isLoading.value = false;

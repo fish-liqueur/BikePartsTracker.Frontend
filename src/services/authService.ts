@@ -1,4 +1,3 @@
-import { apiService } from './api';
 import api from './api';
 import type {
   LoginRequest, RegisterRequest, AuthResponse, User 

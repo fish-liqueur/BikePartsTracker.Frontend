@@ -7,10 +7,8 @@ export interface TemplatePrefillOptions {
 }
 
 /** Maps an existing part to partial form data. Never includes `name` (callers merge name separately). */
-export function mapBikePartToTemplatePrefill(
-  part: BikePart,
-  options: TemplatePrefillOptions = {}
-): Partial<CreatePartDto> {
+export function mapBikePartToTemplatePrefill(part: BikePart,
+  options: TemplatePrefillOptions = {}): Partial<CreatePartDto> {
   const out: Partial<CreatePartDto> = {
     description: part.description ?? '',
     brand: part.brand ?? '',

@@ -5,7 +5,7 @@ import type {
 
 export const chainCyclesService = {
   async getChainCycles(bikeId: string): Promise<ChainCycle[]> {
-    const response = await apiService.get<ChainCycle[]>(`/api/chaincycles`, {
+    const response = await apiService.get<ChainCycle[]>('/api/chaincycles', {
       bikeId
     });
     return response.data ?? [];

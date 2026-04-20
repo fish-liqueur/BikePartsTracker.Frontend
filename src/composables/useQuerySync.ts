@@ -39,7 +39,7 @@ export interface SetParamOptions {
 
 type ConfigValue<T> = T extends QueryParamConfig<infer V> ? V : never;
 
-type QueryState<TConfig extends Record<string, QueryParamConfig<any>>> = {
+type QueryState<TConfig extends Record<string, QueryParamConfig<unknown>>> = {
   [K in keyof TConfig]: Ref<ConfigValue<TConfig[K]>>;
 };
 
@@ -49,7 +49,7 @@ type QueryState<TConfig extends Record<string, QueryParamConfig<any>>> = {
  * - Provides setters that merge existing query and use router.replace by default.
  * - Skips redundant updates using a lightweight equality check.
  */
-export function useQuerySync<TConfig extends Record<string, QueryParamConfig<any>>>(config: TConfig) {
+export function useQuerySync<TConfig extends Record<string, QueryParamConfig<unknown>>>(config: TConfig) {
   const route = useRoute();
   const router = useRouter();
 
@@ -71,7 +71,7 @@ export function useQuerySync<TConfig extends Record<string, QueryParamConfig<any
     return str.length === 0 ? null : str;
   };
 
-  const areQueriesEqual = (a: Record<string, any>, b: Record<string, any>) => {
+  const areQueriesEqual = (a: Record<string, unknown>, b: Record<string, unknown>) => {
     const aKeys = Object.keys(a);
     const bKeys = Object.keys(b);
     if (aKeys.length !== bKeys.length) return false;
@@ -88,8 +88,8 @@ export function useQuerySync<TConfig extends Record<string, QueryParamConfig<any
       const current = state[name as keyof TConfig].value;
       const next = parseValue(cfg as QueryParamConfig<unknown>, route.query[cfg.key]);
       const equals = cfg.equals ?? defaultEquals;
-      if (!equals(current as any, next as any)) {
-        state[name as keyof TConfig].value = next as any;
+      if (!equals(current as unknown, next as unknown)) {
+        state[name as keyof TConfig].value = next as unknown as ConfigValue<TConfig[keyof TConfig]>;
       }
     });
   };
@@ -100,12 +100,12 @@ export function useQuerySync<TConfig extends Record<string, QueryParamConfig<any
     { immediate: true, deep: true }
   );
 
-  const buildMergedQuery = (updates: Partial<Record<keyof TConfig, any>>) => {
+  const buildMergedQuery = (updates: Partial<Record<keyof TConfig, unknown>>) => {
     const nextQuery = { ...route.query };
 
     (Object.keys(updates) as Array<keyof TConfig>).forEach(name => {
       const cfg = config[name];
-      const serialized = serializeValue(cfg, updates[name] as any);
+      const serialized = serializeValue(cfg, updates[name] as unknown as ConfigValue<TConfig[keyof TConfig]>);
       if (serialized === null || serialized === undefined || serialized === '') {
         delete nextQuery[cfg.key];
       } else {
@@ -127,14 +127,14 @@ export function useQuerySync<TConfig extends Record<string, QueryParamConfig<any
     const currentQueryValue = parseValue(cfg as QueryParamConfig<unknown>, route.query[cfg.key]);
     const equals = cfg.equals ?? defaultEquals;
     
-    if (equals(currentQueryValue as any, value as any)) {
+    if (equals(currentQueryValue as unknown, value as unknown)) {
       // Already in sync with URL, just ensure state matches
-      state[name].value = value as any;
+      state[name].value = value as unknown as ConfigValue<TConfig[keyof TConfig]>;
       return;
     }
 
-    state[name].value = value as any;
-    const nextQuery = buildMergedQuery({ [name]: value } as Partial<Record<keyof TConfig, any>>);
+    state[name].value = value as unknown as ConfigValue<TConfig[keyof TConfig]>;
+    const nextQuery = buildMergedQuery({ [name]: value } as Partial<Record<keyof TConfig, unknown>>);
 
     if (areQueriesEqual(route.query, nextQuery)) {
       return;
@@ -153,8 +153,8 @@ export function useQuerySync<TConfig extends Record<string, QueryParamConfig<any
       const equals = cfg.equals ?? defaultEquals;
       const nextVal = updates[name];
       if (nextVal === undefined) return;
-      if (!equals(state[name].value as any, nextVal as any)) {
-        state[name].value = nextVal as any;
+      if (!equals(state[name].value as unknown, nextVal as unknown)) {
+        state[name].value = nextVal as unknown as ConfigValue<TConfig[keyof TConfig]>;
         changed = true;
       }
     });
@@ -163,7 +163,7 @@ export function useQuerySync<TConfig extends Record<string, QueryParamConfig<any
       return;
     }
 
-    const nextQuery = buildMergedQuery(updates as Partial<Record<keyof TConfig, any>>);
+    const nextQuery = buildMergedQuery(updates as Partial<Record<keyof TConfig, unknown>>);
     if (areQueriesEqual(route.query, nextQuery)) {
       return;
     }

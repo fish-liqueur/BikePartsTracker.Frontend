@@ -1,5 +1,5 @@
 import {
-  describe, it, expect, beforeEach, vi 
+  describe, it, expect, beforeEach 
 } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createRouter, createWebHistory } from 'vue-router';
@@ -8,7 +8,7 @@ import { Quasar } from 'quasar';
 import LayoutBase from '../LayoutBase.vue';
 import Header from '@/components/header/Header.vue';
 import QuickMenu from '@/components/menus/QuickMenu.vue';
-import Home from '@/views/Home.vue';
+import Home from '@/views/HomeView.vue';
 
 // Create a simple router for testing
 const router = createRouter({

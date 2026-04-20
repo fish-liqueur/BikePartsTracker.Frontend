@@ -17,7 +17,7 @@ import PartsWidget from '@/components/widgets/PartsWidget.vue';
 const partsStore = usePartsStore();
 const viewMode = ref<'cards' | 'table'>('cards');
 
-const handlePartsChanged = (event: { type: string; partId: string; data?: any }) => {
+const handlePartsChanged = (event: { type: string; partId: string; data?: unknown }) => {
   console.log('Parts changed:', event);
   // Additional handling if needed
 };

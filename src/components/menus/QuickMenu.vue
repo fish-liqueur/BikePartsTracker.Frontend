@@ -13,14 +13,9 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { useRoute } from 'vue-router';
 
 const route = useRoute();
-const router = useRouter();
-
-const navigateTo = (path: string) => {
-  router.push(path);
-};
 
 const menuItems = ref([
   {

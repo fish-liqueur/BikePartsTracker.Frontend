@@ -185,7 +185,7 @@ interface Ride {
   distance?: number;
   duration?: number;
   notes?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface Props {
@@ -273,6 +273,7 @@ const handleParts = () => {
   router.push(`/bikes/${props.bike.id}/parts`);
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const handleConfigure = () => {
   emit('configure', props.bike.id);
   router.push(`/bikes/${props.bike.id}/configure`);

@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { stravaService } from '@/services/stravaService';
 import type { StravaAthleteDto } from '@/types';
+import { getErrorMessage } from '@/utils/error';
 
 export const useStravaStore = defineStore('strava', () => {
   // State
@@ -60,8 +61,8 @@ export const useStravaStore = defineStore('strava', () => {
       
       await stravaService.disconnect();
       clearAthlete();
-    } catch (err: any) {
-      error.value = err.message || 'Failed to disconnect from Strava.';
+    } catch (err: unknown) {
+      error.value = getErrorMessage(err, 'Failed to disconnect from Strava.');
       throw err;
     } finally {
       isLoading.value = false;

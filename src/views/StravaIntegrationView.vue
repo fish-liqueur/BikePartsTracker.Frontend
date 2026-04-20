@@ -39,6 +39,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { stravaService } from '@/services/stravaService';
 import { useStravaStore } from '@/stores/stravaStore';
+import { getErrorMessage } from '@/utils/error';
 
 const router = useRouter();
 const stravaStore = useStravaStore();
@@ -74,8 +75,8 @@ onMounted(async () => {
     } else {
       error.value = response.message || 'Failed to connect to Strava.';
     }
-  } catch (err: any) {
-    error.value = err.message || 'An error occurred while connecting to Strava.';
+  } catch (err: unknown) {
+    error.value = getErrorMessage(err, 'An error occurred while connecting to Strava');
   } finally {
     isLoading.value = false;
   }

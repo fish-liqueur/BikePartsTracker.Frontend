@@ -248,6 +248,7 @@ import type {
   StravaBike, Bike, SyncBikeDto 
 } from '@/types';
 import { BikeType } from '@/types';
+import { getErrorMessage } from '@/utils/error';
 
 interface Props {
   modelValue: boolean;
@@ -428,10 +429,10 @@ const fetchAthleteData = async () => {
         storedName: existingBike ? existingBike.name : null,
       };
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Failed to fetch Strava athlete data:', err);
-    fetchError.value = err.message || 'Failed to fetch bikes from Strava';
-    showError(err.message || 'Failed to fetch bikes from Strava');
+    fetchError.value = getErrorMessage(err, 'Failed to fetch bikes from Strava');
+    showError(fetchError.value);
   } finally {
     isFetchingAthlete.value = false;
   }
@@ -512,8 +513,8 @@ const handleSave = async () => {
             id: existingBike.id,
             stravaBikeId: bikeState.stravaBike.id,
             name: existingBike.name, // Preserve existing name
-            type: (existingBike as any).type || null, // Preserve existing type if available
-            totalDistance: (existingBike as any).totalDistance || 0, // Preserve existing distance if available
+            type: (existingBike as unknown as Bike).type || null, // Preserve existing type if available
+            totalDistance: (existingBike as unknown as Bike).totalDistance || 0, // Preserve existing distance if available
             stravaDistance: bikeState.stravaBike.distance || 0,
             isActive: existingBike.isActive !== false,
           } as SyncBikeDto;
@@ -553,9 +554,9 @@ const handleSave = async () => {
     // Close dialog
     localShow.value = false;
     resetState();
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Failed to sync bikes:', err);
-    showError(err.message || 'Failed to import bikes');
+    showError(getErrorMessage(err, 'Failed to import bikes'));
   } finally {
     isSyncing.value = false;
   }

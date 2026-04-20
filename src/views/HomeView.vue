@@ -1,35 +1,8 @@
 <template>
   <div class="dashboard-container">
     <main class="dashboard-main">
-      <div class="dashboard-stats">
-        <div class="stat-card">
-          <h3>Total Bikes</h3>
-          <p class="stat-number">{{ bikesCount }}</p>
-        </div>
-        <div class="stat-card">
-          <h3>Active Parts</h3>
-          <p class="stat-number">{{ totalParts }}</p>
-        </div>
-        <div class="stat-card">
-          <h3>Maintenance Due</h3>
-          <p class="stat-number">{{ maintenanceDue }}</p>
-        </div>
-      </div>
 
-      <div class="dashboard-actions">
-        <button @click="showAddBikeModal = true" class="action-button primary">
-          <span class="icon">+</span>
-          Add New Bike
-        </button>
-        <button @click="showAddPartModal = true" class="action-button secondary">
-          <span class="icon">🔧</span>
-          Add Part
-        </button>
-        <button @click="showMaintenanceModal = true" class="action-button secondary">
-          <span class="icon">📝</span>
-          Log Maintenance
-        </button>
-      </div>
+
 
       <div class="bikes-section">
         <h2>Your Bikes</h2>
@@ -64,119 +37,41 @@
         </div>
       </div>
     </main>
-
-    <!-- Add Bike Modal -->
-    <div v-if="showAddBikeModal"
-         class="modal-overlay"
-         @click="showAddBikeModal = false">
-      <div class="modal" @click.stop>
-        <h3>Add New Bike</h3>
-        <form @submit.prevent="handleAddBike" class="modal-form">
-          <div class="form-group">
-            <label for="bikeName">Bike Name</label>
-            <input
-              id="bikeName"
-              v-model="newBike.name"
-              type="text"
-              required
-              placeholder="e.g., Road Bike, Mountain Bike"
-            />
-          </div>
-          <div class="form-group">
-            <label for="bikeType">Bike Type</label>
-            <select
-              id="bikeType"
-              v-model="newBike.type"
-              required
-            >
-              <option :value="BikeType.Road">Road</option>
-              <option :value="BikeType.Mountain">Mountain</option>
-              <option :value="BikeType.Gravel">Gravel</option>
-              <option :value="BikeType.EBike">E-Bike</option>
-              <option :value="BikeType.City">City</option>
-              <option :value="BikeType.Touring">Touring</option>
-              <option :value="BikeType.Cargo">Cargo</option>
-              <option :value="BikeType.Fixed">Fixed</option>
-              <option :value="BikeType.Rat">Rat</option>
-              <option :value="BikeType.Other">Other</option>
-            </select>
-          </div>
-          <div class="modal-actions">
-            <button type="button"
-                    @click="showAddBikeModal = false"
-                    class="cancel-button">
-              Cancel
-            </button>
-            <button type="submit" class="submit-button">Add Bike</button>
-          </div>
-        </form>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import {
-  ref, computed, onMounted 
-} from 'vue';
+import { computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
 import { useBikesStore } from '@/stores/bikesStore';
 import { useLayout } from '@/composables/useLayout';
-import type { Bike, CreateBikeDto } from '@/types';
-import { BikeType } from '@/types';
+import type { Bike } from '@/types';
+import { getErrorMessage } from '@/utils/error';
 
 const router = useRouter();
 const authStore = useAuthStore();
 const bikesStore = useBikesStore();
 const {
-  showSuccess, showError, withAjaxBar, startAjaxBar, stopAjaxBar 
+  showSuccess, showError, withAjaxBar
 } = useLayout();
 
 // Reactive state
-const showAddBikeModal = ref(false);
-const showAddPartModal = ref(false);
-const showMaintenanceModal = ref(false);
-const newBike = ref<CreateBikeDto>({
-  name: '',
-  type: BikeType.Other
-});
 
 // Computed properties
-const currentUser = computed(() => authStore.currentUser);
 const bikes = computed(() => bikesStore.bikes);
-const bikesCount = computed(() => bikesStore.bikesCount);
 const isLoading = computed(() => bikesStore.isLoading);
 const error = computed(() => bikesStore.error);
 
-// Mock stats for now - these would come from API calls
-const totalParts = computed(() => {
-  return bikes.value.reduce((total, bike) => total + (bike.parts?.length || 0), 0);
-});
-
-const maintenanceDue = computed(() => {
-  // This would be calculated based on maintenance schedules
-  return 0;
-});
 
 // Methods
-const handleLogout = () => {
-  authStore.logout();
-  router.push('/login');
-};
-
 const selectBike = (bike: Bike) => {
   bikesStore.setCurrentBike(bike);
   router.push(`/bikes/${bike.id}`);
 };
 
 const editBike = (bike: Bike) => {
-  startAjaxBar();
-  setTimeout(() => {
-    stopAjaxBar();
-  }, 2000);
-  // bikesStore.setCurrentBike(bike);
-  // router.push(`/bikes/${bike.id}/edit`);
+  router.push(`/bikes/${bike.id}`);
 };
 
 const deleteBike = async (bikeId: string) => {
@@ -185,29 +80,14 @@ const deleteBike = async (bikeId: string) => {
       // Example: Wrap async operation with ajax-bar (loading indicator)
       await withAjaxBar(bikesStore.deleteBike(bikeId));
       showSuccess('Bike deleted successfully');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to delete bike:', err);
-      showError(err.message || 'Failed to delete bike');
+      showError(getErrorMessage(err, 'Failed to delete bike'));
     }
   }
 };
 
-const handleAddBike = async () => {
-  try {
-    // Example: Wrap async operation with ajax-bar
-    await withAjaxBar(bikesStore.createBike(newBike.value));
-    showAddBikeModal.value = false;
-    // Reset form
-    newBike.value = {
-      name: '',
-      type: BikeType.Other
-    };
-    showSuccess('Bike added successfully');
-  } catch (err: any) {
-    console.error('Failed to create bike:', err);
-    showError(err.message || 'Failed to create bike');
-  }
-};
+
 
 // Lifecycle
 onMounted(async () => {

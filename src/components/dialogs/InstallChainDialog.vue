@@ -35,58 +35,58 @@
             />
           </div>
           <div v-else>
-          <div class="q-mb-md">Add chain into Chain Cycle</div>
+            <div class="q-mb-md">Add chain into Chain Cycle</div>
 
-          <div
-            v-for="cycle in formChainCycles"
-            :key="cycle._key"
-            class="chain-cycle-install-section"
-          >
-            <div class="chain-cycle-install-section__radios">
-              <q-radio
-                v-for="(slotChainId, slotIndex) in cycle.chains"
-                :key="`${cycle._key}-${slotIndex}`"
-                :model-value="getSelectedSlotIndexForCycle(cycle._key)"
-                :val="slotIndex"
-                @update:model-value="(val: number) => handleSlotSelect(cycle._key, val)"
-              >
-                <div class="chain-cycle-install-slot-label">
-                  <span v-if="slotChainId">
-                    <span
-                      v-if="slotChainId === cycle.activeChainId"
-                      class="chain-cycle-install-slot-label--active"
-                    >
-                      {{ getChainName(slotChainId) }} (installed now)
+            <div
+              v-for="cycle in formChainCycles"
+              :key="cycle._key"
+              class="chain-cycle-install-section"
+            >
+              <div class="chain-cycle-install-section__radios">
+                <q-radio
+                  v-for="(slotChainId, slotIndex) in cycle.chains"
+                  :key="`${cycle._key}-${slotIndex}`"
+                  :model-value="getSelectedSlotIndexForCycle(cycle._key)"
+                  :val="slotIndex"
+                  @update:model-value="(val: number) => handleSlotSelect(cycle._key, val)"
+                >
+                  <div class="chain-cycle-install-slot-label">
+                    <span v-if="slotChainId">
+                      <span
+                        v-if="slotChainId === cycle.activeChainId"
+                        class="chain-cycle-install-slot-label--active"
+                      >
+                        {{ getChainName(slotChainId) }} (installed now)
+                      </span>
+                      <span v-else>
+                        {{ getChainName(slotChainId) }}
+                      </span>
                     </span>
-                    <span v-else>
-                      {{ getChainName(slotChainId) }}
+                    <span v-else-if="slotIndex === selectedSlot?.slotIndex" class="chain-cycle-install-slot-label--new">
+                      {{ chain?.name }} (new)
                     </span>
-                  </span>
-                  <span v-else-if="slotIndex === selectedSlot?.slotIndex" class="chain-cycle-install-slot-label--new">
-                    {{ chain?.name }} (new)
-                  </span>
-                  <span v-else class="chain-cycle-install-slot-label--empty">
-                    empty!
-                  </span>
-                </div>
-              </q-radio>
+                    <span v-else class="chain-cycle-install-slot-label--empty">
+                      empty!
+                    </span>
+                  </div>
+                </q-radio>
+              </div>
+            </div>
+
+            <!-- Section 1.2 -->
+            <div class="q-mt-md">
+              <q-toggle
+                v-model="setAsActive"
+                color="primary"
+                label="set as active (you are physically installing chain to the bike)"
+              />
+
+              <!-- Section 1.2.1 -->
+              <div v-if="setAsActive" class="q-mt-md">
+                <DateTimePicker v-model="installationTime" label="installation time" />
+              </div>
             </div>
           </div>
-
-          <!-- Section 1.2 -->
-          <div class="q-mt-md">
-            <q-toggle
-              v-model="setAsActive"
-              color="primary"
-              label="set as active (you are physically installing chain to the bike)"
-            />
-
-            <!-- Section 1.2.1 -->
-            <div v-if="setAsActive" class="q-mt-md">
-              <DateTimePicker v-model="installationTime" label="installation time" />
-            </div>
-          </div>
-        </div>
         </q-tab-panel>
         <q-tab-panel name="without-chain-cycle">
           <DateTimePicker v-model="installationTime" label="installation time" />
@@ -111,10 +111,16 @@
 
       <q-card-actions align="between">
         <!-- Section 3 -->
-         <div class="row justify-between gap-2">
-          <q-btn flat label="Cancel" color="primary" @click="$emit('cancel')" />
-          <q-btn flat label="Reset" color="primary" @click="handleReset" />
-         </div>
+        <div class="row justify-between gap-2">
+          <q-btn flat
+                 label="Cancel"
+                 color="primary"
+                 @click="$emit('cancel')" />
+          <q-btn flat
+                 label="Reset"
+                 color="primary"
+                 @click="handleReset" />
+        </div>
         <q-btn          
           label="Add chain"
           color="primary"
@@ -127,8 +133,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
-import type { Bike, BikePart, ChainCycle } from '@/types';
+import {
+  ref, computed, watch 
+} from 'vue';
+import type {
+  Bike, BikePart, ChainCycle 
+} from '@/types';
 import { usePartsStore } from '@/stores/partsStore';
 import { useUserSettingsStore } from '@/stores/userSettingsStore';
 import { useChainCyclesStore } from '@/stores/chainCyclesStore';
@@ -210,7 +220,7 @@ const currentStatusText = computed(() => {
   }
   if (setAsActive.value) {
     text += ' and setting it as active';
-  }2
+  }
   if (displacedChain.value) {
     if (displacedChain.value.toIndex !== null) {
       text += `, moving ${displacedChain.value.chainName} to slot ${displacedChain.value.toIndex + 1}`;
@@ -251,8 +261,7 @@ const chainCyclesNormalized = (bike: Bike | null, cycles: ChainCycle[]): FormCha
 
   return cycles.map((cycle, index) => {
     const chains = (cycle.chains ?? []).map((c) =>
-      c == null ? null : String(c)
-    ) as Array<string | null>;
+      c == null ? null : String(c)) as Array<string | null>;
     return {
       id: cycle.id,
       _key: cycle.id || `cycle-${index}`,
@@ -264,6 +273,7 @@ const chainCyclesNormalized = (bike: Bike | null, cycles: ChainCycle[]): FormCha
   });
 };
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 const createEmptyChainCycle = (): FormChainCycle => {
   const length = userSettingsStore.userSettings?.defaultChainCycleLength ?? 3;
   const intervalKm = userSettingsStore.userSettings?.defaultChainCycleIntervalKm ?? 700;
@@ -307,9 +317,7 @@ const initForm = () => {
   installationTime.value = new Date();
   displacedChain.value = null;
 
-  originalChainsMap.value = new Map(
-    formChainCycles.value.map(c => [c._key, [...c.chains]])
-  );
+  originalChainsMap.value = new Map(formChainCycles.value.map(c => [c._key, [...c.chains]]));
 
   if (props.preselectedSlotIndex != null && formChainCycles.value.length > 0) {
     const cycle = props.preselectedChainCycleId

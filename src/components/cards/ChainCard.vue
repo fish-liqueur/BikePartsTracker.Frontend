@@ -1,41 +1,41 @@
 <template>
-<div class="chain-card draggable-card"
-        :class="{
-          'chain-card--active bg-primary text-white': isActive && part,
-          'chain-card--draggable bg-secondary text-white': !isActive && part,
-        }">
-  <div class="chain-card__index">
-    {{ index + 1 }}
+  <div class="chain-card draggable-card"
+       :class="{
+         'chain-card--active bg-primary text-white': isActive && part,
+         'chain-card--draggable bg-secondary text-white': !isActive && part,
+       }">
+    <div class="chain-card__index">
+      {{ index + 1 }}
+    </div>
+    <h4 class="chain-card__name">{{ part.name }}</h4>
+    <p class="chain-card__description">{{ part.description }}</p>
+    <p class="chain-card__third-line" :style="thirdLineStyle">{{ thirdLineText }}</p>
+    <q-menu touch-position>
+      <q-list>
+        <q-item clickable
+                v-close-popup
+                @click="handleFullDetails">
+          <q-item-section avatar>
+            <q-icon name="info" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>To detailed page</q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item clickable
+                v-close-popup
+                @click="removeChainFromBike">
+          <q-item-section avatar>
+            <q-icon name="remove_circle" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Do not use on this bike</q-item-label>
+            <q-item-label caption>{{ props.bikeContext.name }}</q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </q-menu>
   </div>
-  <h4 class="chain-card__name">{{ part.name }}</h4>
-  <p class="chain-card__description">{{ part.description }}</p>
-  <p class="chain-card__third-line" :style="thirdLineStyle">{{ thirdLineText }}</p>
-  <q-menu touch-position>
-    <q-list>
-      <q-item clickable
-              v-close-popup
-              @click="handleFullDetails">
-        <q-item-section avatar>
-          <q-icon name="info" />
-        </q-item-section>
-        <q-item-section>
-          <q-item-label>To detailed page</q-item-label>
-        </q-item-section>
-      </q-item>
-      <q-item clickable
-              v-close-popup
-              @click="removeChainFromBike">
-        <q-item-section avatar>
-          <q-icon name="remove_circle" />
-        </q-item-section>
-        <q-item-section>
-          <q-item-label>Do not use on this bike</q-item-label>
-          <q-item-label caption>{{ props.bikeContext.name }}</q-item-label>
-        </q-item-section>
-      </q-item>
-    </q-list>
-  </q-menu>
-</div>
 </template>
 
 <script setup lang="ts">

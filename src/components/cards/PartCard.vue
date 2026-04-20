@@ -246,15 +246,13 @@ const isChain = computed((): boolean => {
 });
 
 const chainCyclesForBike = computed(() =>
-  props.bikeContext?.id ? chainCyclesStore.getChainCyclesForBike(props.bikeContext.id) : []
-);
+  props.bikeContext?.id ? chainCyclesStore.getChainCyclesForBike(props.bikeContext.id) : []);
 
 const isChainInCycle = computed((): boolean => {
   if (!chainCyclesForBike.value.length) return false;
   const pid = props.part.id;
   return chainCyclesForBike.value.some(c =>
-    (c.chains ?? []).some(cid => cid != null && String(cid) === pid)
-  );
+    (c.chains ?? []).some(cid => cid != null && String(cid) === pid));
 });
 
 const isChainInCycleActive = computed((): boolean => {

@@ -141,14 +141,15 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import type { Bike } from '@/types';
+import type { QTableProps } from 'quasar';
 
 export interface TableColumn {
   name: string;
   label: string;
-  field: string | ((row: any) => any);
+  field: string | ((row: unknown) => unknown);
   align?: 'left' | 'center' | 'right';
   sortable?: boolean;
-  format?: (val: any, row: any) => string;
+  format?: (val: unknown, row: unknown) => string;
 }
 
 interface Props {
@@ -212,7 +213,7 @@ const getSelectedString = () => {
   return '';
 };
 
-const onRequest = (tableProps: any) => {
+const onRequest = (tableProps: QTableRequestProps) => {
   const {
     page, rowsPerPage, sortBy, descending 
   } = tableProps.pagination;
@@ -229,6 +230,8 @@ const handleRowClick = (bike: Bike) => {
 const getPartsCount = (bike: Bike): number => {
   return bike.parts?.length || 0;
 };
+
+type QTableRequestProps = Parameters<NonNullable<QTableProps['onRequest']>>[0];
 </script>
 
 <style scoped lang="css">

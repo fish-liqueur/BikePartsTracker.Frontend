@@ -2,7 +2,6 @@
 import {
   computed, ref, provide, onMounted 
 } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useUserSettingsStore } from '@/stores/userSettingsStore';
@@ -11,9 +10,7 @@ import type { QAjaxBar } from 'quasar';
 import QuickMenu from '@/components/menus/QuickMenu.vue';
 import Header from '@/components/header/Header.vue';
 
-const router = useRouter();
 const authStore = useAuthStore();
-const route = useRoute();
 const isAuthenticated = computed(() => authStore.isAuthenticated);
 
 const layoutStore = useLayoutStore();

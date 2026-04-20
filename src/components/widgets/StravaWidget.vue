@@ -63,7 +63,7 @@ const handleDisconnectStrava = async () => {
       stravaStore.disconnect();
     });
 
-  } catch (err: any) {
+  } catch {
     // Error is already handled in the store
   }
 };

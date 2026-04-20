@@ -78,6 +78,8 @@ describe('Header', () => {
       email: 'test@example.com',
       username: 'testuser',
       name: 'John Doe',
+      defaultChainCycleLength: 0,
+      defaultChainCycleInterval: 0,
       createdAt: new Date()
     };
 
@@ -105,6 +107,8 @@ describe('Header', () => {
       email: 'test@example.com',
       username: 'testuser',
       name: '',
+      defaultChainCycleLength: 0,
+      defaultChainCycleInterval: 0,
       createdAt: new Date()
     };
 
@@ -137,7 +141,7 @@ describe('Header', () => {
 
     // Access the logout method through the component instance
     // Since it's script setup, we need to trigger it through the component
-    const component = wrapper.vm as { logout: () => void };
+    const component = wrapper.vm as unknown as { logout: () => void };
     if (component.logout) {
       await component.logout();
     } else {

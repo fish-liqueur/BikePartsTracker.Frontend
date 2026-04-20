@@ -116,7 +116,9 @@ import PartsTableContainer from '@/components/parts/PartsTableContainer.vue';
 import InstallPartDialog from '@/components/dialogs/InstallPartDialog.vue';
 import InstallChainDialog from '@/components/dialogs/InstallChainDialog.vue';
 import AddPartDialog from '@/components/dialogs/AddPartDialog.vue';
-import type { Bike, BikePart, CreatePartDto } from '@/types';
+import type {
+  Bike, BikePart, CreatePartDto 
+} from '@/types';
 import { EMPTY_GUID } from '@/types';
 import { PartType } from '@/types';
 import { defaultPartColumns } from '../parts/partsTableColumns';
@@ -128,8 +130,7 @@ function mergePartIntoCycleChains(
   index: number
 ): (string | null)[] {
   const next = [...chainIds].map(id =>
-    id != null && String(id) === String(partId) ? null : id
-  );
+    id != null && String(id) === String(partId) ? null : id);
   while (next.length <= index) next.push(null);
   next[index] = partId;
   return next;
@@ -211,7 +212,6 @@ const partName = computed(() => {
   return pendingPartInstall.value?.part?.name || '';
 });
 
-const chainPartId = computed(() => pendingPartInstall.value?.partId || '');
 
 const targetBikeContext = computed(() => {
   const targetBikeId = extractBikeId(pendingPartInstall.value?.targetContainerId || '');
@@ -413,9 +413,7 @@ const handleInstallPart = async (data: { installationDate: string; mileageAtInst
   }
 };
 
-const handleInstallChainWithoutChainCycle = async (
-  data: { installationDate: Date; mileageAtInstallation: number }
-) => {
+const handleInstallChainWithoutChainCycle = async (data: { installationDate: Date; mileageAtInstallation: number }) => {
   if (!pendingPartInstall.value) return;
 
   try {
@@ -443,14 +441,12 @@ const handleInstallChainWithoutChainCycle = async (
   }
 };
 
-const handleInstallChainWithinChainCycle = async (
-  data: {
-    chainCycleId: string;
-    position: number;
-    setAsActive: boolean;
-    installationTime?: Date;
-  }
-) => {
+const handleInstallChainWithinChainCycle = async (data: {
+  chainCycleId: string;
+  position: number;
+  setAsActive: boolean;
+  installationTime?: Date;
+}) => {
   if (!pendingPartInstall.value) return;
 
   const { partId, targetContainerId } = pendingPartInstall.value;
@@ -470,7 +466,9 @@ const handleInstallChainWithinChainCycle = async (
     if (!cycle) throw new Error('Chain cycle not found');
 
     const oldSlotId = (cycle.chains ?? [])[data.position] ?? null;
-    let newChains = mergePartIntoCycleChains(cycle.chains ?? [], partId, data.position);
+    const newChains = mergePartIntoCycleChains(
+      cycle.chains ?? [], partId, data.position
+    );
 
     let activeChainId = cycle.activeChainId ?? null;
     if (data.setAsActive) {
@@ -481,12 +479,14 @@ const handleInstallChainWithinChainCycle = async (
 
     const prevActive = cycle.activeChainId == null ? null : String(cycle.activeChainId);
     const nextActive = activeChainId == null ? null : String(activeChainId);
-    await withAjaxBar(chainCyclesStore.updateChainCycle(data.chainCycleId, targetBikeId, {
-      chains: newChains,
-      ...(nextActive !== prevActive
-        ? { activeChainId: activeChainId === null ? EMPTY_GUID : activeChainId }
-        : {})
-    }));
+    await withAjaxBar(chainCyclesStore.updateChainCycle(
+      data.chainCycleId, targetBikeId, {
+        chains: newChains,
+        ...(nextActive !== prevActive
+          ? { activeChainId: activeChainId === null ? EMPTY_GUID : activeChainId }
+          : {})
+      }
+    ));
 
     showSuccess('Chain installed into chain cycle successfully');
     showInstallDialog.value = false;

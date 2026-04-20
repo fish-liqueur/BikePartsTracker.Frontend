@@ -113,7 +113,7 @@ import { useChainCyclesStore } from '@/stores/chainCyclesStore';
 import { useLayout } from '@/composables/useLayout';
 import ChainCard from '@/components/cards/ChainCard.vue';
 import ChainCardEmpty from '@/components/cards/ChainCardEmpty.vue';
-import InstallChainDialog, { type DisplacedChainInfo } from '@/components/parts/InstallChainDialog.vue';
+import InstallChainDialog, { type DisplacedChainInfo } from '@/components/dialogs/InstallChainDialog.vue';
 import ElementWithTooltipButton from '@/components/shared/ElementWithTooltipButton.vue';
 
 // ---- Types / Interfaces ----
@@ -158,8 +158,7 @@ function mergePartIntoChainsSlots(
   index: number
 ): (string | null)[] {
   const next = [...chainIds].map(id =>
-    id != null && String(id) === String(partId) ? null : id
-  );
+    id != null && String(id) === String(partId) ? null : id);
   while (next.length <= index) next.push(null);
   next[index] = partId;
   return next;
@@ -175,8 +174,7 @@ const chainCyclesDetailed = computed(() => {
 
   return cycles.map(chainCycle => {
     const chainsResolved: (BikePart | null)[] = (chainCycle.chains ?? []).map(id =>
-      id ? partsStore.parts.find(p => p.id === id) ?? null : null
-    );
+      id ? partsStore.parts.find(p => p.id === id) ?? null : null);
     return { ...chainCycle, chains: chainsResolved };
   });
 });
@@ -203,17 +201,17 @@ const updateBikeChainCycle = async (
   try {
     const part = partsStore.getPartById(newChainId);
     if (part && part.bikeId !== props.bikeContext.id) {
-      await withAjaxBar(
-        partsStore.updatePart(newChainId, { bikeId: props.bikeContext.id })
-      );
+      await withAjaxBar(partsStore.updatePart(newChainId, { bikeId: props.bikeContext.id }));
     }
     const targetCycle = chainCyclesStore.getChainCyclesForBike(props.bikeContext.id)
       .find(c => c.id === chainCycleId);
     if (!targetCycle) throw new Error('Chain cycle not found');
-    const newChains = mergePartIntoChainsSlots(targetCycle.chains ?? [], newChainId, index);
-    await withAjaxBar(
-      chainCyclesStore.updateChainCycle(chainCycleId, props.bikeContext.id, { chains: newChains })
+    const newChains = mergePartIntoChainsSlots(
+      targetCycle.chains ?? [], newChainId, index
     );
+    await withAjaxBar(chainCyclesStore.updateChainCycle(
+      chainCycleId, props.bikeContext.id, { chains: newChains }
+    ));
     showSuccess('Chain added to cycle successfully');
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Failed to update bike with new chain';
@@ -320,9 +318,9 @@ const handleUpdateChainCycleLength = async (length: number, chainCycleId: string
       dto.activeChainId = activeChainId === null ? EMPTY_GUID : activeChainId;
     }
 
-    await withAjaxBar(
-      chainCyclesStore.updateChainCycle(chainCycleId, props.bikeContext.id, dto)
-    );
+    await withAjaxBar(chainCyclesStore.updateChainCycle(
+      chainCycleId, props.bikeContext.id, dto
+    ));
     showSuccess('Chain cycle length updated successfully');
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Failed to update chain cycle length';
@@ -343,10 +341,12 @@ const handleUserCreateChain = async (
       const targetCycle = chainCyclesStore.getChainCyclesForBike(props.bikeContext.id)
         .find(c => c.id === chainCycleId);
       if (targetCycle) {
-        const newChains = mergePartIntoChainsSlots(targetCycle.chains ?? [], newChain.id, index);
-        await withAjaxBar(
-          chainCyclesStore.updateChainCycle(chainCycleId, props.bikeContext.id, { chains: newChains })
+        const newChains = mergePartIntoChainsSlots(
+          targetCycle.chains ?? [], newChain.id, index
         );
+        await withAjaxBar(chainCyclesStore.updateChainCycle(
+          chainCycleId, props.bikeContext.id, { chains: newChains }
+        ));
       }
     }
   } catch (error) {
@@ -365,15 +365,13 @@ const handleChainDrop = (
   showInstallChainDialog.value = true;
 };
 
-const handleInstallChainWithinCycle = async (
-  data: {
-    chainCycleId: string;
-    position: number;
-    setAsActive: boolean;
-    installationTime?: Date;
-    displacedChain?: DisplacedChainInfo | null;
-  }
-) => {
+const handleInstallChainWithinCycle = async (data: {
+  chainCycleId: string;
+  position: number;
+  setAsActive: boolean;
+  installationTime?: Date;
+  displacedChain?: DisplacedChainInfo | null;
+}) => {
   if (!pendingChainDrop.value) return;
   const { chainId } = pendingChainDrop.value;
   const bikeId = props.bikeContext.id;
@@ -391,7 +389,9 @@ const handleInstallChainWithinCycle = async (
     if (!cycle) throw new Error('Chain cycle not found');
 
     const oldSlotId = (cycle.chains ?? [])[data.position] ?? null;
-    const newChains = mergePartIntoChainsSlots(cycle.chains ?? [], chainId, data.position);
+    const newChains = mergePartIntoChainsSlots(
+      cycle.chains ?? [], chainId, data.position
+    );
 
     if (data.displacedChain) {
       if (data.displacedChain.toIndex !== null) {
@@ -408,12 +408,14 @@ const handleInstallChainWithinCycle = async (
 
     const prevActive = cycle.activeChainId == null ? null : String(cycle.activeChainId);
     const nextActive = activeChainId == null ? null : String(activeChainId);
-    await withAjaxBar(chainCyclesStore.updateChainCycle(data.chainCycleId, bikeId, {
-      chains: newChains,
-      ...(nextActive !== prevActive
-        ? { activeChainId: activeChainId === null ? EMPTY_GUID : activeChainId }
-        : {})
-    }));
+    await withAjaxBar(chainCyclesStore.updateChainCycle(
+      data.chainCycleId, bikeId, {
+        chains: newChains,
+        ...(nextActive !== prevActive
+          ? { activeChainId: activeChainId === null ? EMPTY_GUID : activeChainId }
+          : {})
+      }
+    ));
 
     showSuccess('Chain installed into chain cycle successfully');
   } catch (error) {
@@ -425,9 +427,7 @@ const handleInstallChainWithinCycle = async (
   }
 };
 
-const handleInstallChainWithoutCycle = async (
-  data: { installationDate: Date; mileageAtInstallation: number }
-) => {
+const handleInstallChainWithoutCycle = async (data: { installationDate: Date; mileageAtInstallation: number }) => {
   if (!pendingChainDrop.value) return;
   const { chainId } = pendingChainDrop.value;
 

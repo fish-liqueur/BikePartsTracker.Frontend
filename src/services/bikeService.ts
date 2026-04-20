@@ -1,6 +1,6 @@
 import { apiService } from './api';
 import type {
-  Bike, CreateBikeDto, UpdateBikeDto, ApiResponse, PaginatedResponse, SyncBikeDto 
+  Bike, CreateBikeDto, UpdateBikeDto, PaginatedResponse, SyncBikeDto 
 } from '@/types';
 
 export const bikeService = {

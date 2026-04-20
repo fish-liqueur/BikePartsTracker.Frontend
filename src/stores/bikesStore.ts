@@ -4,6 +4,7 @@ import { bikeService } from '@/services/bikeService';
 import type {
   Bike, CreateBikeDto, UpdateBikeDto, FetchStatus 
 } from '@/types';
+import { getErrorMessage } from '@/utils/error';
 
 export const useBikesStore = defineStore('bikes', () => {
   // State
@@ -34,8 +35,8 @@ export const useBikesStore = defineStore('bikes', () => {
       fetchStatus.value = 'done';
       
       return fetchedBikes;
-    } catch (err: any) {
-      error.value = err.message || 'Failed to fetch bikes';
+    } catch (err: unknown) {
+      error.value = getErrorMessage(err, 'Failed to fetch bikes');
       fetchStatus.value = 'error';
       throw err;
     } finally {
@@ -62,8 +63,8 @@ export const useBikesStore = defineStore('bikes', () => {
       }
       
       return bike;
-    } catch (err: any) {
-      error.value = err.message || 'Failed to fetch bike';
+    } catch (err: unknown) {
+      error.value = getErrorMessage(err, 'Failed to fetch bike');
       throw err;
     } finally {
       isLoading.value = false;
@@ -81,8 +82,8 @@ export const useBikesStore = defineStore('bikes', () => {
       }
       
       return newBike;
-    } catch (err: any) {
-      error.value = err.message || 'Failed to create bike';
+    } catch (err: unknown) {
+      error.value = getErrorMessage(err, 'Failed to create bike');
       throw err;
     } finally {
       isLoading.value = false;
@@ -107,8 +108,8 @@ export const useBikesStore = defineStore('bikes', () => {
       }
       
       return updatedBike;
-    } catch (err: any) {
-      error.value = err.message || 'Failed to update bike';
+    } catch (err: unknown) {
+      error.value = getErrorMessage(err, 'Failed to update bike');
       throw err;
     } finally {
       isLoading.value = false;
@@ -130,8 +131,8 @@ export const useBikesStore = defineStore('bikes', () => {
       }
       
       return success;
-    } catch (err: any) {
-      error.value = err.message || 'Failed to delete bike';
+    } catch (err: unknown) {
+      error.value = getErrorMessage(err, 'Failed to delete bike');
       throw err;
     } finally {
       isLoading.value = false;
@@ -145,7 +146,7 @@ export const useBikesStore = defineStore('bikes', () => {
       
       // Use updateBike with isActive set to false
       // Cast to any to allow isActive field which may not be in CreateBikeDto type
-      const updatedBike = await bikeService.updateBike(id, { isActive: false } as any);
+      const updatedBike = await bikeService.updateBike(id, { isActive: false } as UpdateBikeDto);
       if (updatedBike) {
         const index = bikes.value.findIndex(bike => bike.id === id);
         if (index !== -1) {
@@ -158,8 +159,8 @@ export const useBikesStore = defineStore('bikes', () => {
       }
       
       return updatedBike;
-    } catch (err: any) {
-      error.value = err.message || 'Failed to retire bike';
+    } catch (err: unknown) {
+      error.value = getErrorMessage(err, 'Failed to retire bike');
       throw err;
     } finally {
       isLoading.value = false;
@@ -171,7 +172,7 @@ export const useBikesStore = defineStore('bikes', () => {
       isLoading.value = true;
       error.value = null;
       
-      const updatedBike = await bikeService.updateBike(id, { isActive: true } as any);
+      const updatedBike = await bikeService.updateBike(id, { isActive: true } as UpdateBikeDto);
       if (updatedBike) {
         const index = bikes.value.findIndex(bike => bike.id === id);
         if (index !== -1) {
@@ -184,8 +185,8 @@ export const useBikesStore = defineStore('bikes', () => {
       }
       
       return updatedBike;
-    } catch (err: any) {
-      error.value = err.message || 'Failed to activate bike';
+    } catch (err: unknown) {
+      error.value = getErrorMessage(err, 'Failed to activate bike');
       throw err;
     } finally {
       isLoading.value = false;

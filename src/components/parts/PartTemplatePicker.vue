@@ -21,7 +21,7 @@
         map-options
         option-value="id"
       >
-      <template v-slot:option="scope">
+        <template v-slot:option="scope">
           <q-item v-bind="scope.itemProps">
             <q-item-section>
               <q-item-label>{{ scope.opt.name }}</q-item-label>
@@ -29,9 +29,9 @@
             </q-item-section>
             <q-item-section v-if="!filterByFormTypeOnly" avatar>
               <q-chip :label="scope.opt.partType"
-                :color="scope.opt.partType === formPartType ? 'primary' : 'secondary'"
-                text-color="white"
-                size="md" />
+                      :color="scope.opt.partType === formPartType ? 'primary' : 'secondary'"
+                      text-color="white"
+                      size="md" />
             </q-item-section>
           </q-item>
         </template>
@@ -48,7 +48,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import {
+  computed, ref, watch 
+} from 'vue';
 import { usePartsStore } from '@/stores/partsStore';
 import type { BikePart } from '@/types';
 import { PartType } from '@/types';
@@ -76,8 +78,7 @@ const typeLabel = computed(() => {
 });
 
 const filterToggleLabel = computed(() =>
-  filterByFormTypeOnly.value ? `Only ${typeLabel.value}` : 'All part types'
-);
+  filterByFormTypeOnly.value ? `Only ${typeLabel.value}` : 'All part types');
 
 const partById = computed(() => {
   const map = new Map<string, BikePart>();

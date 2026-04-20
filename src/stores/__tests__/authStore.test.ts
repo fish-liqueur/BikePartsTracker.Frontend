@@ -33,6 +33,8 @@ describe('authStore', () => {
         email: 'test@example.com',
         username: 'testuser',
         name: 'Test User',
+        defaultChainCycleLength: 0,
+        defaultChainCycleInterval: 0,
         createdAt: new Date()
       };
 
@@ -67,6 +69,8 @@ describe('authStore', () => {
         email: 'test@example.com',
         username: 'testuser',
         name: 'Test User',
+        defaultChainCycleLength: 0,
+        defaultChainCycleInterval: 0,
         createdAt: new Date()
       };
 
@@ -127,6 +131,8 @@ describe('authStore', () => {
           email: 'test@example.com',
           username: 'testuser',
           name: 'Test User',
+          defaultChainCycleLength: 0,
+          defaultChainCycleInterval: 0,
           createdAt: new Date()
         }
       };
@@ -154,6 +160,8 @@ describe('authStore', () => {
         email: 'newuser@example.com',
         username: 'newuser',
         name: 'New User',
+        defaultChainCycleLength: 0,
+        defaultChainCycleInterval: 0,
         createdAt: new Date()
       };
 
@@ -218,6 +226,8 @@ describe('authStore', () => {
         email: 'test@example.com',
         username: 'testuser',
         name: 'Test User',
+        defaultChainCycleLength: 0,
+        defaultChainCycleInterval: 0,
         createdAt: new Date()
       };
       store.token = 'some-token';
@@ -252,6 +262,8 @@ describe('authStore', () => {
         email: 'updated@example.com',
         username: 'updateduser',
         name: 'Updated User',
+        defaultChainCycleLength: 0,
+        defaultChainCycleInterval: 0,
         createdAt: new Date()
       };
 
@@ -283,6 +295,8 @@ describe('authStore', () => {
         email: 'test@example.com',
         username: 'testuser',
         name: 'Test User',
+        defaultChainCycleLength: 0,
+        defaultChainCycleInterval: 0,
         createdAt: new Date()
       };
 

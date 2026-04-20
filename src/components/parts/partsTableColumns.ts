@@ -1,10 +1,10 @@
 export interface TableColumn {
   name: string;
   label: string;
-  field: string | ((row: any) => any);
+  field: string | ((row: unknown) => unknown);
   align?: 'left' | 'center' | 'right';
   sortable?: boolean;
-  format?: (val: any, row: any) => string;
+  format?: (val: unknown, row: unknown) => string;
 }
 
 export const defaultPartColumns: TableColumn[] = [

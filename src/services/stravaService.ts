@@ -1,7 +1,6 @@
+import { getErrorMessage } from '@/utils/error';
 import { apiService } from './api';
-import type {
-  ApiResponse, StravaAthleteDto, StravaBike 
-} from '@/types';
+import type { StravaAthleteDto, StravaBike } from '@/types';
 
 // Strava OAuth configuration
 const STRAVA_CLIENT_ID = import.meta.env.VITE_STRAVA_CLIENT_ID || '';
@@ -108,9 +107,8 @@ export const stravaService = {
       }
 
       return response.data;
-    } catch (error: any) {
-      console.error('Failed to exchange code for token:', error);
-      throw error;
+    } catch (error: unknown) {
+      throw getErrorMessage(error, 'Failed to exchange code for token');
     }
   },
 

@@ -1,6 +1,7 @@
 import {
   describe, it, expect, beforeEach, vi 
 } from 'vitest';
+import type { AxiosResponse } from 'axios';
 import { authService } from '../authService';
 import api from '../api';
 import type {
@@ -28,6 +29,8 @@ describe('authService', () => {
         email: 'test@example.com',
         username: 'testuser',
         name: 'Test User',
+        defaultChainCycleLength: 0,
+        defaultChainCycleInterval: 0,
         createdAt: new Date()
       };
 
@@ -39,7 +42,7 @@ describe('authService', () => {
 
       vi.mocked(api.post).mockResolvedValue({
         data: mockResponse
-      } as any);
+      } as unknown as AxiosResponse<AuthResponse>);
 
       const credentials: LoginRequest = {
         email: 'test@example.com',
@@ -62,7 +65,7 @@ describe('authService', () => {
 
       vi.mocked(api.post).mockResolvedValue({
         data: mockResponse
-      } as any);
+      } as unknown as AxiosResponse<AuthResponse>);
 
       const credentials: LoginRequest = {
         email: 'test@example.com',
@@ -84,6 +87,8 @@ describe('authService', () => {
         email: 'newuser@example.com',
         username: 'newuser',
         name: 'New User',
+        defaultChainCycleLength: 0,
+        defaultChainCycleInterval: 0,
         createdAt: new Date()
       };
 
@@ -95,7 +100,7 @@ describe('authService', () => {
 
       vi.mocked(api.post).mockResolvedValue({
         data: mockResponse
-      } as any);
+      } as unknown as AxiosResponse<AuthResponse>);
 
       const userData: RegisterRequest = {
         name: 'New User',
@@ -120,8 +125,15 @@ describe('authService', () => {
 
       // Mock window.location
       const originalLocation = window.location;
-      delete (window as any).location;
-      window.location = { ...originalLocation, href: '' } as any;
+      Object.defineProperty(
+        window,
+        'location',
+        {
+          configurable: true,
+          writable: true,
+          value: { ...originalLocation, href: '' } as unknown as Location
+        }
+      );
 
       authService.logout();
 
@@ -130,7 +142,15 @@ describe('authService', () => {
       expect(window.location.href).toBe('/login');
 
       // Restore window.location
-      window.location = originalLocation;
+      Object.defineProperty(
+        window,
+        'location',
+        {
+          configurable: true,
+          writable: true,
+          value: originalLocation
+        }
+      );
     });
   });
 
@@ -141,6 +161,8 @@ describe('authService', () => {
         email: 'test@example.com',
         username: 'testuser',
         name: 'Test User',
+        defaultChainCycleLength: 0,
+        defaultChainCycleInterval: 0,
         createdAt: new Date('2024-01-01')
       };
 
@@ -196,7 +218,7 @@ describe('authService', () => {
     it('should refresh token successfully', async () => {
       vi.mocked(api.post).mockResolvedValue({
         data: { token: 'new-token-123' }
-      } as any);
+      } as unknown as AxiosResponse<{ token: string }>);
 
       const newToken = await authService.refreshToken();
 
@@ -210,8 +232,15 @@ describe('authService', () => {
 
       // Mock window.location
       const originalLocation = window.location;
-      delete (window as any).location;
-      window.location = { ...originalLocation, href: '' } as any;
+      Object.defineProperty(
+        window,
+        'location',
+        {
+          configurable: true,
+          writable: true,
+          value: { ...originalLocation, href: '' } as unknown as Location
+        }
+      );
 
       const newToken = await authService.refreshToken();
 
@@ -219,7 +248,15 @@ describe('authService', () => {
       expect(window.location.href).toBe('/login');
 
       // Restore window.location
-      window.location = originalLocation;
+      Object.defineProperty(
+        window,
+        'location',
+        {
+          configurable: true,
+          writable: true,
+          value: originalLocation
+        }
+      );
     });
   });
 });

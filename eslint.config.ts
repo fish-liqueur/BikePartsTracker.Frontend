@@ -25,12 +25,12 @@ export default defineConfigWithVueTs(
         {
           ObjectPattern: { minProperties: 3, consistent: true },
           ObjectExpression: { minProperties: 3, consistent: true },
-          ImportDeclaration: { minProperties: 3, consistent: true },
+          // ImportDeclaration: { minProperties: 3, consistent: true },
         },
       ],
       'vue/max-attributes-per-line': ['error', { singleline: { max: 2 }, multiline: { max: 1 } }],
       'vue/html-indent': ['error', 2, { attribute: 1, closeBracket: 0 }],
-      'vue/multi-word-component-names': ['error', 'never'],
+      'vue/multi-word-component-names': 'off',
     },
   },
 );

@@ -39,10 +39,8 @@ export const partService = {
   },
 
   /** PUT part — returns updated part and chain cycles affected by bike cascade. */
-  async updatePart(
-    id: string,
-    partData: Partial<CreatePartDto> | Partial<UpdatePartDto>,
-  ): Promise<UpdatePartResponse | null> {
+  async updatePart(id: string,
+    partData: Partial<CreatePartDto> | Partial<UpdatePartDto>,): Promise<UpdatePartResponse | null> {
     try {
       const response = await apiService.put<UpdatePartResponse>(`/api/parts/${id}`, partData);
       return response.data ?? null;
