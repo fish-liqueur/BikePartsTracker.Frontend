@@ -1,100 +1,102 @@
 <!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <template>
-  <div class="parts-widget">
-    <!-- View Mode Toggle -->
-    <div class="widget-header">
-      <div class="header-left">
-        <h2 v-if="title" class="widget-title">{{ title }}</h2>
+  <!-- Parts Widget Layout -->
+  <LayoutWidgetGeneral class="parts-widget">
+    <template #header-left>
+      <h2 v-if="title">{{ title }}</h2>
+    </template>
+    <template #header-right>
+      <q-btn label="Add part"
+             color="primary"
+             icon="add"
+             @click="showAddPartDialog = true" />
+      <q-btn-toggle v-model="localViewMode"
+                    :options="viewModeOptions"
+                    toggle-color="primary"
+                    @update:model-value="handleViewModeChange" />
+    </template>
+    <template #header-filter>
+      <q-toggle v-model="showInstalledToOtherBikes"
+                label="Show parts equipped to other bikes"
+                color="primary" />
+    </template>
+    <template #default>
+      <!-- Cards View -->
+      <div v-if="localViewMode === 'cards'" class="parts-widget__cards-view">
+        <div v-if="computedContainers && computedContainers.length > 0"
+             class="parts-widget__containers containers-wrapper"
+             :class="{
+               'parts-widget__containers--single containers-single': computedContainers.length === 1,
+               'parts-widget__containers--multiple containers-multiple': computedContainers.length > 1
+             }">
+          <PartsDragContainer v-for="container in computedContainers"
+                              :key="container.id"
+                              class="parts-widget__drag-container"
+                              :parts="container.parts"
+                              :container-id="container.id"
+                              :title="container.title"
+                              :show-count="showCount"
+                              :current-bike-mileage="currentBikeMileage"
+                              :empty-text="container.emptyText"
+                              :bike-context="container.id === 'available' ? null : bikeContext"
+                              @part-dropped="handlePartDropped"
+                              @part-moved="handlePartMoved"
+                              @full-details="handleFullDetails"
+                              @rides-history="handleRidesHistory"
+                              @show-bike="handleShowBike"
+                              @remove-from-bike="handleRemoveFromBike"
+                              @put-on-other-bike="handlePutOnOtherBike"
+                              @pass-to-other-user="handlePassToOtherUser"
+                              @delete="handleDelete"
+                              @configure="handleConfigure" />
+        </div>
+        <div v-else class="no-containers">
+          <q-icon name="error_outline"
+                  size="48px"
+                  color="grey-5" />
+          <p>No parts available</p>
+        </div>
       </div>
-      <div class="header-right">
-        <q-btn label="Add part"
-               color="primary"
-               icon="add"
-               @click="showAddPartDialog = true" />
-        <q-toggle v-model="showInstalledToOtherBikes"
-                  label="Show parts equipped to other bikes"
-                  color="primary"
-                  class="toggle-filter" />
-        <q-btn-toggle v-model="localViewMode"
-                      :options="viewModeOptions"
-                      toggle-color="primary"
-                      @update:model-value="handleViewModeChange" />
+      <!-- Table View -->
+      <div v-else class="parts-widget__table-view">
+        <PartsTableContainer v-for="container in computedContainers" 
+                             :key="container.id" 
+                             :parts="container.parts"
+                             :container-id="container.id"
+                             :title="container.title"
+                             :show-count="showCount"
+                             :current-bike-mileage="currentBikeMileage"
+                             :loading="isLoading"
+                             :columns="tableColumns"
+                             @part-selected="handlePartSelected"
+                             @full-details="handleFullDetails"
+                             @rides-history="handleRidesHistory"
+                             @show-bike="handleShowBike"
+                             @remove-from-bike="handleRemoveFromBike"
+                             @put-on-other-bike="handlePutOnOtherBike"
+                             @pass-to-other-user="handlePassToOtherUser"
+                             @delete="handleDelete"
+                             @configure="handleConfigure" />
       </div>
-    </div>
+    </template>
+  </LayoutWidgetGeneral>
 
-    <!-- Cards View -->
-    <div v-if="localViewMode === 'cards'" class="cards-view">
-      <div v-if="computedContainers && computedContainers.length > 0"
-           class="containers-wrapper"
-           :class="{
-             'containers-single': computedContainers.length === 1,
-             'containers-multiple': computedContainers.length > 1
-           }">
-        <PartsDragContainer v-for="container in computedContainers"
-                            :key="container.id"
-                            :parts="container.parts"
-                            :container-id="container.id"
-                            :title="container.title"
-                            :show-count="showCount"
-                            :current-bike-mileage="currentBikeMileage"
-                            :empty-text="container.emptyText"
-                            :bike-context="container.id === 'available' ? null : bikeContext"
-                            @part-dropped="handlePartDropped"
-                            @part-moved="handlePartMoved"
-                            @full-details="handleFullDetails"
-                            @rides-history="handleRidesHistory"
-                            @show-bike="handleShowBike"
-                            @remove-from-bike="handleRemoveFromBike"
-                            @put-on-other-bike="handlePutOnOtherBike"
-                            @pass-to-other-user="handlePassToOtherUser"
-                            @delete="handleDelete"
-                            @configure="handleConfigure" />
-      </div>
-      <div v-else class="no-containers">
-        <q-icon name="error_outline"
-                size="48px"
-                color="grey-5" />
-        <p>No parts available</p>
-      </div>
-    </div>
-    <!-- Table View -->
-    <div v-else class="table-view">
-      <PartsTableContainer v-for="container in computedContainers" 
-                           :key="container.id" 
-                           :parts="container.parts"
-                           :container-id="container.id"
-                           :title="container.title"
-                           :show-count="showCount"
-                           :current-bike-mileage="currentBikeMileage"
-                           :loading="isLoading"
-                           :columns="tableColumns"
-                           @part-selected="handlePartSelected"
-                           @full-details="handleFullDetails"
-                           @rides-history="handleRidesHistory"
-                           @show-bike="handleShowBike"
-                           @remove-from-bike="handleRemoveFromBike"
-                           @put-on-other-bike="handlePutOnOtherBike"
-                           @pass-to-other-user="handlePassToOtherUser"
-                           @delete="handleDelete"
-                           @configure="handleConfigure" />
-    </div>
+  <!-- Dialogs -->
+  <InstallPartDialog v-model="showInstallDialog"
+                     :part-name="partName"
+                     :source-bike-name="sourceBikeName"
+                     :target-bike-name="targetBikeName"
+                     :current-bike-mileage="currentBikeMileage"
+                     @install="handleInstallPart"
+                     @cancel="handleInstallCancel" />
 
-    <InstallPartDialog v-model="showInstallDialog"
-                       :part-name="partName"
-                       :source-bike-name="sourceBikeName"
-                       :target-bike-name="targetBikeName"
-                       :current-bike-mileage="currentBikeMileage"
-                       @install="handleInstallPart"
-                       @cancel="handleInstallCancel" />
-
-    <InstallChainDialog v-model="showInstallChainDialog"
-                        :chain="pendingPartInstall?.part || null"
-                        :target-bike="targetBikeContext"
-                        :current-bike-mileage="currentBikeMileage"
-                        @install-without-chain-cycle="handleInstallChainWithoutChainCycle"
-                        @install-within-chain-cycle="handleInstallChainWithinChainCycle"
-                        @cancel="handleInstallCancel" />
-  </div>
+  <InstallChainDialog v-model="showInstallChainDialog"
+                      :chain="pendingPartInstall?.part || null"
+                      :target-bike="targetBikeContext"
+                      :current-bike-mileage="currentBikeMileage"
+                      @install-without-chain-cycle="handleInstallChainWithoutChainCycle"
+                      @install-within-chain-cycle="handleInstallChainWithinChainCycle"
+                      @cancel="handleInstallCancel" />
 
   <AddPartDialog v-model="showAddPartDialog"
                  :targetBikeId="bikeContext?.id"
@@ -123,6 +125,7 @@ import { EMPTY_GUID } from '@/types';
 import { PartType } from '@/types';
 import { defaultPartColumns } from '../parts/partsTableColumns';
 import type { TableColumn } from '../parts/partsTableColumns';
+import LayoutWidgetGeneral from '@/components/layouts/LayoutWidgetGeneral.vue';
 
 function mergePartIntoCycleChains(
   chainIds: (string | null)[],
@@ -609,88 +612,80 @@ const handleViewModeChange = (mode: 'cards' | 'table') => {
 
 </script>
 
-<style scoped lang="css">
+<style scoped lang="scss">
 .parts-widget {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-}
+  &__cards-view {
+    width: 100%;
+    flex: 1 1 auto;
+    overflow-y: auto;
+  }
 
+  &__table-view {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    width: 100%;
+  }
 
-.toggle-filter {
-  margin-right: 8px;
-}
+  &__containers {
+    display: flex;
+    gap: 1.5rem;
+    flex-direction: column;
 
-.cards-view {
-  width: 100%;
-  flex: 1 1 auto;
-  overflow-y: auto;
-}
+    &--single {
+      flex-direction: column;
+    }
 
-.containers-wrapper {
-  display: flex;
-  gap: 24px;
-  flex-direction: column;
-}
+    &--multiple {
+      flex-direction: row;
+      height: 100%;
 
-.containers-wrapper.containers-multiple {
-  flex-direction: row;
-  height: 100%;
-}
+      & .parts-widget__drag-container {
+        display: flex;
+        flex-direction: column;
+        width: calc(50% - 12px);
+        /* height: 100%; */
+        overflow-y: auto;
+      }
 
-.containers-wrapper.containers-multiple .parts-drag-container {
-  display: flex;
-  flex-direction: column;
-  width: calc(50% - 12px);
-  /* height: 100%; */
-  overflow-y: auto;
-}
+      & .parts-widget__drag-container:first-child {
+        background-color: rgba(33, 186, 69, 0.1);
+      }
 
-.containers-wrapper.containers-multiple .parts-drag-container:first-child {
-  background-color: rgba(33, 186, 69, 0.1);
-}
+      & .parts-widget__drag-container:last-child {
+        background-color: rgba(49, 204, 236, 0.1);
+      }
 
-.containers-wrapper.containers-multiple .parts-drag-container:first-child :deep(.part-card) {
-  box-shadow:
-    2px 1px .5rem rgba(33, 186, 69, 0.4),
-    2px 2px .4rem rgba(49, 204, 236, 0.3),
-    0 3px 1px -2px rgba(33, 186, 69, 0.3);
-  transition: 0.3s;
-}
+      & .parts-widget__drag-container:first-child :deep(.part-card) {
+        box-shadow:
+          2px 1px .5rem rgba(33, 186, 69, 0.4),
+          2px 2px .4rem rgba(49, 204, 236, 0.3),
+          0 3px 1px -2px rgba(33, 186, 69, 0.3);
+      }
 
-.containers-wrapper.containers-multiple .parts-drag-container:first-child :deep(.part-card):hover {
-  box-shadow:
-    2px 1px .5rem rgba(33, 186, 69, 0.8),
-    2px 2px .4rem rgba(49, 204, 236, 0.6),
-    0 3px 1px -2px rgba(33, 186, 69, 0.6);
-}
+      & .parts-widget__drag-container:first-child :deep(.part-card):hover {
+        box-shadow:
+          2px 1px .5rem rgba(33, 186, 69, 0.8),
+          2px 2px .4rem rgba(49, 204, 236, 0.6),
+          0 3px 1px -2px rgba(33, 186, 69, 0.6);
+      }
 
-.containers-wrapper.containers-multiple .parts-drag-container:last-child {
-  background-color: rgba(49, 204, 236, 0.1);
-  box-shadow:
-    2px 1px .5rem rgba(49, 204, 236, 0.6),
-    2px 2px .4rem rgba(49, 204, 236, 0.5),
-    0 3px 1px -2px rgba(49, 204, 236, 0.5);
-}
+      & .parts-widget__drag-container:last-child :deep(.part-card.part-card--on-other-bike) {
+        filter: grayscale(60%);
+        /* background-color: rgba(193, 0, 21, 0.1); */
+        box-shadow:
+          2px 1px .5rem rgba(193, 0, 21, 0.4),
+          2px 2px .4rem rgba(193, 0, 21, 0.3),
+          0 3px 1px -2px rgba(193, 0, 21, 0.3);
+      }
 
-.containers-wrapper.containers-multiple .parts-drag-container:last-child :deep(.part-card.part-card--on-other-bike) {
-  filter: grayscale(60%);
-  /* background-color: rgba(193, 0, 21, 0.1); */
-  box-shadow:
-    2px 1px .5rem rgba(193, 0, 21, 0.4),
-    2px 2px .4rem rgba(193, 0, 21, 0.3),
-    0 3px 1px -2px rgba(193, 0, 21, 0.3);
-}
-
-.containers-wrapper.containers-single {
-  max-width: 100%;
-}
-
-.table-view {
-  flex: 1 1 auto;
-  overflow-y: auto;
-  width: 100%;
+      & .parts-widget__drag-container:last-child :deep(.part-card):hover {
+        box-shadow:
+          2px 1px .5rem rgba(193, 0, 21, 0.8),
+          2px 2px .4rem rgba(193, 0, 21, 0.6),
+          0 3px 1px -2px rgba(193, 0, 21, 0.6);
+      }
+    }
+  }
 }
 
 .no-containers {
@@ -706,24 +701,5 @@ const handleViewModeChange = (mode: 'cards' | 'table') => {
 .no-containers p {
   margin: 16px 0 0 0;
   font-size: 1rem;
-}
-
-@media (max-width: 1024px) {
-  .containers-wrapper.containers-multiple {
-    flex-direction: column;
-  }
-}
-
-@media (max-width: 768px) {
-  .widget-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-  }
-
-  .header-right {
-    width: 100%;
-    justify-content: flex-end;
-  }
 }
 </style>
