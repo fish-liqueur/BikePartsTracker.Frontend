@@ -175,18 +175,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
-import type { Bike, BikePart } from '@/types';
-
-// Basic Ride interface - can be extended when Ride type is defined
-interface Ride {
-  id?: string;
-  date: Date | string;
-  mileage?: number;
-  distance?: number;
-  duration?: number;
-  notes?: string;
-  [key: string]: unknown;
-}
+import type { Bike, BikePart, Ride } from '@/types';
 
 interface Props {
   bike: Bike;
@@ -227,32 +216,38 @@ const totalMileage = (part: BikePart): number => {
   return Math.max(0, props.currentBikeMileage - (part.mileageAtInstallation || 0));
 };
 
-// Calculate mileage in current maintenance cycle
-// This assumes maintenance cycles are tracked via PartUsageHistory
+// Open usage period (no end date) = current install interval; distance is meters from API
 const currentMaintenanceCycleMileage = (part: BikePart): number | null => {
-  if (!part.usageHistory || part.usageHistory.length === 0) {
-    return null;
+  const history = part.usageHistory?.filter((h) => !h.isShadow) ?? [];
+  if (history.length === 0) return null;
+
+  const open = [...history]
+    .filter((h) => !h.endDate)
+    .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
+
+  if (!open) return null;
+
+  if (open.distance > 0) {
+    return Math.round(open.distance / 1000);
   }
-  
-  // Get the most recent usage history entry (last maintenance)
-  const lastMaintenance = part.usageHistory
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
-  
-  if (!lastMaintenance || !props.currentBikeMileage) {
-    return null;
+  if (props.currentBikeMileage != null && part.mileageAtInstallation != null) {
+    return Math.max(0, props.currentBikeMileage - part.mileageAtInstallation);
   }
-  
-  return Math.max(0, props.currentBikeMileage - lastMaintenance.mileage);
+  return null;
 };
 
-// Format ride for display
+// Format ride for display (distances from API in meters)
 const formatRide = (ride: Ride): string => {
-  const date = typeof ride.date === 'string' ? new Date(ride.date) : ride.date;
+  const date =
+    typeof ride.startDateLocal === 'string'
+      ? new Date(ride.startDateLocal)
+      : ride.startDateLocal;
   const dateStr = date.toLocaleDateString();
-  const mileage = ride.mileage || ride.distance || 0;
-  
-  if (mileage > 0) {
-    return `${dateStr} - ${mileage} km`;
+  const meters = ride.userDistance || ride.distance || 0;
+  const km = Math.round((meters / 1000) * 10) / 10;
+
+  if (km > 0) {
+    return `${dateStr} - ${km} km`;
   }
   return dateStr;
 };

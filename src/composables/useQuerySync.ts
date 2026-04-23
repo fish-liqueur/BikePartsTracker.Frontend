@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- Query config values differ per key (booleans, unions); `any` here keeps correct inference for parse/serialize. */
 import { ref, watch } from 'vue';
 import type { Ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -39,7 +40,7 @@ export interface SetParamOptions {
 
 type ConfigValue<T> = T extends QueryParamConfig<infer V> ? V : never;
 
-type QueryState<TConfig extends Record<string, QueryParamConfig<string | null | undefined>>> = {
+type QueryState<TConfig extends Record<string, QueryParamConfig<any>>> = {
   [K in keyof TConfig]: Ref<ConfigValue<TConfig[K]>>;
 };
 
@@ -49,7 +50,7 @@ type QueryState<TConfig extends Record<string, QueryParamConfig<string | null | 
  * - Provides setters that merge existing query and use router.replace by default.
  * - Skips redundant updates using a lightweight equality check.
  */
-export function useQuerySync<TConfig extends Record<string, QueryParamConfig<string | null | undefined>>>(config: TConfig) {
+export function useQuerySync<TConfig extends Record<string, QueryParamConfig<any>>>(config: TConfig) {
   const route = useRoute();
   const router = useRouter();
 
@@ -80,15 +81,15 @@ export function useQuerySync<TConfig extends Record<string, QueryParamConfig<str
 
   // Initialize refs
   Object.entries(config).forEach(([name, cfg]) => {
-    state[name as keyof TConfig] = ref(parseValue(cfg as QueryParamConfig<string | null | undefined>, route.query[(cfg as QueryParamConfig<string | null | undefined>).key])) as QueryState<TConfig>[keyof TConfig];
+    state[name as keyof TConfig] = ref(parseValue(cfg as QueryParamConfig<any>, route.query[(cfg as QueryParamConfig<any>).key])) as QueryState<TConfig>[keyof TConfig];
   });
 
   const syncFromRoute = () => {
     Object.entries(config).forEach(([name, cfg]) => {
       const current = state[name as keyof TConfig].value;
-      const next = parseValue(cfg as QueryParamConfig<string | null | undefined>, route.query[cfg.key]);
+      const next = parseValue(cfg as QueryParamConfig<any>, route.query[cfg.key]);
       const equals = cfg.equals ?? defaultEquals;
-      if (!equals(current as string | null | undefined, next as string | null | undefined)) {
+      if (!equals(current as any, next as any)) {
         state[name as keyof TConfig].value = next as unknown as ConfigValue<TConfig[keyof TConfig]>;
       }
     });
@@ -124,10 +125,10 @@ export function useQuerySync<TConfig extends Record<string, QueryParamConfig<str
     const cfg = config[name];
     
     // Check against the actual query param value, not state (state might be out of sync due to v-model)
-    const currentQueryValue = parseValue(cfg as QueryParamConfig<string | null | undefined>, route.query[cfg.key]);
+    const currentQueryValue = parseValue(cfg as QueryParamConfig<any>, route.query[cfg.key]);
     const equals = cfg.equals ?? defaultEquals;
     
-    if (equals(currentQueryValue as string | null | undefined, value as string | null | undefined)) {
+    if (equals(currentQueryValue as any, value as any)) {
       // Already in sync with URL, just ensure state matches
       state[name].value = value as unknown as ConfigValue<TConfig[keyof TConfig]>;
       return;
@@ -153,7 +154,7 @@ export function useQuerySync<TConfig extends Record<string, QueryParamConfig<str
       const equals = cfg.equals ?? defaultEquals;
       const nextVal = updates[name];
       if (nextVal === undefined) return;
-      if (!equals(state[name].value as string | null | undefined, nextVal as string | null | undefined)) {
+      if (!equals(state[name].value as any, nextVal as any)) {
         state[name].value = nextVal as unknown as ConfigValue<TConfig[keyof TConfig]>;
         changed = true;
       }

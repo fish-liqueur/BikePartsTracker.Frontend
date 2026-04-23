@@ -146,15 +146,110 @@ export interface CreateMaintenanceDto {
   notes?: string;
 }
 
-// Part Usage History
+// Rides (Strava-imported activities)
+export interface Ride {
+  id: string;
+  stravaActivityId: number;
+  bikeId: string | null;
+  name: string;
+  description?: string | null;
+  type: string;
+  gearId?: string | null;
+  /** Distance from Strava, meters */
+  distance: number;
+  /** User-adjusted distance, meters */
+  userDistance: number;
+  isActive: boolean;
+  startDateLocal: Date;
+}
+
+export interface ImportStravaRidesRequestDto {
+  startDate: Date | string;
+  endDate: Date | string;
+}
+
+export interface ImportStravaRidesResponseDto {
+  inserted: number;
+  updated: number;
+  rides: Ride[];
+}
+
+// Works (maintenance / replacement rules on Part, Bike, or ChainCycle)
+export type WorkType = 'OneTime' | 'Repeating' | 'Cyclic';
+export type WorkTriggerType = 'Distance' | 'Time';
+export type WorkParentType = 'Part' | 'Bike' | 'ChainCycle';
+
+export interface Work {
+  id: string;
+  name: string;
+  description?: string | null;
+  startDate: Date;
+  type: WorkType;
+  triggerType: WorkTriggerType;
+  parentType: WorkParentType;
+  parentId: string;
+  /** Distance trigger: meters; time trigger: days */
+  triggerValue: number;
+  isActive: boolean;
+  consumedValue: number;
+  remainingValue: number;
+  needsAttention: boolean;
+}
+
+export interface CreateWorkDto {
+  name: string;
+  description?: string | null;
+  startDate?: Date | string;
+  type?: WorkType;
+  triggerType?: WorkTriggerType;
+  parentType?: WorkParentType;
+  parentId: string;
+  triggerValue: number;
+  isActive?: boolean;
+}
+
+export interface UpdateWorkDto {
+  name?: string | null;
+  description?: string | null;
+  startDate?: Date | string | null;
+  type?: WorkType | null;
+  triggerType?: WorkTriggerType | null;
+  parentType?: WorkParentType | null;
+  parentId?: string | null;
+  triggerValue?: number | null;
+  isActive?: boolean | null;
+}
+
+/**
+ * Part usage period (install/remove window on a bike), from `GET /api/usageperiods/part/{id}`.
+ * Distances are meters (backend cached interval).
+ */
 export interface PartUsageHistory {
   id: string;
-  partId: string;
-  part: BikePart;
-  mileage: number;
-  date: Date;
-  notes?: string;
-  createdAt: Date;
+  bikePartId: string;
+  bikeId: string | null;
+  startDate: Date;
+  endDate: Date | null;
+  distance: number;
+  isShadow: boolean;
+  workId: string | null;
+  sourceUsagePeriodId: string | null;
+  notes?: string | null;
+}
+
+export interface CreatePartUsageHistoryDto {
+  bikePartId: string;
+  bikeId?: string | null;
+  startDate: Date | string;
+  endDate?: Date | string | null;
+  notes?: string | null;
+}
+
+export interface UpdatePartUsageHistoryDto {
+  bikeId?: string | null;
+  startDate?: Date | string | null;
+  endDate?: Date | string | null;
+  notes?: string | null;
 }
 
 // Enums

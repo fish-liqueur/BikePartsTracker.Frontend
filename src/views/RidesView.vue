@@ -1,27 +1,14 @@
 <template>
   <div class="view-container">
-    <div class="view-content">
-      <p>Log and track your bike rides here.</p>
-    </div>
+    <RidesWidget title="Rides" />
   </div>
 </template>
 
 <script setup lang="ts">
-// Rides view - placeholder for ride tracking
+import RidesWidget from '@/components/widgets/RidesWidget.vue';
 </script>
 
-<style scoped>
-.view-content {
-  background: white;
-  padding: 24px;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
+<style scoped lang="scss">
 
-.view-content p {
-  color: #4a5568;
-  font-size: 1rem;
-  margin: 0;
-}
 </style>
 
