@@ -114,7 +114,7 @@ import { useBikesStore } from '@/stores/bikesStore';
 import { useChainCyclesStore } from '@/stores/chainCyclesStore';
 import { useLayout } from '@/composables/useLayout';
 import PartsDragContainer from '@/components/parts/PartsDragContainer.vue';
-import PartsTableContainer from '@/components/parts/PartsTableContainer.vue';
+import PartsTableContainer from '@/components/tables/PartsTableContainer.vue';
 import InstallPartDialog from '@/components/dialogs/InstallPartDialog.vue';
 import InstallChainDialog from '@/components/dialogs/InstallChainDialog.vue';
 import AddPartDialog from '@/components/dialogs/AddPartDialog.vue';
@@ -123,8 +123,8 @@ import type {
 } from '@/types';
 import { EMPTY_GUID } from '@/types';
 import { PartType } from '@/types';
-import { defaultPartColumns } from '../parts/partsTableColumns';
-import type { TableColumn } from '../parts/partsTableColumns';
+import { defaultPartColumns } from '@/components/tables/partsTableColumns';
+import type { TableColumn } from '@/components/tables/partsTableColumns';
 import LayoutWidgetGeneral from '@/components/layouts/LayoutWidgetGeneral.vue';
 
 function mergePartIntoCycleChains(

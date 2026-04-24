@@ -1,4 +1,4 @@
-import type { TableColumn } from '@/components/parts/partsTableColumns';
+import type { TableColumn } from '@/components/tables/partsTableColumns';
 
 export const defaultRideColumns: TableColumn[] = [
   {

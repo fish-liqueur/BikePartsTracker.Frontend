@@ -93,7 +93,7 @@ import { ref } from 'vue';
 import type { QTableProps } from 'quasar';
 import type { Ride } from '@/types';
 import { defaultRideColumns } from './ridesTableColumns';
-import type { TableColumn } from '@/components/parts/partsTableColumns';
+import type { TableColumn } from '@/components/tables/partsTableColumns';
 
 type QTableRequestProps = Parameters<NonNullable<QTableProps['onRequest']>>[0];
 
