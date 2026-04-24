@@ -12,7 +12,7 @@ export const defaultRideColumns: TableColumn[] = [
     name: 'distance',
     label: 'Distance',
     field: 'distance',
-    align: 'right',
+    align: 'left',
     sortable: true,
   },
   {

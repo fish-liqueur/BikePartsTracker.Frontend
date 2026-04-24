@@ -1,6 +1,8 @@
 import { apiService } from './api';
 import type {
   Ride,
+  CreateRideDto,
+  UpdateRideDto,
   ImportStravaRidesRequestDto,
   ImportStravaRidesResponseDto,
 } from '@/types';
@@ -17,6 +19,16 @@ export const ridesService = {
       endDate: params?.endDate,
     });
     return response.data ?? [];
+  },
+
+  async createRide(dto: CreateRideDto): Promise<Ride | null> {
+    const response = await apiService.post<Ride>('/api/rides', dto);
+    return response.data ?? null;
+  },
+
+  async updateRide(id: string, dto: UpdateRideDto): Promise<Ride | null> {
+    const response = await apiService.put<Ride>(`/api/rides/${id}`, dto);
+    return response.data ?? null;
   },
 
   async importFromStrava(body: ImportStravaRidesRequestDto,): Promise<ImportStravaRidesResponseDto> {

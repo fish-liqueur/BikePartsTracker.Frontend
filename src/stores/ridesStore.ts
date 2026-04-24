@@ -1,7 +1,13 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { ridesService } from '@/services/ridesService';
-import type { Ride, ImportStravaRidesRequestDto, FetchStatus } from '@/types';
+import type {
+  Ride,
+  CreateRideDto,
+  UpdateRideDto,
+  ImportStravaRidesRequestDto,
+  FetchStatus,
+} from '@/types';
 import { getErrorMessage } from '@/utils/error';
 
 export const useRidesStore = defineStore('rides', () => {
@@ -62,6 +68,45 @@ export const useRidesStore = defineStore('rides', () => {
     }
   };
 
+  const createRide = async (dto: CreateRideDto) => {
+    try {
+      isLoading.value = true;
+      error.value = null;
+      const created = await ridesService.createRide(dto);
+      if (created) {
+        rides.value.push(created);
+      }
+      return created;
+    } catch (err: unknown) {
+      error.value = getErrorMessage(err, 'Failed to create ride');
+      throw err;
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  const updateRide = async (id: string, dto: UpdateRideDto) => {
+    try {
+      isLoading.value = true;
+      error.value = null;
+      const updated = await ridesService.updateRide(id, dto);
+      if (updated) {
+        const index = rides.value.findIndex((r) => r.id === id);
+        if (index >= 0) {
+          rides.value[index] = updated;
+        } else {
+          rides.value.push(updated);
+        }
+      }
+      return updated;
+    } catch (err: unknown) {
+      error.value = getErrorMessage(err, 'Failed to update ride');
+      throw err;
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
   const setRides = (list: Ride[]) => {
     rides.value = list;
   };
@@ -87,6 +132,8 @@ export const useRidesStore = defineStore('rides', () => {
     lastImportSummary,
     ensureRides,
     fetchRides,
+    createRide,
+    updateRide,
     importFromStrava,
     setRides,
     clearError,

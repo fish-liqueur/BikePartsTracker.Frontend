@@ -13,7 +13,7 @@
       <q-btn label="Add Ride"
              color="primary"
              icon="add"
-             @click="handleAddRide" />
+             @click="handleClickAddRide" />
     </template>
     <template #default>
       <div class="rides-widget__table-view">
@@ -24,16 +24,22 @@
       </div>
     </template>
   </LayoutWidgetGeneral>
+
+  <!-- Dialogs -->
+  <AddRideDialog v-model="showAddRideDialog"
+                 @submit="handleAddRideSubmit" />
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRidesStore } from '@/stores/ridesStore';
 import LayoutWidgetGeneral from '@/components/layouts/LayoutWidgetGeneral.vue';
 import RidesTableContainer from '@/components/rides/RidesTableContainer.vue';
 import { defaultRideColumns } from '@/components/rides/ridesTableColumns';
-import type { Bike } from '@/types';
+import AddRideDialog from '@/components/dialogs/AddRideDialog.vue';
+import type { Bike, CreateRideDto } from '@/types';
+import { useLayout } from '@/composables/useLayout';
 
 interface Props {
   bikeContext?: Bike | null;
@@ -47,8 +53,12 @@ const props = withDefaults(defineProps<Props>(), {
 
 const ridesStore = useRidesStore();
 const { ridesSorted, isLoading } = storeToRefs(ridesStore);
+const {
+  showSuccess, showError, withAjaxBar 
+} = useLayout();
 
 const rideColumns = defaultRideColumns;
+const showAddRideDialog = ref(false);
 
 const rides = computed(() => {
   const list = ridesSorted.value;
@@ -63,12 +73,25 @@ onMounted(() => {
   void ridesStore.ensureRides();
 });
 
+const handleClickAddRide = () => {
+  showAddRideDialog.value = true;
+};
+
 const handleSyncRides = () => {
   void ridesStore.fetchRides();
 };
 
-const handleAddRide = () => {
-  // Placeholder until add-ride flow exists
+const handleAddRideSubmit = async (ride: CreateRideDto) => {
+  try {
+    const createdRide = await withAjaxBar(ridesStore.createRide(ride));
+    showSuccess(`Ride ${createdRide?.name} created successfully`);
+
+  } catch (err: unknown) {
+    console.error('Failed to create ride:', err);
+    showError((err as Error)?.message || 'Failed to create ride');
+  } finally {
+    showAddRideDialog.value = false;
+  }
 };
 </script>
 

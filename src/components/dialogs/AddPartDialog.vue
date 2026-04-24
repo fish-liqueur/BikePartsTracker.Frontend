@@ -165,22 +165,17 @@ const handleCancel = () => {
 };
 
 const handleSubmit = (formData: CreatePartDto) => {
-  // Create CreatePartDto - include all form fields
-  // Note: description is included even though not in CreatePartDto type
-  // as BikePart requires it and backend may accept it
   const createData: CreatePartDto = {
     name: formData.name,
     partType: formData.partType,
     brand: formData.brand || undefined,
+    description: formData.description || undefined,
     model: formData.model || undefined,
     bikeId: formData.bikeId || undefined,
     mileageAtInstallation: formData.mileageAtInstallation
   };
-  // Include description if provided (backend may accept it)
-  const dataWithDescription = formData.description 
-    ? { ...createData, description: formData.description } as CreatePartDto
-    : createData;
-  emit('create', dataWithDescription);
+
+  emit('create', createData);
   emit('update:modelValue', false);
 };
 </script>

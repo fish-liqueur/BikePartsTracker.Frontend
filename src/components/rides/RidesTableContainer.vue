@@ -39,12 +39,12 @@
           <q-td key="distance" :props="props">
             <div class="rides-table__distance">
               <div class="rides-table__distance-line">
-                <span class="rides-table__distance-label">Distance</span>
-                <span>{{ formatKm(props.row.distance) }}</span>
+                <span class="rides-table__distance-label">Recorded distance</span>
+                <span>{{ formatKm(props.row.recordedDistance) }}</span>
               </div>
               <div class="rides-table__distance-line">
                 <span class="rides-table__distance-label">User distance</span>
-                <span>{{ formatKm(props.row.userDistance) }}</span>
+                <span>{{ formatKm(props.row.distance) }}</span>
               </div>
             </div>
           </q-td>
@@ -201,7 +201,6 @@ const formatKm = (meters: number): string => {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    align-items: flex-end;
   }
 
   &__distance-line {
