@@ -13,12 +13,6 @@
              filled
              rows="2"
              class="m-0 p-0" />
-    <q-input v-model="formData.distance"
-             label="Distance *"
-             type="number"
-             filled
-             :rules="[(val: number | null) => val !== null && val !== undefined && val >= 0 || 'Distance must be a positive number']"
-             class="m-0 p-0" />
 
     <q-select v-model="formData.bikeId"
               :options="bikeOptions"
@@ -31,19 +25,26 @@
               :rules="[(val: string | null) => !!val || 'Please pick a bike']"
               class="m-0 p-0" />
     <DateTimePicker v-model="formData.startDateLocal" label="Start Time" />
-   
-
+    <RideDistanceEditor v-model="formData.distance"
+                        :recorded-distance="props.initialData?.recordedDistance ?? 0" />
+    <!-- <q-input v-model="formData.distance"
+             label="Distance *"
+             type="number"
+             filled
+             :rules="[(val: number | null) => val !== null && val !== undefined && val >= 0 || 'Distance must be a positive number']"
+             class="m-0 p-0" /> -->
   </q-form>
 </template>
 
 <script setup lang="ts">
-import type { CreateRideDto } from '@/types';
+import type { CreateRideDto, Ride } from '@/types';
 import { computed, ref, watch } from 'vue';
 import { useBikesStore } from '@/stores/bikesStore';
 import DateTimePicker from '@/components/shared/DateTimePicker.vue';
+import RideDistanceEditor from '@/components/shared/RideDistanceEditor.vue';
 
 interface Props {
-  initialData?: Partial<CreateRideDto>;
+  initialData?: Partial<Ride>;
 }
 
 const props = withDefaults(defineProps<Props>(), {

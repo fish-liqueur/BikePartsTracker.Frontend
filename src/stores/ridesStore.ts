@@ -85,6 +85,20 @@ export const useRidesStore = defineStore('rides', () => {
     }
   };
 
+  const deleteRide = async (id: string) => {
+    try {
+      isLoading.value = true;
+      error.value = null;
+      await ridesService.deleteRide(id);
+      rides.value = rides.value.filter((r) => r.id !== id);
+    } catch (err: unknown) {
+      error.value = getErrorMessage(err, 'Failed to delete ride');
+      throw err;
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
   const updateRide = async (id: string, dto: UpdateRideDto) => {
     try {
       isLoading.value = true;
@@ -133,6 +147,7 @@ export const useRidesStore = defineStore('rides', () => {
     ensureRides,
     fetchRides,
     createRide,
+    deleteRide,
     updateRide,
     importFromStrava,
     setRides,

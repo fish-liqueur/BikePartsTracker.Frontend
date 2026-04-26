@@ -17,7 +17,8 @@
              :selected-rows-label="getSelectedString"
              selection="none"
              :grid="$q.screen.xs"
-             class="rides-table__table">
+             class="rides-table__table"
+             :table-row-class-fn="rowClassFn">
       <template v-slot:top-right>
         <q-input v-model="filter"
                  borderless
@@ -34,7 +35,11 @@
       <template v-slot:body="props">
         <q-tr :props="props" class="rides-table__row">
           <q-td key="date" :props="props">
-            {{ formatDate(props.row.startDateLocal) }}
+            <div class="display-flex flex-column flex-align-start gap-2 w-100">
+              <span>{{ formatDate(props.row.startDateLocal) }}</span>
+              <span v-if="!props.row.isActive" class="co">Ignored (doesn't count)</span>
+            </div>
+              
           </q-td>
           <q-td key="distance" :props="props">
             <div class="rides-table__distance">
@@ -60,18 +65,41 @@
           <q-td key="actions"
                 :props="props"
                 auto-width>
-            <q-btn flat
-                   dense
-                   no-caps
-                   color="grey-8"
-                   label="Ignore"
-                   @click.stop="$emit('ignore', props.row.id)" />
-            <q-btn flat
-                   dense
-                   no-caps
-                   color="primary"
-                   label="Edit"
-                   @click.stop="$emit('edit', props.row.id)" />
+            <div class="display-flex flex-row flex-align-center flex-wrap flex-justify-end gap-2">
+              <div class="display-flex flex-row gap-2">
+                <q-btn 
+                  v-if="!props.row.stravaActivityId"
+                  outlined
+                  dense
+                  no-caps
+                  color="negative"
+                  label="Delete"
+                  @click.stop="$emit('deleteRide', props.row as Ride)" />
+                <q-btn 
+                  v-if="props.row.isActive"
+                  outlined
+                  dense
+                  no-caps
+                  color="accent"
+                  label="Ignore"
+                  @click.stop="$emit('changeActivityState', props.row as Ride, false)" />
+                <q-btn 
+                  v-else
+                  outlined
+                  dense
+                  no-caps
+                  color="secondary"
+                  label="Activate"
+                  @click.stop="$emit('changeActivityState', props.row as Ride, true)" />
+                <q-btn
+                  outlined
+                  dense
+                  no-caps
+                  color="primary"
+                  label="Edit"
+                  @click.stop="$emit('edit', props.row as Ride)" />
+              </div>
+            </div>
           </q-td>
         </q-tr>
       </template>
@@ -113,8 +141,9 @@ withDefaults(defineProps<Props>(), {
 });
 
 defineEmits<{
-  ignore: [rideId: string];
-  edit: [rideId: string];
+  changeActivityState: [ride: Ride, newActivityState: boolean];
+  deleteRide: [ride: Ride];
+  edit: [ride: Ride];
 }>();
 
 const filter = ref('');
@@ -126,6 +155,10 @@ const pagination = ref({
 });
 
 const getSelectedString = () => '';
+
+const rowClassFn = (row: Ride) => {
+  return row.isActive ? 'rides-table__row--active' : 'rides-table__row--inactive';
+};
 
 const onRequest = (tableProps: QTableRequestProps) => {
   const {
@@ -170,6 +203,21 @@ const formatKm = (meters: number): string => {
     margin-bottom: 16px;
     padding-bottom: 12px;
     border-bottom: 1px solid #e2e8f0;
+  }
+
+  &__row {
+    background-color: #f7fafc;
+
+    &--active {
+      background-color: #f7fafc;
+    }
+    &--inactive {
+      background-color: #CCC;
+
+      &:hover {
+        background-color: #CCC;
+      }
+    }
   }
 
   &__title {

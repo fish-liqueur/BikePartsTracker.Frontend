@@ -26,6 +26,11 @@ export const ridesService = {
     return response.data ?? null;
   },
 
+  async deleteRide(id: string): Promise<boolean> {
+    const response = await apiService.delete<boolean>(`/api/rides/${id}`);
+    return response.data ?? false;
+  },
+
   async updateRide(id: string, dto: UpdateRideDto): Promise<Ride | null> {
     const response = await apiService.put<Ride>(`/api/rides/${id}`, dto);
     return response.data ?? null;

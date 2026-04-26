@@ -148,11 +148,7 @@ export interface ContainerConfig {
 interface DropOptions {
   part?: BikePart;
 }
-type PartsChangedEvent =
-  | { type: 'configure' | 'deleted' | 'fullDetails' | 'passToOtherUser' | 'putOnOtherBike' | 'removedFromBike' | 'ridesHistory'; partId: string }
-  | { type: 'moved'; partId: string; data: { sourceContainerId: string; targetContainerId: string } }
-  | { type: 'selected'; partId: string; data: { part: BikePart } }
-  | { type: 'showBike'; partId: string; data: { bikeId: string } };
+
 interface Props {
   viewMode?: 'cards' | 'table';
   bikeContext?: Bike | null;
@@ -169,11 +165,6 @@ const props = withDefaults(defineProps<Props>(), {
   currentBikeMileage: 0,
   tableColumns: () => defaultPartColumns
 });
-const emit = defineEmits<{
-  'update:viewMode': [value: 'cards' | 'table'];
-  partsChanged: [event: PartsChangedEvent];
-  viewModeChanged: [mode: 'cards' | 'table'];
-}>();
 
 const router = useRouter();
 const $q = useQuasar();
@@ -342,10 +333,6 @@ const handleAddPart = async (part: CreatePartDto) => {
 };
 
 const handleConfigure = (partId: string) => {
-  emit('partsChanged', {
-    type: 'configure',
-    partId
-  });
   router.push(`/parts/${partId}/configure`);
 };
 
@@ -357,21 +344,30 @@ const handleDelete = async (partId: string) => {
   try {
     await withAjaxBar(partsStore.deletePart(partId));
     showSuccess('Part deleted successfully');
-    emit('partsChanged', {
-      type: 'deleted',
-      partId
-    });
   } catch (err: unknown) {
     console.error('Failed to delete part:', err);
     showError((err as Error)?.message || 'Failed to delete part');
   }
+
+  try {
+    $q.dialog({
+      title: 'Do you want to delete this bike?',
+      message: 'This action cannot be undone. All data will be lost for good.',
+      cancel: true,
+      persistent: false
+    }).onOk(async () => {
+      //TODO: Add deletet part name to response and display here in notification
+      await withAjaxBar(partsStore.deletePart(partId));
+      showSuccess('Part deleted successfully');
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to delete the ride';
+    showError(message);
+  }
 };
 
 const handleFullDetails = (partId: string) => {
-  emit('partsChanged', {
-    type: 'fullDetails',
-    partId
-  });
+  console.log('Full details:', partId);
   router.push(`/parts/${partId}`);
 };
 
@@ -540,9 +536,9 @@ const handlePartDropped = (
   if (targetContainerId === 'available' || targetContainerId === 'all') {
     confirmRemoveFromBike(
       partId,
-      () => emit('partsChanged', {
-        type: 'moved', partId, data: { sourceContainerId, targetContainerId } 
-      }),
+      () => console.log(
+        'Part removed from bike:', partId, sourceContainerId, targetContainerId
+      ),
       () => resyncContainers(),
     );
   }
@@ -551,63 +547,40 @@ const handlePartDropped = (
 const handlePartMoved = (
   partId: string, sourceContainerId: string, targetContainerId: string
 ) => {
-  emit('partsChanged', {
-    type: 'moved',
-    partId,
-    data: { sourceContainerId, targetContainerId }
-  });
+  console.log(
+    'Part moved:', partId, sourceContainerId, targetContainerId
+  );
 };
 
 const handlePartSelected = (part: BikePart) => {
-  emit('partsChanged', {
-    type: 'selected',
-    partId: part.id,
-    data: { part }
-  });
+  console.log('Part selected:', part);
 };
 
 const handlePassToOtherUser = (partId: string) => {
-  emit('partsChanged', {
-    type: 'passToOtherUser',
-    partId
-  });
   // TODO: Implement user selection dialog/modal
+  console.log('Part passed to other user:', partId);
 };
 
 const handlePutOnOtherBike = (partId: string) => {
-  emit('partsChanged', {
-    type: 'putOnOtherBike',
-    partId
-  });
   // TODO: Implement bike selection dialog/modal
+  console.log('Part put on other bike:', partId);
 };
 
 const handleRemoveFromBike = (partId: string) => {
   confirmRemoveFromBike(partId,
-    () => emit('partsChanged', { type: 'removedFromBike', partId }),);
+    () => console.log('Part removed from bike:', partId));
 };
 
 const handleRidesHistory = (partId: string) => {
-  emit('partsChanged', {
-    type: 'ridesHistory',
-    partId
-  });
   router.push(`/parts/${partId}/rides`);
 };
 
 const handleShowBike = (bikeId: string) => {
-  emit('partsChanged', {
-    type: 'showBike',
-    partId: '',
-    data: { bikeId }
-  });
   router.push(`/bikes/${bikeId}`);
 };
 
 const handleViewModeChange = (mode: 'cards' | 'table') => {
   localViewMode.value = mode;
-  emit('update:viewMode', mode);
-  emit('viewModeChanged', mode);
 };
 
 </script>
