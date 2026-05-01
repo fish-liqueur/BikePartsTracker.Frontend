@@ -57,7 +57,7 @@ onMounted(async () => {
 
     <Header />
 
-    <q-page-container class="layout-base-content max-width-1200">
+    <q-page-container class="layout-base-content">
       <router-view />
     </q-page-container>
 

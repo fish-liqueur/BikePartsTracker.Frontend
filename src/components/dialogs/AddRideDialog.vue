@@ -37,7 +37,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import type { CreateRideDto } from '@/types';
+import type { CreateRideDto, Ride } from '@/types';
 import RideForm from '@/components/forms/RideForm.vue';
 
 interface Props {
@@ -53,7 +53,7 @@ const emit = defineEmits<{
 
 const formRef = ref<InstanceType<typeof RideForm>>();
 const isValid = ref(false);
-const initialFormData = ref<CreateRideDto>({
+const initialFormData = ref<Partial<Ride>>({
   name: '',
   description: '',
   bikeId: '',

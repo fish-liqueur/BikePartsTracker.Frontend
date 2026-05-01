@@ -25,7 +25,8 @@
               :rules="[(val: string | null) => !!val || 'Please pick a bike']"
               class="m-0 p-0" />
     <DateTimePicker v-model="formData.startDateLocal" label="Start Time" />
-    <RideDistanceEditor v-model="formData.distance"
+    <RideDistanceEditor v-if="formData.distance" 
+                        v-model="formData.distance"
                         :recorded-distance="props.initialData?.recordedDistance ?? 0" />
     <!-- <q-input v-model="formData.distance"
              label="Distance *"
@@ -37,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-import type { CreateRideDto, Ride } from '@/types';
+import type { Ride } from '@/types';
 import { computed, ref, watch } from 'vue';
 import { useBikesStore } from '@/stores/bikesStore';
 import DateTimePicker from '@/components/shared/DateTimePicker.vue';
@@ -53,13 +54,13 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-  submit: [data: CreateRideDto];
+  submit: [data: Ride];
   'update:isValid': [value: boolean];
 }>();
 
 const bikesStore = useBikesStore();
 
-const formData = ref<CreateRideDto>({
+const formData = ref<Partial<Ride>>({
   name: '',
   description: '',
   bikeId: '',
@@ -105,7 +106,7 @@ const isValid = computed(() => {
 // Handle form submit
 const handleSubmit = () => {
   if (isValid.value) {
-    emit('submit', { ...formData.value });
+    emit('submit', formData.value as Ride);
   }
 };
 

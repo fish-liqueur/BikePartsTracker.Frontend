@@ -5,7 +5,7 @@ import type { StravaAthleteDto, StravaBike } from '@/types';
 // Strava OAuth configuration
 const STRAVA_CLIENT_ID = import.meta.env.VITE_STRAVA_CLIENT_ID || '';
 const STRAVA_REDIRECT_URI = import.meta.env.VITE_STRAVA_REDIRECT_URI || `${window.location.origin}/strava/integration`;
-const STRAVA_SCOPE = 'profile:read_all';
+const STRAVA_SCOPE = 'profile:read_all,activity:read_all';
 const STRAVA_AUTH_URL = 'https://www.strava.com/oauth/authorize';
 
 export interface StravaAuthResponse {

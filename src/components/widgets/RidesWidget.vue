@@ -9,7 +9,7 @@
              outline
              icon="sync"
              :loading="isLoading"
-             @click="handleSyncRides" />
+             @click="handleClickSyncRides" />
       <q-btn label="Add Ride"
              color="primary"
              icon="add"
@@ -34,6 +34,8 @@
   <EditRideDialog v-model="showEditRideDialog"
                   :initial-data="currentRide"
                   @submit="handleEditRideSubmit" />
+  <SyncRidesDialog v-model="showSyncRidesDialog"
+                   @submit="handleSyncRides" />
 </template>
 
 <script setup lang="ts">
@@ -45,7 +47,8 @@ import RidesTableContainer from '@/components/tables/RidesTableContainer.vue';
 import { defaultRideColumns } from '@/components/tables/ridesTableColumns';
 import AddRideDialog from '@/components/dialogs/AddRideDialog.vue';
 import EditRideDialog from '@/components/dialogs/EditRideDialog.vue';
-import type { Bike, CreateRideDto, Ride, UpdateRideDto } from '@/types';
+import SyncRidesDialog from '@/components/dialogs/SyncRidesDialog.vue';
+import type { Bike, CreateRideDto, ImportStravaRidesRequestDto, Ride, UpdateRideDto } from '@/types';
 import { useLayout } from '@/composables/useLayout';
 import { useQuasar } from 'quasar';
 
@@ -70,6 +73,7 @@ const currentRide = ref<Ride | null>(null);
 const rideColumns = defaultRideColumns;
 const showAddRideDialog = ref(false);
 const showEditRideDialog = ref(false);
+const showSyncRidesDialog = ref(false);
 
 const rides = computed(() => {
   const list = ridesSorted.value;
@@ -88,8 +92,19 @@ const handleClickAddRide = () => {
   showAddRideDialog.value = true;
 };
 
-const handleSyncRides = () => {
-  void ridesStore.fetchRides();
+const handleClickSyncRides = () => {
+  showSyncRidesDialog.value = true;
+};
+
+const handleSyncRides = async (importData: ImportStravaRidesRequestDto) => {
+  try {
+    await withAjaxBar(ridesStore.importFromStrava(importData));
+    showSyncRidesDialog.value = false;
+    showSuccess(`Rides synced successfully from ${importData.startDate} to ${importData.endDate}`);
+
+  } catch (err: unknown) {
+    showError((err as Error)?.message || 'Failed to sync rides');
+  }
 };
 
 const handleAddRideSubmit = async (ride: CreateRideDto) => {
