@@ -3,22 +3,22 @@
           :class="{
             'part-card--on-other-bike': isInstalledOnOtherBike
           }">
-    <q-card-section>
-      <div class="part-header">
-        <div class="part-header__chip-wrapper">
+    <q-card-section class="flex-grow">
+      <div class="part-card__header">
+        <div class="part-card__chip-wrapper">
           <q-chip :label="part.partType"
                   color="primary"
                   text-color="white"
                   size="md"
-                  class="part-type-chip" />
+                  class="part-card__chip" />
           <q-chip v-if="part.bikeId"
                   :label="bikesStore.getBikeById(part.bikeId)?.name"
                   :color="bikeChipColor"
                   text-color="white"
                   size="md"
-                  class="bike-name-chip" />
+                  class="part-card__bike-name-chip" />
         </div>
-        <div class="chain-description"
+        <div class="part-card__chain-description"
              v-if="isChain && bikeContext"
              :style="chainCycleStatus.style">
           <ElementWithTooltipButton :tooltip-text="chainCycleStatus.tooltipText" show-always>
@@ -26,11 +26,11 @@
           </ElementWithTooltipButton>
         </div>
 
-        <h3 class="part-name">{{ part.name }}</h3>
-        <div v-if="part.description" class="part-brand-model">
+        <h3 class="part-card__name">{{ part.name }}</h3>
+        <div v-if="part.description" class="part-card__brand-model">
           {{ part.description }}
         </div>
-        <div v-else-if="part.brand || part.model" class="part-brand-model">
+        <div v-else-if="part.brand || part.model" class="part-card__brand-model">
           {{ part.brand }} {{ part.model }}
         </div>
       </div>
@@ -38,20 +38,20 @@
 
     <q-separator />
 
-    <q-card-section class="part-info">
+    <q-card-section class="part-card__info">
 
 
       <!-- Total Mileage -->
-      <div class="info-row">
-        <span class="info-label">Total Mileage:</span>
-        <span class="info-value">{{ totalMileage }} km</span>
+      <div class="part-card__info-row">
+        <span class="part-card__info-label">Total Mileage:</span>
+        <span class="part-card__info-value">{{ formatMeters(part.totalDistance ?? 0) }}</span>
       </div>
     </q-card-section>
 
     <q-separator />
 
     <!-- Action Buttons -->
-    <q-card-actions align="right" class="part-actions">
+    <q-card-actions align="right" class="part-card__actions">
       <q-btn flat
              label="Full Details"
              color="primary"
@@ -155,6 +155,7 @@ import {
   PartType, type Bike, type BikePart 
 } from '@/types';
 import ElementWithTooltipButton from '@/components/shared/ElementWithTooltipButton.vue';
+import { formatMeters } from '@/utils/distance';
 
 interface Props {
   part: BikePart;
@@ -181,17 +182,6 @@ const emit = defineEmits<{
 const router = useRouter();
 const bikesStore = useBikesStore();
 const chainCyclesStore = useChainCyclesStore();
-
-// Calculate total mileage
-const totalMileage = computed((): number => {
-  if (!props.currentBikeMileage || props.currentBikeMileage === 0 || !props.part.mileageAtInstallation) {
-    return 0;
-  }
-  return Math.max(0, props.currentBikeMileage - props.part.mileageAtInstallation);
-});
-
-
-
 
 
 
@@ -306,104 +296,96 @@ mileage form every ride will be recorded for all of them.`,
 });
 </script>
 
-<style scoped lang="css">
+<style scoped lang="scss">
 .part-card {
-  min-width: 200px;
-  max-width: 100%;
-}
-
-.part-header {
   display: flex;
   flex-direction: column;
-}
+  min-width: 200px;
+  max-width: 100%;
 
-.part-header__chip-wrapper {
-  display: flex;
+  &__header {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__chip-wrapper {
+    display: flex;
   justify-content: space-between;
   width: 100%;
   max-width: 100%;
   margin-bottom: .5rem;
-}
+  }
 
-.part-type-chip {
-  margin-bottom: 8px;
-}
+  &__chip {
+    margin-bottom: .5rem;
+  }
 
-.bike-name-chip {
-  max-width: 100%;
-}
-
-.bike-name-chip :deep(.q-chip__content) {
+  &__bike-name-chip :deep(.q-chip__content) {
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.chain-description {
-  padding: 4px 8px;
+  &__chain-description {
+  padding: .25 rem .5rem;
   border-radius: .5rem;
   border: 1px solid var(--q-primary);
   white-space: pre-wrap;
   text-align: left;
-}
+  }
 
-.part-name {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1a202c;
-}
+  &__name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1a202c;
+  }
 
-.part-brand-model {
-  grid-area: 3 / 1 / 4 / -1;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #718096;
-  font-size: 0.875rem;
-  margin-top: 4px;
-}
+  &__brand-model {
+    grid-area: 3 / 1 / 4 / -1;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #718096;
+    font-size: 0.875rem;
+    margin-top: 4px;
+  }
 
-.part-info {
-  padding: 16px;
-}
+  &__info {
+    padding: 1rem;
+  }
 
-.info-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-}
+  &__info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+  }
 
-.info-label {
-  font-weight: 500;
-  color: #4a5568;
-  font-size: 0.875rem;
-}
+  &__info-label {
+    font-weight: 500;
+    color: #4a5568;
+    font-size: 0.875rem;
+  }
 
-.info-value {
-  font-weight: 600;
-  color: #1a202c;
-  font-size: 0.875rem;
-}
+  &__info-value {
+    font-weight: 600;
+    color: #1a202c;
+    font-size: 0.875rem;
+  }
 
-.info-value.remaining-warning {
-  color: #ed8936;
-}
+  &__actions {
+    padding: 1rem;
+  }
 
-.info-value.remaining-due {
-  color: #e53e3e;
-}
+  &__actions :deep(.q-btn) {
+    margin: 2px;
+  }
 
-.part-actions {
-  padding: 8px;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.part-actions :deep(.q-btn) {
-  margin: 2px;
+  &--on-other-bike { 
+    background-color: var(--q-warning);
+  }
 }
 </style>
