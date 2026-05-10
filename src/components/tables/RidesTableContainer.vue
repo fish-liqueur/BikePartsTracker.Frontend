@@ -18,6 +18,8 @@
              selection="none"
              :grid="$q.screen.xs"
              class="rides-table__table"
+             wrap-cells
+          
              :table-row-class-fn="rowClassFn">
       <template v-slot:top-right>
         <q-input v-model="filter"
@@ -41,6 +43,20 @@
             </div>
               
           </q-td>
+          <q-td key="name" :props="props">
+            <div class="rides-table__name-cell">
+              <div class="rides-table__name">{{ props.row.name }}</div>
+              <div v-if="props.row.description"
+                   class="rides-table__description">
+                {{ props.row.description }}
+              </div>
+            </div>
+          </q-td>
+          <q-td key="bikeId" :props="props">
+            <div v-if="props.row.bikeId" class="rides-table__bike-cell">
+              <OverflowTooltip :text="bikesStore.getBikeById(props.row.bikeId)?.name || 'Unknown'" />
+            </div>
+          </q-td>
           <q-td key="distance" :props="props">
             <div class="rides-table__distance">
               <div class="rides-table__distance-line">
@@ -53,15 +69,7 @@
               </div>
             </div>
           </q-td>
-          <q-td key="name" :props="props">
-            <div class="rides-table__name-cell">
-              <div class="rides-table__name">{{ props.row.name }}</div>
-              <div v-if="props.row.description"
-                   class="rides-table__description">
-                {{ props.row.description }}
-              </div>
-            </div>
-          </q-td>
+          
           <q-td key="actions"
                 :props="props"
                 auto-width>
@@ -122,6 +130,10 @@ import type { QTableProps } from 'quasar';
 import type { Ride } from '@/types';
 import { defaultRideColumns } from './ridesTableColumns';
 import type { TableColumn } from '@/components/tables/partsTableColumns';
+import { useBikesStore } from '@/stores/bikesStore';
+import OverflowTooltip from '@/components/shared/OverflowTooltip.vue';
+
+const bikesStore = useBikesStore();
 
 type QTableRequestProps = Parameters<NonNullable<QTableProps['onRequest']>>[0];
 
@@ -268,6 +280,10 @@ const formatKm = (meters: number): string => {
   &__name-cell {
     display: flex;
     flex-direction: column;
+  }
+
+  &__bike-cell {
+    max-width: 5rem;
   }
 
   &__name {

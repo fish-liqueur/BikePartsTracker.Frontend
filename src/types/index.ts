@@ -67,6 +67,7 @@ export interface BikePart {
   createdAt?: Date;
   updatedAt?: Date;
   isActive?: boolean;
+  totalDistance?: number;
 }
 
 export interface PartDto {
@@ -188,6 +189,11 @@ export interface UpdateRideDto {
   isActive?: boolean | null;
 }
 
+export interface RideResponseDto {
+  ride: Ride;
+  affected: UpdateResponseAffected;
+}
+
 export interface ImportStravaRidesRequestDto {
   startDate: Date | string;
   endDate: Date | string;
@@ -197,6 +203,7 @@ export interface ImportStravaRidesResponseDto {
   inserted: number;
   updated: number;
   rides: Ride[];
+  affected: UpdateResponseAffected;
 }
 
 // Works (maintenance / replacement rules on Part, Bike, or ChainCycle)
@@ -433,6 +440,13 @@ export interface UpdateChainCycleDto {
   chains?: (string | null)[];
   activeChainId?: string | null;
   intervalKm?: number | null;
+}
+
+export interface UpdateResponseAffected {
+  affectedBikeIds: string[];
+  affectedPartIds: string[];
+  affectedRideIds: string[];
+  affectedWorkIds: string[];
 }
 
 /** Response from PUT /api/parts/{id}. */

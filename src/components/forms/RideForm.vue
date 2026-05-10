@@ -25,7 +25,7 @@
               :rules="[(val: string | null) => !!val || 'Please pick a bike']"
               class="m-0 p-0" />
     <DateTimePicker v-model="formData.startDateLocal" label="Start Time" />
-    <RideDistanceEditor v-if="formData.distance" 
+    <RideDistanceEditor v-if="formData.distance !== null && formData.distance !== undefined" 
                         v-model="formData.distance"
                         :recorded-distance="props.initialData?.recordedDistance ?? 0" />
     <!-- <q-input v-model="formData.distance"

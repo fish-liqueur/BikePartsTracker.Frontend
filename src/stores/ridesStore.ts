@@ -9,6 +9,7 @@ import type {
   FetchStatus,
 } from '@/types';
 import { getErrorMessage } from '@/utils/error';
+import { usePartsStore } from './partsStore';
 
 export const useRidesStore = defineStore('rides', () => {
   const rides = ref<Ride[]>([]);
@@ -59,6 +60,9 @@ export const useRidesStore = defineStore('rides', () => {
       };
       rides.value = result.rides;
       fetchStatus.value = 'done';
+      if (result.affected.affectedPartIds.length > 0) {
+        usePartsStore().markPartsDirty(result.affected.affectedPartIds);
+      }
       return result;
     } catch (err: unknown) {
       error.value = getErrorMessage(err, 'Failed to import rides from Strava');
@@ -72,11 +76,20 @@ export const useRidesStore = defineStore('rides', () => {
     try {
       isLoading.value = true;
       error.value = null;
-      const created = await ridesService.createRide(dto);
-      if (created) {
-        rides.value.push(created);
+      const response = await ridesService.createRide(dto);
+      if (!response) {
+        throw new Error('Failed to create ride');
       }
-      return created;
+      const { ride, affected: { affectedPartIds } } = response;
+      if (ride) {
+        rides.value.push(ride);
+      }
+
+      if (affectedPartIds.length) {
+        usePartsStore().markPartsDirty(affectedPartIds);
+      }
+      
+      return ride;
     } catch (err: unknown) {
       error.value = getErrorMessage(err, 'Failed to create ride');
       throw err;
@@ -89,7 +102,14 @@ export const useRidesStore = defineStore('rides', () => {
     try {
       isLoading.value = true;
       error.value = null;
-      await ridesService.deleteRide(id);
+      const response = await ridesService.deleteRide(id);
+      if (!response) {
+        throw new Error('Failed to delete ride');
+      }
+      const { affectedPartIds } = response;
+      if (affectedPartIds.length) {
+        usePartsStore().markPartsDirty(affectedPartIds);
+      }
       rides.value = rides.value.filter((r) => r.id !== id);
     } catch (err: unknown) {
       error.value = getErrorMessage(err, 'Failed to delete ride');
@@ -103,16 +123,26 @@ export const useRidesStore = defineStore('rides', () => {
     try {
       isLoading.value = true;
       error.value = null;
-      const updated = await ridesService.updateRide(id, dto);
-      if (updated) {
+      const response = await ridesService.updateRide(id, dto);
+      if (!response) {
+        throw new Error('Failed to update ride');
+      }
+
+      const { ride, affected } = response;
+      if (ride) {
         const index = rides.value.findIndex((r) => r.id === id);
         if (index >= 0) {
-          rides.value[index] = updated;
+          rides.value[index] = ride;
         } else {
-          rides.value.push(updated);
+          rides.value.push(ride);
         }
       }
-      return updated;
+     
+      if (affected.affectedPartIds.length > 0) {
+        usePartsStore().markPartsDirty(affected.affectedPartIds);
+      }
+
+      return ride;
     } catch (err: unknown) {
       error.value = getErrorMessage(err, 'Failed to update ride');
       throw err;

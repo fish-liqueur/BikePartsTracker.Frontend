@@ -17,7 +17,7 @@
     </template>
     <template #header-filter>
       <q-toggle v-model="showInstalledToOtherBikes"
-                label="Show parts equipped to other bikes"
+                :label="bikeContext ? 'Show parts equipped to other bikes' : 'Show all parts'"
                 color="primary" />
     </template>
     <template #default>

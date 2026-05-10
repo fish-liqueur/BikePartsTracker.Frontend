@@ -3,7 +3,7 @@
     <slot />
     <TooltipButton v-if="enabled"
                    :text="tooltipText"
-                   class="ml-2" />
+                   class="m-l-2" />
   </div>
 </template>
 

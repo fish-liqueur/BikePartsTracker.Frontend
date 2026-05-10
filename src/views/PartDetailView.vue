@@ -51,11 +51,14 @@
 
           <!-- Rides Tab -->
           <q-tab-panel name="rides">
-            <div class="empty-tab">
+            <RidesWidget v-if="part.bike"
+                         title="Rides"
+                         :bike-context="part.bike" />
+            <div v-else class="empty-tab">
               <q-icon name="directions_bike"
                       size="64px"
                       color="grey-5" />
-              <p>Rides coming soon</p>
+              <p>No rides found for this part</p>
             </div>
           </q-tab-panel>
 
@@ -139,6 +142,7 @@ import { useRoute, useRouter } from 'vue-router';
 import PartForm from '@/components/forms/PartForm.vue';
 import LayoutViewGeneral from '@/components/layouts/LayoutViewGeneral.vue';
 import { getErrorMessage } from '@/utils/error';
+import RidesWidget from '@/components/widgets/RidesWidget.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -186,6 +190,14 @@ const formData = ref<UpdatePartDto>({
   scheduleType: PartScheduleType.OneTimeUse,
   scheduleValue: 0
 });
+
+watch(
+  partId,
+  async (id) => {
+    if (id) await partsStore.ensurePart(id);
+  },
+  { immediate: true }
+);
 
 watch(
   part, (newPart) => {

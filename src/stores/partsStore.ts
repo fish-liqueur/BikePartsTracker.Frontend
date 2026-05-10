@@ -10,10 +10,10 @@ import { PartType, EMPTY_GUID } from '@/types';
 export const usePartsStore = defineStore('parts', () => {
   // State
   const parts = ref<BikePart[]>([]);
-  const currentPart = ref<BikePart | null>(null);
   const isLoading = ref(false);
   const error = ref<string | null>(null);
   const fetchStatus = ref<FetchStatus>('idle');
+  const partsDirty = ref<Set<string>>(new Set());
 
   // Getters
   const partsCount = computed(() => parts.value.length);
@@ -27,6 +27,23 @@ export const usePartsStore = defineStore('parts', () => {
   const ensureParts = async () => {
     if (fetchStatus.value === 'done' || fetchStatus.value === 'loading') return;
     return fetchParts();
+  };
+
+  const ensurePart = async (id: string) => {
+    const part = getPartById.value(id);
+    if (part && !partsDirty.value.has(id)) {
+      return part;
+    } else {
+      return fetchPart(id);
+    }
+  };
+
+  const markPartsClean = (ids: string[]) => {
+    ids.forEach((id) => partsDirty.value.delete(id));
+  };
+
+  const markPartsDirty = (ids: string[]) => {
+    ids.forEach((id) => partsDirty.value.add(id));
   };
 
   const fetchParts = async () => {
@@ -51,18 +68,18 @@ export const usePartsStore = defineStore('parts', () => {
 
   const fetchPart = async (id: string) => {
     try {
-      isLoading.value = true;
-      error.value = null;
-
-      // TODO: Replace with actual service call
-      // const part = await partService.getPart(id);
-
-      const part = parts.value.find((p) => p.id === id) || null;
-      if (part) {
-        currentPart.value = part;
+      const existingPart = getPartById.value(id);
+      const fetchedPart = await partService.getPart(id);
+      if (!fetchedPart) {
+        throw new Error('Failed to fetch part');
       }
-
-      return part;
+      if (existingPart) {
+        parts.value[parts.value.indexOf(existingPart)] = fetchedPart;
+      } else {
+        parts.value.push(fetchedPart);
+      }
+      markPartsClean([id]);
+      return fetchedPart;
     } catch (err: unknown) {
       error.value = (err as Error).message || 'Failed to fetch part';
       throw err;
@@ -121,9 +138,6 @@ export const usePartsStore = defineStore('parts', () => {
         } else {
           parts.value.push(updatedPart);
         }
-        if (currentPart.value?.id === id) {
-          currentPart.value = updatedPart;
-        }
         useChainCyclesStore().applyAffectedChainCycles(affectedChainCycles ?? []);
         return updatedPart;
       }
@@ -162,9 +176,6 @@ export const usePartsStore = defineStore('parts', () => {
       const result = await partService.deletePart(id);
       if (result?.success) {
         parts.value = parts.value.filter((part) => part.id !== id);
-        if (currentPart.value?.id === id) {
-          currentPart.value = null;
-        }
         useChainCyclesStore().applyAffectedChainCycles(result.affectedChainCycles ?? []);
         return true;
       }
@@ -177,21 +188,12 @@ export const usePartsStore = defineStore('parts', () => {
     }
   };
 
-  const setCurrentPart = (part: BikePart | null) => {
-    currentPart.value = part;
-  };
-
-  // const setPartsContextBike = (bike: Bike | null) => {
-  //   partsContextBike.value = bike;
-  // };
-
   const clearError = () => {
     error.value = null;
   };
 
   const reset = () => {
     parts.value = [];
-    currentPart.value = null;
     isLoading.value = false;
     error.value = null;
     fetchStatus.value = 'idle';
@@ -200,10 +202,10 @@ export const usePartsStore = defineStore('parts', () => {
   return {
     // State
     parts,
-    currentPart,
     isLoading,
     error,
     fetchStatus,
+    partsDirty,
 
     // Getters
     partsCount,
@@ -214,14 +216,16 @@ export const usePartsStore = defineStore('parts', () => {
 
     // Actions
     ensureParts,
+    ensurePart,
     fetchParts,
     fetchPart,
     fetchPartsByBike,
     createPart,
     updatePart,
+    markPartsClean,
+    markPartsDirty,
     movePartToBike,
     deletePart,
-    setCurrentPart,
     clearError,
     reset,
   };

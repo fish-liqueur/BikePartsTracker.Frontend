@@ -5,6 +5,8 @@ import type {
   UpdateRideDto,
   ImportStravaRidesRequestDto,
   ImportStravaRidesResponseDto,
+  RideResponseDto,
+  UpdateResponseAffected,
 } from '@/types';
 
 export type ListRidesParams = {
@@ -21,18 +23,18 @@ export const ridesService = {
     return response.data ?? [];
   },
 
-  async createRide(dto: CreateRideDto): Promise<Ride | null> {
-    const response = await apiService.post<Ride>('/api/rides', dto);
+  async createRide(dto: CreateRideDto): Promise<RideResponseDto | null> {
+    const response = await apiService.post<RideResponseDto>('/api/rides', dto);
     return response.data ?? null;
   },
 
-  async deleteRide(id: string): Promise<boolean> {
-    const response = await apiService.delete<boolean>(`/api/rides/${id}`);
+  async deleteRide(id: string): Promise<UpdateResponseAffected | null> {
+    const response = await apiService.delete<UpdateResponseAffected>(`/api/rides/${id}`);
     return response.data ?? false;
   },
 
-  async updateRide(id: string, dto: UpdateRideDto): Promise<Ride | null> {
-    const response = await apiService.put<Ride>(`/api/rides/${id}`, dto);
+  async updateRide(id: string, dto: UpdateRideDto): Promise<RideResponseDto | null> {
+    const response = await apiService.put<RideResponseDto>(`/api/rides/${id}`, dto);
     return response.data ?? null;
   },
 
