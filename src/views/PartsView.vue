@@ -2,6 +2,7 @@
   <div class="view-container">
     <PartsWidget
       title="Parts Management"
+      show-installed-to-other-bikes
     />
   </div>
 </template>

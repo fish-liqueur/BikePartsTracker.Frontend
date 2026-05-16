@@ -10,19 +10,19 @@
              color="primary"
              icon="add"
              @click="showAddPartDialog = true" />
-      <q-btn-toggle v-model="localViewMode"
+      <q-btn-toggle v-model="activeViewMode"
                     :options="viewModeOptions"
                     toggle-color="primary"
                     @update:model-value="handleViewModeChange" />
     </template>
     <template #header-filter>
-      <q-toggle v-model="showInstalledToOtherBikes"
+      <q-toggle v-model="showInstalledToOtherBikesLocal"
                 :label="bikeContext ? 'Show parts equipped to other bikes' : 'Show all parts'"
                 color="primary" />
     </template>
     <template #default>
       <!-- Cards View -->
-      <div v-if="localViewMode === 'cards'" class="parts-widget__cards-view">
+      <div v-if="activeViewMode === 'cards'" class="parts-widget__cards-view">
         <div v-if="computedContainers && computedContainers.length > 0"
              class="parts-widget__containers containers-wrapper"
              :class="{
@@ -105,7 +105,8 @@
 
 <script setup lang="ts">
 import {
-  ref, computed, watch 
+  ref, computed, watch, 
+  onMounted
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
@@ -126,6 +127,7 @@ import { PartType } from '@/types';
 import { defaultPartColumns } from '@/components/tables/partsTableColumns';
 import type { TableColumn } from '@/components/tables/partsTableColumns';
 import LayoutWidgetGeneral from '@/components/layouts/LayoutWidgetGeneral.vue';
+import { useQuerySync, type RawQueryValue } from '@/composables/useQuerySync';
 
 function mergePartIntoCycleChains(
   chainIds: (string | null)[],
@@ -156,6 +158,7 @@ interface Props {
   showCount?: boolean;
   currentBikeMileage?: number;
   tableColumns?: TableColumn[];
+  showInstalledToOtherBikes?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -163,7 +166,8 @@ const props = withDefaults(defineProps<Props>(), {
   bikeContext: null,
   showCount: true,
   currentBikeMileage: 0,
-  tableColumns: () => defaultPartColumns
+  tableColumns: () => defaultPartColumns,
+  showInstalledToOtherBikes: false
 });
 
 const router = useRouter();
@@ -175,6 +179,41 @@ const {
   showSuccess, showError, withAjaxBar 
 } = useLayout();
 
+const { state: queryState, setParam: setQueryParam } = useQuerySync({
+  partsViewMode: {
+    key: 'partsViewMode',
+    defaultValue: props.viewMode as 'cards' | 'table',
+    parse: (raw: RawQueryValue) => {
+      const validModes = ['cards', 'table'];
+      return validModes.includes(raw as string) ? (raw as 'cards', 'table') : 'cards';
+    },
+    serialize: (value: 'cards' | 'table') => value,
+  },
+  showInstalledToOtherBikes: {
+    key: 'showInstalledToOtherBikes',
+    defaultValue: props.showInstalledToOtherBikes as boolean,
+    parse: (raw: RawQueryValue) => (raw === 'true' ? true : false),
+    serialize: (value: boolean) => value ? 'true' : 'false',
+  },
+});
+
+const activeViewMode = computed({
+  get: () => queryState.partsViewMode.value,
+  set: (value) => {
+    void setQueryParam(
+      'partsViewMode', value, { replace: true }
+    );
+  }
+});
+
+const showInstalledToOtherBikesLocal = computed({
+  get: () => queryState.showInstalledToOtherBikes.value,
+  set: (value) => {
+    void setQueryParam(
+      'showInstalledToOtherBikes', value, { replace: true }
+    );
+  }
+});
 // Dialog state
 const showInstallDialog = ref(false);
 const showInstallChainDialog = ref(false);
@@ -186,7 +225,6 @@ const pendingPartInstall = ref<{
   part: BikePart | null;
 } | null>(null);
 // Local view mode
-const localViewMode = ref<'cards' | 'table'>(props.viewMode);
 const viewModeOptions = [
   {
     label: 'Cards', value: 'cards', icon: 'grid_view' 
@@ -195,10 +233,7 @@ const viewModeOptions = [
     label: 'Table', value: 'table', icon: 'table_view' 
   }
 ];
-// Default: true if no bikeContext, false if bikeContext is set
-// const showInstalledToOtherBikes = ref<boolean>(props.bikeContext === null);
 
-const showInstalledToOtherBikes = ref(false);
 
 const allParts = computed(() => partsStore.parts);
 const isLoading = computed(() => partsStore.isLoading);
@@ -237,7 +272,7 @@ const computedContainers = computed<ContainerConfig[]>(() => {
 
     let partsNotOnBike = allParts.value.filter(part => part.bikeId !== props.bikeContext?.id);
 
-    if (!showInstalledToOtherBikes.value) {
+    if (!showInstalledToOtherBikesLocal.value) {
       // Filter to show only parts installed to nothing (no bikeId)
       partsNotOnBike = partsNotOnBike.filter(part =>
         part.bikeId === '' || part.bikeId === null || !part.bikeId);
@@ -262,7 +297,7 @@ const computedContainers = computed<ContainerConfig[]>(() => {
     // Single container: all parts (or filtered if toggle is off)
     let parts = allParts.value;
 
-    if (!showInstalledToOtherBikes.value) {
+    if (!showInstalledToOtherBikesLocal.value) {
       // Filter to show only parts installed to nothing (no bikeId)
       parts = parts.filter(part =>
         part.bikeId === '' || part.bikeId === null || !part.bikeId);
@@ -279,9 +314,13 @@ const computedContainers = computed<ContainerConfig[]>(() => {
   }
 });
 
+onMounted(() => {
+  showInstalledToOtherBikesLocal.value = props.showInstalledToOtherBikes;
+});
+
 // Watch for external viewMode changes
 watch(() => props.viewMode, (newMode) => {
-  localViewMode.value = newMode;
+  activeViewMode.value = newMode;
 });
 
 // ---- Methods ----
@@ -580,7 +619,7 @@ const handleShowBike = (bikeId: string) => {
 };
 
 const handleViewModeChange = (mode: 'cards' | 'table') => {
-  localViewMode.value = mode;
+  activeViewMode.value = mode;
 };
 
 </script>

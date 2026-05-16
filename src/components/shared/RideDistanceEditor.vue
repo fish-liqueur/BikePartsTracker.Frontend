@@ -20,6 +20,8 @@
       label="Distance (m)"
       outlined
       step="any"
+      :rules="[(val: string) => (val !== null && val !== '' && Number.parseFloat(val) > 0) || 'Enter a distance greater than 0']"
+      hide-bottom-space
       @update:model-value="onNumericInput"
     />
     <q-slider

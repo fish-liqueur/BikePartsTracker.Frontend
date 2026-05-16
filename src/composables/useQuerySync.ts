@@ -4,7 +4,7 @@ import type { Ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import type { LocationQueryValue } from 'vue-router';
 
-type RawQueryValue = LocationQueryValue | LocationQueryValue[];
+export type RawQueryValue = LocationQueryValue | LocationQueryValue[];
 
 export interface QueryParamConfig<T> {
   /**

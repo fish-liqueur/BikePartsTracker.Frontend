@@ -67,12 +67,9 @@
 
           <!-- Rides Tab -->
           <q-tab-panel name="rides">
-            <div class="empty-tab">
-              <q-icon name="directions_bike"
-                      size="64px"
-                      color="grey-5" />
-              <p>Rides coming soon</p>
-            </div>
+            <RidesWidget v-if="bike"
+                         title="Rides"
+                         :bike-context="bike" />
           </q-tab-panel>
 
           <!-- Works Tab -->
@@ -156,6 +153,7 @@ import { useLayout } from '@/composables/useLayout';
 import { useQuerySync } from '@/composables/useQuerySync';
 import PartsWidget from '@/components/widgets/PartsWidget.vue';
 import ChainCycleWidget from '@/components/widgets/ChainCycleWidget.vue';
+import RidesWidget from '@/components/widgets/RidesWidget.vue';
 import BikeForm from '@/components/forms/BikeForm.vue';
 import LayoutViewGeneral from '@/components/layouts/LayoutViewGeneral.vue';
 import type {

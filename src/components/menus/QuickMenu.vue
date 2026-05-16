@@ -5,7 +5,7 @@
            :color="route.path === item.path ? 'primary' : 'default'" 
            :icon="item.icon" 
            :label="item.label" 
-           :to="item.path"
+           :to="{ path: item.path, query: route.query }"
            size="2.5rem"
            class="quick-menu-button" />
   </q-btn-group>
