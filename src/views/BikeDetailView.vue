@@ -388,21 +388,6 @@ const handleDelete = async () => {
   min-height: 400px;
 }
 
-.empty-tab {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 64px 32px;
-  text-align: center;
-  color: #718096;
-}
-
-.empty-tab p {
-  margin: 16px 0 0 0;
-  font-size: 1rem;
-}
-
 .settings-panel {
   padding: 32px;
 }

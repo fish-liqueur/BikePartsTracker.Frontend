@@ -172,17 +172,6 @@
     .w-100 { width: 100%; }
     .w-50 { width: 50%; }
 
-    /* Tooltip styles - must be global because tooltips render in portals */
-    .tooltip-text {
-      white-space: pre-line;
-    }
-
-    /* form general */
-    .form-general {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
 
 }
 

@@ -1,19 +1,6 @@
-// Import layers declaration first (must be before any other CSS)
 import './assets/layers.css';
-
-// Import reset styles
-import './assets/reset.css';
-
-// Import icon libraries within icons layer
-import './assets/icons.css';
-
-// Import Quasar CSS within quasar layer
-import './assets/quasar-layer.sass';
-
-// Import custom layers
-import './assets/components.css';
-import './assets/utilities.css';
-import './assets/overrides.css';
+import './assets/tailwind.css';
+import './assets/main.scss';
 
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';

@@ -4,6 +4,7 @@ import { defineConfig } from 'vitest/config';
 import vue from '@vitejs/plugin-vue';
 import vueDevTools from 'vite-plugin-vue-devtools';
 import { quasar, transformAssetUrls } from '@quasar/vite-plugin';
+import tailwindcss from '@tailwindcss/vite';
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -14,7 +15,8 @@ export default defineConfig({
     vueDevTools(),
     quasar({
       sassVariables: fileURLToPath(new URL('./src/quasar-variables.sass', import.meta.url))
-    })
+    }),
+    tailwindcss()
   ],
   resolve: {
     alias: {
