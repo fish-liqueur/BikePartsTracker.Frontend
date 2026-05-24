@@ -25,7 +25,7 @@
                @click="handleCancel" />
         <q-btn
           flat
-          label="Create Part"
+          label="Add Ride"
           color="primary"
           @click="() => formRef?.handleSubmit()"
           :disable="!isValid"

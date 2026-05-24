@@ -61,11 +61,11 @@
             <div class="rides-table__distance">
               <div class="rides-table__distance-line">
                 <span class="rides-table__distance-label">Recorded distance</span>
-                <span>{{ formatKm(props.row.recordedDistance) }}</span>
+                <span>{{ formatMeters(props.row.recordedDistance) }}</span>
               </div>
               <div class="rides-table__distance-line">
                 <span class="rides-table__distance-label">User distance</span>
-                <span>{{ formatKm(props.row.distance) }}</span>
+                <span>{{ formatMeters(props.row.distance) }}</span>
               </div>
             </div>
           </q-td>
@@ -132,6 +132,8 @@ import { defaultRideColumns } from './ridesTableColumns';
 import type { TableColumn } from '@/components/tables/partsTableColumns';
 import { useBikesStore } from '@/stores/bikesStore';
 import OverflowTooltip from '@/components/shared/OverflowTooltip.vue';
+import { formatDate } from '@/utils/date';
+import { formatMeters } from '@/utils/distance';
 
 const bikesStore = useBikesStore();
 
@@ -180,20 +182,6 @@ const onRequest = (tableProps: QTableRequestProps) => {
   pagination.value.rowsPerPage = rowsPerPage;
   pagination.value.sortBy = sortBy;
   pagination.value.descending = descending;
-};
-
-const formatDate = (value: Date | string): string => {
-  const d = typeof value === 'string' ? new Date(value) : value;
-  return d.toLocaleString(undefined, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  });
-};
-
-const formatKm = (meters: number): string => {
-  const km = (meters ?? 0) / 1000;
-  const rounded = Math.round(km * 10) / 10;
-  return `${rounded} km`;
 };
 </script>
 

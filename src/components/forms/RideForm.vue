@@ -16,7 +16,7 @@
 
     <q-select v-model="formData.bikeId"
               :options="bikeOptions"
-              label="Bike"
+              label="Bike *"
               emit-value
               map-options
               option-label="name"

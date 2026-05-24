@@ -63,7 +63,6 @@ export interface BikePart {
   mileageAtInstallation?: number;
   bikeId: string | null;
   bike?: Bike;
-  usageHistory?: PartUsageHistory[];
   createdAt?: Date;
   updatedAt?: Date;
   isActive?: boolean;

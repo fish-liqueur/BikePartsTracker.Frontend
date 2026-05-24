@@ -10,7 +10,7 @@
               size="md" />
       <q-select
         v-if="parts.length"
-        :model-value="selectedBikeId"
+        :model-value="selectedPartId"
         :options="parts"
         dense
         outlined
@@ -34,6 +34,9 @@
           <q-tab name="rides"
                  label="Rides"
                  icon="directions_bike" />
+          <q-tab name="history"
+                 label="Usage archive"
+                 icon="directions_bike" />
           <q-tab name="works"
                  label="Works"
                  icon="build" />
@@ -51,15 +54,27 @@
 
           <!-- Rides Tab -->
           <q-tab-panel name="rides">
-            <RidesWidget v-if="part.bike"
-                         title="Rides"
-                         :bike-context="part.bike" />
-            <div v-else class="empty-tab">
-              <q-icon name="directions_bike"
-                      size="64px"
-                      color="grey-5" />
-              <p>No rides found for this part</p>
+            <div class="flex flex-column flex-align-center gap-3">
+              <div class="text-xl">Here we can see the rides since the last installation of this part ({{ formatDate(part.installationDate) }}).</div>
+              <div class="text-l">If the data looks incomplete, just re-sync the rides from your Strava account for the desired period.</div>
+              <RidesWidget v-if="bikeWherePartIsInstalled"
+                           title="Rides"
+                           :bike-context="bikeWherePartIsInstalled"
+                           :date-from="dateFrom" />
+              <div v-else class="empty-tab">
+                <q-icon name="directions_bike"
+                        size="64px"
+                        color="grey-5" />
+                <p>The part is not installed on any bike</p>
+              </div>
             </div>
+          </q-tab-panel>
+
+          <!-- History Tab -->
+          <q-tab-panel name="history">
+            <PartHistoryWidget v-if="part"
+                               :part-id="part.id"
+                               :title="`Usage archive log for ${part.name} (${part.partType})`" />
           </q-tab-panel>
 
           <!-- Works Tab -->
@@ -131,6 +146,7 @@
 import { useLayout } from '@/composables/useLayout';
 import { useQuerySync } from '@/composables/useQuerySync';
 import { usePartsStore } from '@/stores/partsStore';
+import { useBikesStore } from '@/stores/bikesStore';
 import {
   PartScheduleType, PartType, type CreatePartDto, type PartFormExposed, type UpdatePartDto 
 } from '@/types';
@@ -142,11 +158,14 @@ import { useRoute, useRouter } from 'vue-router';
 import PartForm from '@/components/forms/PartForm.vue';
 import LayoutViewGeneral from '@/components/layouts/LayoutViewGeneral.vue';
 import { getErrorMessage } from '@/utils/error';
+import { formatDate } from '@/utils/date';
 import RidesWidget from '@/components/widgets/RidesWidget.vue';
+import PartHistoryWidget from '@/components/widgets/PartHistoryWidget.vue';
 
 const route = useRoute();
 const router = useRouter();
 const partsStore = usePartsStore();
+const bikesStore = useBikesStore();
 const {
   showSuccess, showError, withAjaxBar 
 } = useLayout();
@@ -191,6 +210,44 @@ const formData = ref<UpdatePartDto>({
   scheduleValue: 0
 });
 
+// Action states
+const isSaving = ref(false);
+const isDeleting = ref(false);
+const isRetiring = ref(false);
+const isValid = ref(false);
+
+// Tab management with query parameter sync
+const { state: queryState, setParam: setQueryParam } = useQuerySync({
+  tab: {
+    key: 'tab',
+    defaultValue: 'settings' as 'rides' | 'history' | 'works' | 'settings',
+    parse: (raw) => {
+      const validTabs = ['rides', 'history', 'works', 'settings'];
+      return validTabs.includes(raw as string) ? (raw as 'rides' | 'history' | 'works' | 'settings') : 'settings';
+    },
+    serialize: (value) => value,
+  },
+});
+const activeTab = computed({
+  get: () => queryState.tab.value,
+  set: (value) => {
+    void setQueryParam(
+      'tab', value, { replace: true }
+    );
+  }
+});
+const parts = computed(() => partsStore.parts);
+const selectedPartId = computed(() => partId.value);
+
+const bikeWherePartIsInstalled = computed(() => {
+  if (!part.value?.bikeId) return null;
+  return bikesStore.getBikeById(part.value.bikeId);
+});
+const dateFrom = computed(() => {
+  if (!part.value?.installationDate) return null;
+  return new Date(part.value.installationDate);
+});
+
 watch(
   partId,
   async (id) => {
@@ -218,34 +275,6 @@ watch(
   }, { immediate: true }
 );
 
-// Action states
-const isSaving = ref(false);
-const isDeleting = ref(false);
-const isRetiring = ref(false);
-const isValid = ref(false);
-
-// Tab management with query parameter sync
-const { state: queryState, setParam: setQueryParam } = useQuerySync({
-  tab: {
-    key: 'tab',
-    defaultValue: 'settings' as 'rides' | 'works' | 'settings',
-    parse: (raw) => {
-      const validTabs = ['rides', 'works', 'settings'];
-      return validTabs.includes(raw as string) ? (raw as 'rides' | 'works' | 'settings') : 'settings';
-    },
-    serialize: (value) => value,
-  },
-});
-const activeTab = computed({
-  get: () => queryState.tab.value,
-  set: (value) => {
-    void setQueryParam(
-      'tab', value, { replace: true }
-    );
-  }
-});
-const parts = computed(() => partsStore.parts);
-const selectedBikeId = computed(() => partId.value);
 
 // Handlers
 const handleDelete = async () => {

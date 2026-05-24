@@ -17,7 +17,7 @@
     </template>
     <template #default>
       <div class="rides-widget__table-view">
-        <RidesTableContainer :rides="rides"
+        <RidesTableContainer :rides="ridesToShow"
                              :loading="isLoading"
                              :columns="rideColumns"
                              :show-count="true" 
@@ -35,6 +35,7 @@
                   :initial-data="currentRide"
                   @submit="handleEditRideSubmit" />
   <SyncRidesDialog v-model="showSyncRidesDialog"
+                   :date-from="dateFrom"
                    @submit="handleSyncRides" />
 </template>
 
@@ -55,11 +56,13 @@ import { useQuasar } from 'quasar';
 interface Props {
   bikeContext?: Bike | null;
   title?: string;
+  dateFrom?: Date | null;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   bikeContext: null,
   title: '',
+  dateFrom: null,
 });
 
 const ridesStore = useRidesStore();
@@ -75,13 +78,21 @@ const showAddRideDialog = ref(false);
 const showEditRideDialog = ref(false);
 const showSyncRidesDialog = ref(false);
 
-const rides = computed(() => {
-  const list = ridesSorted.value;
-  if (!props.bikeContext) {
-    return list;
+const ridesToShow = computed(() => {
+  // Could use a sequential reassignment for each filtering property,
+  // but like this way because it applies all the filters at a single pass. 
+  const predicates: Array<(r: Ride) => boolean> = [];
+
+  if (props.bikeContext) {
+    const bikeId = props.bikeContext.id;
+    predicates.push((r) => r.bikeId === bikeId);
   }
-  const bikeId = String(props.bikeContext.id);
-  return list.filter((r) => r.bikeId != null && String(r.bikeId) === bikeId);
+  if (props.dateFrom) {
+    const fromTime = props.dateFrom.getTime();
+    predicates.push((r) => new Date(r.startDateLocal).getTime() >= fromTime);
+  }
+  
+  return ridesSorted.value.filter((r) => predicates.every((p) => p(r)));
 });
 
 onMounted(() => {

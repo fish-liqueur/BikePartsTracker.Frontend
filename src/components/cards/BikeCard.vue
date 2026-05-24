@@ -176,6 +176,7 @@
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import type { Bike, BikePart, Ride } from '@/types';
+import { usePartsStore } from '@/stores/partsStore';
 
 interface Props {
   bike: Bike;
@@ -199,6 +200,7 @@ const emit = defineEmits<{
 }>();
 
 const router = useRouter();
+const partsStore = usePartsStore();
 
 // Get last 3 rides
 const displayedRides = computed(() => {
@@ -216,9 +218,12 @@ const totalMileage = (part: BikePart): number => {
   return Math.max(0, props.currentBikeMileage - (part.mileageAtInstallation || 0));
 };
 
-// Open usage period (no end date) = current install interval; distance is meters from API
+// Open usage period (no end date) = current install interval; distance is meters from API.
+// History lives in the parts store; returns null when not yet loaded for this part.
 const currentMaintenanceCycleMileage = (part: BikePart): number | null => {
-  const history = part.usageHistory?.filter((h) => !h.isShadow) ?? [];
+  const loaded = partsStore.getPartHistory(part.id);
+  if (!loaded) return null;
+  const history = loaded.filter((h) => !h.isShadow);
   if (history.length === 0) return null;
 
   const open = [...history]
@@ -243,7 +248,7 @@ const formatRide = (ride: Ride): string => {
       ? new Date(ride.startDateLocal)
       : ride.startDateLocal;
   const dateStr = date.toLocaleDateString();
-  const meters = ride.userDistance || ride.distance || 0;
+  const meters = ride.distance || 0;
   const km = Math.round((meters / 1000) * 10) / 10;
 
   if (km > 0) {

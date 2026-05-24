@@ -3,17 +3,21 @@ import { ref, computed } from 'vue';
 import { partService } from '@/services/partService';
 import { useChainCyclesStore } from '@/stores/chainCyclesStore';
 import type {
-  BikePart, CreatePartDto, UpdatePartDto, FetchStatus 
+  BikePart, CreatePartDto, UpdatePartDto, FetchStatus, PartUsageHistory,
 } from '@/types';
 import { PartType, EMPTY_GUID } from '@/types';
 
 export const usePartsStore = defineStore('parts', () => {
   // State
   const parts = ref<BikePart[]>([]);
+  // History is a separate slice keyed by part id; not embedded on BikePart.
+  const partHistories = ref<Record<string, PartUsageHistory[]>>({});
   const isLoading = ref(false);
+  const isHistoryLoading = ref(false);
   const error = ref<string | null>(null);
   const fetchStatus = ref<FetchStatus>('idle');
   const partsDirty = ref<Set<string>>(new Set());
+  const partsHistoryDirty = ref<Set<string>>(new Set());
 
   // Getters
   const partsCount = computed(() => parts.value.length);
@@ -22,6 +26,8 @@ export const usePartsStore = defineStore('parts', () => {
   const getAvailableParts = computed(() =>
     parts.value.filter((part) => !part.bikeId || part.bikeId === ''),);
   const getPartsByPartType = computed(() => (partType: PartType) => parts.value.filter((part) => part.partType === partType),);
+  // Returns null when history has not yet been loaded for this id (vs. [] = loaded but empty).
+  const getPartHistory = computed(() => (id: string): PartUsageHistory[] | null => partHistories.value[id] ?? null);
 
   // Actions
   const ensureParts = async () => {
@@ -33,17 +39,40 @@ export const usePartsStore = defineStore('parts', () => {
     const part = getPartById.value(id);
     if (part && !partsDirty.value.has(id)) {
       return part;
-    } else {
-      return fetchPart(id);
     }
+    return fetchPart(id);
+  };
+
+  const ensurePartHistory = async (id: string) => {
+    const cached = partHistories.value[id];
+    if (cached !== undefined && !partsHistoryDirty.value.has(id)) {
+      return cached;
+    }
+    return fetchPartHistory(id);
   };
 
   const markPartsClean = (ids: string[]) => {
     ids.forEach((id) => partsDirty.value.delete(id));
   };
 
+  const markPartsHistoryClean = (ids: string[]) => {
+    ids.forEach((id) => partsHistoryDirty.value.delete(id));
+  };
+
   const markPartsDirty = (ids: string[]) => {
-    ids.forEach((id) => partsDirty.value.add(id));
+    ids.forEach((id) => {
+      partsDirty.value.add(id);
+      partsHistoryDirty.value.add(id);
+    });
+  };
+
+  const upsertPart = (part: BikePart) => {
+    const idx = parts.value.findIndex((p) => p.id === part.id);
+    if (idx !== -1) {
+      parts.value[idx] = part;
+    } else {
+      parts.value.push(part);
+    }
   };
 
   const fetchParts = async () => {
@@ -54,6 +83,7 @@ export const usePartsStore = defineStore('parts', () => {
 
       const fetchedParts = await partService.getParts();
       parts.value = fetchedParts;
+      fetchedParts.forEach((p) => partsDirty.value.delete(p.id));
       fetchStatus.value = 'done';
 
       return fetchedParts;
@@ -68,16 +98,14 @@ export const usePartsStore = defineStore('parts', () => {
 
   const fetchPart = async (id: string) => {
     try {
-      const existingPart = getPartById.value(id);
+      isLoading.value = true;
+      error.value = null;
+
       const fetchedPart = await partService.getPart(id);
       if (!fetchedPart) {
         throw new Error('Failed to fetch part');
       }
-      if (existingPart) {
-        parts.value[parts.value.indexOf(existingPart)] = fetchedPart;
-      } else {
-        parts.value.push(fetchedPart);
-      }
+      upsertPart(fetchedPart);
       markPartsClean([id]);
       return fetchedPart;
     } catch (err: unknown) {
@@ -85,6 +113,61 @@ export const usePartsStore = defineStore('parts', () => {
       throw err;
     } finally {
       isLoading.value = false;
+    }
+  };
+
+  const fetchPartHistory = async (id: string) => {
+    try {
+      isHistoryLoading.value = true;
+      error.value = null;
+
+      const history = await partService.getPartHistory(id);
+      partHistories.value[id] = history;
+      markPartsHistoryClean([id]);
+      return history;
+    } catch (err: unknown) {
+      error.value = (err as Error).message || 'Failed to fetch part history';
+      throw err;
+    } finally {
+      isHistoryLoading.value = false;
+    }
+  };
+
+  const batchFetchParts = async (ids: string[]) => {
+    try {
+      isLoading.value = true;
+      error.value = null;
+
+      const fetched = await partService.batchGetParts(ids);
+      for (const [id, part] of Object.entries(fetched)) {
+        upsertPart(part);
+        markPartsClean([id]);
+      }
+      return fetched;
+    } catch (err: unknown) {
+      error.value = (err as Error).message || 'Failed to batch fetch parts';
+      throw err;
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  const batchFetchPartHistories = async (ids: string[]) => {
+    try {
+      isHistoryLoading.value = true;
+      error.value = null;
+
+      const fetched = await partService.batchGetPartHistories(ids);
+      for (const [id, history] of Object.entries(fetched)) {
+        partHistories.value[id] = history;
+        markPartsHistoryClean([id]);
+      }
+      return fetched;
+    } catch (err: unknown) {
+      error.value = (err as Error).message || 'Failed to batch fetch part histories';
+      throw err;
+    } finally {
+      isHistoryLoading.value = false;
     }
   };
 
@@ -194,6 +277,9 @@ export const usePartsStore = defineStore('parts', () => {
 
   const reset = () => {
     parts.value = [];
+    partHistories.value = {};
+    partsDirty.value.clear();
+    partsHistoryDirty.value.clear();
     isLoading.value = false;
     error.value = null;
     fetchStatus.value = 'idle';
@@ -202,10 +288,13 @@ export const usePartsStore = defineStore('parts', () => {
   return {
     // State
     parts,
+    partHistories,
     isLoading,
+    isHistoryLoading,
     error,
     fetchStatus,
     partsDirty,
+    partsHistoryDirty,
 
     // Getters
     partsCount,
@@ -213,16 +302,22 @@ export const usePartsStore = defineStore('parts', () => {
     getPartsByBike,
     getAvailableParts,
     getPartsByPartType,
+    getPartHistory,
 
     // Actions
     ensureParts,
     ensurePart,
+    ensurePartHistory,
     fetchParts,
     fetchPart,
+    fetchPartHistory,
     fetchPartsByBike,
+    batchFetchParts,
+    batchFetchPartHistories,
     createPart,
     updatePart,
     markPartsClean,
+    markPartsHistoryClean,
     markPartsDirty,
     movePartToBike,
     deletePart,

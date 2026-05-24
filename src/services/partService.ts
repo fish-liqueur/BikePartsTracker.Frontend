@@ -1,6 +1,7 @@
 import { apiService } from './api';
 import type {
   BikePart, CreatePartDto, UpdatePartDto, UpdatePartResponse, DeletePartResponse,
+  PartUsageHistory,
 } from '@/types';
 
 export const partService = {
@@ -27,6 +28,12 @@ export const partService = {
     }
   },
 
+  // Get usage history for a part
+  async getPartHistory(id: string): Promise<PartUsageHistory[]> {
+    const response = await apiService.get<PartUsageHistory[]>(`/api/parts/${id}/history`);
+    return response.data ?? [];
+  },
+
   // Create new part
   async createPart(partData: CreatePartDto): Promise<BikePart | null> {
     try {
@@ -48,6 +55,18 @@ export const partService = {
       console.error('Failed to update part:', error);
       throw error;
     }
+  },
+
+  // Batch fetch part data (no history) for multiple ids
+  async batchGetParts(partIds: string[]): Promise<Record<string, BikePart>> {
+    const response = await apiService.post<Record<string, BikePart>>('/api/parts/batch', { partIds });
+    return response.data ?? {};
+  },
+
+  // Batch fetch usage history for multiple parts
+  async batchGetPartHistories(partIds: string[]): Promise<Record<string, PartUsageHistory[]>> {
+    const response = await apiService.post<Record<string, PartUsageHistory[]>>('/api/parts/batch/history', { partIds });
+    return response.data ?? {};
   },
 
   /** DELETE part — returns success and any chain cycles updated by cascade. */
@@ -91,24 +110,4 @@ export const partService = {
   //   return response.data || [];
   // },
 
-  // Add usage history entry
-  // async addUsageHistory(partId: string, usageData: {
-  //   mileage: number;
-  //   date: Date;
-  //   notes?: string;
-  // }): Promise<PartUsageHistory | null> {
-  //   try {
-  //     const response = await apiService.post<PartUsageHistory>(`/api/parts/${partId}/usage`, usageData);
-  //     return response.data || null;
-  //   } catch (error) {
-  //     console.error('Failed to add usage history:', error);
-  //     throw error;
-  //   }
-  // },
-
-  // Get usage history for a part
-//   async getPartUsageHistory(partId: string): Promise<PartUsageHistory[]> {
-//     const response = await apiService.get<PartUsageHistory[]>(`/api/parts/${partId}/usage`);
-//     return response.data || [];
-//   }
 };

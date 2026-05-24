@@ -42,8 +42,9 @@ import type { ImportStravaRidesRequestDto } from '@/types';
 import { onMounted, ref } from 'vue';
 import DateTimePicker from '@/components/shared/DateTimePicker.vue';
 
-defineProps<{
+const props = defineProps<{
   modelValue: boolean;
+  dateFrom?: Date | null;
 }>();
 
 const emit = defineEmits<{
@@ -59,7 +60,7 @@ const formData = ref<Partial<ImportStravaRidesRequestDto>>({
 });
 
 onMounted(() => {
-  formData.value.startDate = new Date(new Date().setDate(new Date().getDate() - 30));
+  formData.value.startDate = props.dateFrom ?? new Date(new Date().setDate(new Date().getDate() - 30));
   formData.value.endDate = new Date();
 });
 

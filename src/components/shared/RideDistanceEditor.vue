@@ -17,7 +17,7 @@
     <q-input
       :model-value="distanceString"
       type="number"
-      label="Distance (m)"
+      label="Distance (m) *"
       outlined
       step="any"
       :rules="[(val: string) => (val !== null && val !== '' && Number.parseFloat(val) > 0) || 'Enter a distance greater than 0']"
