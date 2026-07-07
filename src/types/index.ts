@@ -397,11 +397,14 @@ export interface SyncBikeDto {
   isActive: boolean;
 }
 
+export type DistanceUnit = 'km' | 'mi';
+
 export interface UserSettings {
   defaultChainCycleLength: number;
   defaultChainCycleIntervalKm: number;
   defaultUseChainCycle: boolean;
   showTips: boolean;
+  distanceUnit: DistanceUnit;
 }
 
 export interface UserSettingsDto {

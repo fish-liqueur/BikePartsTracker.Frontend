@@ -79,12 +79,10 @@
 
           <!-- Works Tab -->
           <q-tab-panel name="works">
-            <div class="empty-tab">
-              <q-icon name="build"
-                      size="64px"
-                      color="grey-5" />
-              <p>Works coming soon</p>
-            </div>
+            <WorksWidget v-if="part"
+                         :part="part"
+                         :parent-type="workParentType"
+                         :title="`Works for ${part.name} (${part.partType})`" />
           </q-tab-panel>
 
           <!-- Settings Tab -->
@@ -148,7 +146,7 @@ import { useQuerySync } from '@/composables/useQuerySync';
 import { usePartsStore } from '@/stores/partsStore';
 import { useBikesStore } from '@/stores/bikesStore';
 import {
-  PartScheduleType, PartType, type CreatePartDto, type PartFormExposed, type UpdatePartDto 
+  PartScheduleType, PartType, type WorkParentType, type CreatePartDto, type PartFormExposed, type UpdatePartDto 
 } from '@/types';
 import { useQuasar } from 'quasar';
 import {
@@ -161,6 +159,7 @@ import { getErrorMessage } from '@/utils/error';
 import { formatDate } from '@/utils/date';
 import RidesWidget from '@/components/widgets/RidesWidget.vue';
 import PartHistoryWidget from '@/components/widgets/PartHistoryWidget.vue';
+import WorksWidget from '@/components/widgets/WorksWidget.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -194,6 +193,7 @@ const initialFormData = computed(() => {
 });
 
 const partFormRef = ref<ComponentPublicInstance & PartFormExposed | null>(null);
+const workParentType = ref<WorkParentType>('Part');
 
 // Form data
 const formData = ref<UpdatePartDto>({

@@ -113,7 +113,7 @@
       </template>
 
       <template v-slot:no-data>
-        <div class="rides-table__empty">
+        <div class="rides-table__empty m-auto">
           <q-icon name="directions_bike"
                   size="48px"
                   color="grey-5" />

@@ -430,6 +430,7 @@ const handleInstallPart = async (data: { installationDate: string; mileageAtInst
 
     const installationDateObj = new Date(data.installationDate);
 
+    // TODO: Handle part returned from the API
     await withAjaxBar(partsStore.movePartToBike(
       partId,
       targetBikeId,

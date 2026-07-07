@@ -1,14 +1,18 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { userSettingsService } from '@/services/userSettingsService';
 import type {
-  UserSettings, UserSettingsDto, FetchStatus 
+  UserSettings, UserSettingsDto, FetchStatus, 
+  DistanceUnit
 } from '@/types';
 
 export const useUserSettingsStore = defineStore('userSettings', () => {
   // State
   const userSettings = ref<UserSettings | null>(null);
   const fetchStatus = ref<FetchStatus>('idle');
+
+  // Getters
+  const distanceUnit = computed<DistanceUnit>(() => userSettings.value?.distanceUnit ?? 'km');
 
   // Actions
   const ensureSettings = async () => {
@@ -48,6 +52,9 @@ export const useUserSettingsStore = defineStore('userSettings', () => {
     // State
     userSettings,
     fetchStatus,
+
+    // Getters
+    distanceUnit,
     
     // Actions
     ensureSettings,

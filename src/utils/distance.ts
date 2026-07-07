@@ -1,3 +1,17 @@
+import type { DistanceUnit } from '@/types';
+
+const METERS_PER_UNIT: Record<DistanceUnit, number> = {
+  km: 1000,
+  mi: 1609.344,
+};
+
+export function metersToUnit(meters: number, unit: DistanceUnit): number {
+  return meters / METERS_PER_UNIT[unit];
+}
+export function unitToMeters(value: number, unit: DistanceUnit): number {
+  return value * METERS_PER_UNIT[unit];
+}
+
 export function formatMeters(meters: number): string {
   if (!Number.isFinite(meters)) return '-';
 

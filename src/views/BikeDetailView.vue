@@ -24,118 +24,117 @@
       />
     </template>
 
-    <template v-if="bike" #default>
-      <div v-if="bike" class="bike-detail-container">
-        <!-- Tabs -->
-        <q-tabs
-          v-model="activeTab"
-          class="text-grey"
-          active-color="primary"
-          indicator-color="primary"
-        >
-          <q-tab name="parts"
-                 label="Parts"
-                 icon="hardware" />
-          <q-tab name="rides"
-                 label="Rides"
-                 icon="directions_bike" />
-          <q-tab name="works"
-                 label="Works"
-                 icon="build" />
-          <q-tab name="settings"
-                 label="Settings"
-                 icon="settings" />
-        </q-tabs>
+    <template #default>
+      <template v-if="bike">
+        <div v-if="bike" class="bike-detail-container">
+          <!-- Tabs -->
+          <q-tabs
+            v-model="activeTab"
+            class="text-grey"
+            active-color="primary"
+            indicator-color="primary"
+          >
+            <q-tab name="parts"
+                   label="Parts"
+                   icon="hardware" />
+            <q-tab name="rides"
+                   label="Rides"
+                   icon="directions_bike" />
+            <q-tab name="works"
+                   label="Works"
+                   icon="build" />
+            <q-tab name="settings"
+                   label="Settings"
+                   icon="settings" />
+          </q-tabs>
 
-        <q-separator />
+          <q-separator />
 
-        <!-- Tab Panels -->
-        <q-tab-panels v-model="activeTab"
-                      animated
-                      class="tab-panels">
-          <!-- Parts Tab -->
-          <q-tab-panel name="parts">
-            <div class="display-flex flex-column gap-5">
-              <ChainCycleWidget  
-                :bike-context="bike" />
-              <PartsWidget
-                :bike-context="bike"
-                title="Parts"
-              />
-            </div>
-          </q-tab-panel>
-
-          <!-- Rides Tab -->
-          <q-tab-panel name="rides">
-            <RidesWidget v-if="bike"
-                         title="Rides"
-                         :bike-context="bike" />
-          </q-tab-panel>
-
-          <!-- Works Tab -->
-          <q-tab-panel name="works">
-            <div class="empty-tab">
-              <q-icon name="build"
-                      size="64px"
-                      color="grey-5" />
-              <p>Works coming soon</p>
-            </div>
-          </q-tab-panel>
-
-          <!-- Settings Tab -->
-          <q-tab-panel name="settings">
-            <div class="settings-panel">
-              <div class="settings-form">
-                <BikeForm
-                  :key="bikeId"
-                  ref="bikeFormRef"
-                  :initial-data="bikeFormInitialData"
-                  @update:isValid="(v) => (bikeFormIsValid = v)"
-                  @submit="handleSave"
+          <!-- Tab Panels -->
+          <q-tab-panels v-model="activeTab"
+                        animated
+                        class="tab-panels">
+            <!-- Parts Tab -->
+            <q-tab-panel name="parts">
+              <div class="display-flex flex-column gap-5">
+                <ChainCycleWidget  
+                  :bike-context="bike" />
+                <PartsWidget
+                  :bike-context="bike"
+                  title="Parts"
                 />
               </div>
+            </q-tab-panel>
 
-              <div class="form-actions">
-                <q-btn
-                  label="Delete Bike"
-                  color="negative"
-                  icon="delete"
-                  outline
-                  @click="handleDelete"
-                  :loading="isDeleting"
-                />
-                <q-btn
-                  label="Retire Bike"
-                  color="orange"
-                  icon="archive"
-                  outline
-                  @click="handleRetire"
-                  :loading="isRetiring"
-                />
-                <q-btn
-                  label="Save"
-                  color="primary"
-                  icon="save"
-                  :loading="isSaving"
-                  :disable="!bikeFormIsValid"
-                  @click="() => bikeFormRef?.handleSubmit()"
-                />
+            <!-- Rides Tab -->
+            <q-tab-panel name="rides">
+              <RidesWidget v-if="bike"
+                           title="Rides"
+                           :bike-context="bike" />
+            </q-tab-panel>
+
+            <!-- Works Tab -->
+            <q-tab-panel name="works">
+              <WorksWidget 
+                :bike="bike"
+                :parent-type="workParentType"
+                :title="`Works for ${bike.name} (${bike.type})`" />
+            </q-tab-panel>
+
+            <!-- Settings Tab -->
+            <q-tab-panel name="settings">
+              <div class="settings-panel">
+                <div class="settings-form">
+                  <BikeForm
+                    :key="bikeId"
+                    ref="bikeFormRef"
+                    :initial-data="bikeFormInitialData"
+                    @update:isValid="(v) => (bikeFormIsValid = v)"
+                    @submit="handleSave"
+                  />
+                </div>
+
+                <div class="form-actions">
+                  <q-btn
+                    label="Delete Bike"
+                    color="negative"
+                    icon="delete"
+                    outline
+                    @click="handleDelete"
+                    :loading="isDeleting"
+                  />
+                  <q-btn
+                    label="Retire Bike"
+                    color="orange"
+                    icon="archive"
+                    outline
+                    @click="handleRetire"
+                    :loading="isRetiring"
+                  />
+                  <q-btn
+                    label="Save"
+                    color="primary"
+                    icon="save"
+                    :loading="isSaving"
+                    :disable="!bikeFormIsValid"
+                    @click="() => bikeFormRef?.handleSubmit()"
+                  />
+                </div>
               </div>
-            </div>
-          </q-tab-panel>
-        </q-tab-panels>
+            </q-tab-panel>
+          </q-tab-panels>
+        </div>
+      </template>
+      <div v-else class="error-container">
+        <q-icon name="error_outline"
+                size="48px"
+                color="negative" />
+        <p>Bike not found</p>
+        <q-btn label="Go Back"
+               color="primary"
+               @click="router.push('/bikes')" />
       </div>
     </template> 
-
-    <div v-if="!bike" class="error-container">
-      <q-icon name="error_outline"
-              size="48px"
-              color="negative" />
-      <p>Bike not found</p>
-      <q-btn label="Go Back"
-             color="primary"
-             @click="router.push('/bikes')" />
-    </div>
   </LayoutViewGeneral>
 </template>
 
@@ -157,10 +156,11 @@ import RidesWidget from '@/components/widgets/RidesWidget.vue';
 import BikeForm from '@/components/forms/BikeForm.vue';
 import LayoutViewGeneral from '@/components/layouts/LayoutViewGeneral.vue';
 import type {
-  CreateBikeDto, UpdateBikeDto, BikeFormExposed 
+  CreateBikeDto, UpdateBikeDto, BikeFormExposed, 
+  WorkParentType
 } from '@/types';
-import { BikeType } from '@/types';
 import { getErrorMessage } from '@/utils/error';
+import WorksWidget from '@/components/widgets/WorksWidget.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -171,9 +171,11 @@ const {
   showSuccess, showError, withAjaxBar 
 } = useLayout();
 const $q = useQuasar();
-const bikeId = computed(() => route.params.id as string);
-const bike = computed(() => bikesStore.getBikeById(bikeId.value));
-const isLoading = computed(() => bikesStore.isLoading);
+
+
+const bikeFormRef = ref<ComponentPublicInstance & BikeFormExposed | null>(null);
+const bikeFormIsValid = ref(false);
+const workParentType = ref<WorkParentType>('Bike');
 
 // Tab management with query parameter sync
 const { state: queryState, setParam: setQueryParam } = useQuerySync({
@@ -197,22 +199,18 @@ const activeTab = computed({
   }
 });
 
-const bikeFormRef = ref<ComponentPublicInstance & BikeFormExposed | null>(null);
-const bikeFormIsValid = ref(false);
+const bike = computed(() => bikesStore.getBikeById(bikeId.value));
 
 const bikeFormInitialData = computed(() => {
-  const b = bike.value;
-  if (!b) {
+  if (!bike.value) {
     return undefined;
   }
-  return {
-    name: b.name || '',
-    type: b.type || BikeType.Other,
-    description: b.description || '',
-    totalDistance: b.totalDistance ?? 0,
-    stravaDistance: b.stravaDistance ?? 0,
-  };
+  return bike.value;
 });
+
+const bikeId = computed(() => route.params.id as string);
+
+const isLoading = computed(() => bikesStore.isLoading);
 
 // Set parts context bike in store when bike changes
 // watch(bike, (newBike) => {
