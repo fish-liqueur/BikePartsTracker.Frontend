@@ -62,7 +62,7 @@
                         spread 
                         class="flex-1" />
           <q-btn-toggle v-model="formData.type"
-                        :options="workTypeOptions"
+                        :options="maintenanceTaskTypeOptions"
                         spread 
                         class="flex-1" />
 
@@ -101,14 +101,14 @@
 </template>
 
 <script setup lang="ts">
-import type { CreateWorkDto, Work } from '@/types';
+import type { CreateMaintenanceTaskDto, MaintenanceTask } from '@/types';
 import { computed, ref, watch } from 'vue';
 import { metersToUnit, unitToMeters } from '@/utils/distance';
 import { useUserSettingsStore } from '@/stores/userSettingsStore';
 import DateTimePicker from '@/components/shared/DateTimePicker.vue';
 
 interface Props {
-  initialData?: Partial<Work>;
+  initialData?: Partial<MaintenanceTask>;
   
 }
 
@@ -118,7 +118,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-  submit: [data: CreateWorkDto];
+  submit: [data: CreateMaintenanceTaskDto];
   'update:isValid': [value: boolean];
 }>();
 
@@ -127,7 +127,7 @@ const settings = useUserSettingsStore();
 // const bikesStore = useBikesStore();
 // const partsStore = usePartsStore();
 
-const formData = ref<Partial<Work>>({
+const formData = ref<Partial<MaintenanceTask>>({
   name: '',
   description: '',
   type: 'OneTime',
@@ -143,7 +143,7 @@ const triggerTypeOptions = ref([
   { label: 'Time', value: 'Time' },
 ]);
 
-const workTypeOptions = ref([
+const maintenanceTaskTypeOptions = ref([
   { label: 'Once', value: 'OneTime' },
   { label: 'Repeating', value: 'Repeating' },
 ]);
@@ -226,7 +226,7 @@ const isValid = computed(() => {
 // Handle form submit
 const handleSubmit = () => {
   if (isValid.value) {
-    emit('submit', formData.value as CreateWorkDto);
+    emit('submit', formData.value as CreateMaintenanceTaskDto);
   }
 };
 

@@ -75,9 +75,9 @@
 
             <!-- Works Tab -->
             <q-tab-panel name="works">
-              <WorksWidget 
+              <MaintenanceTasksWidget 
                 :bike="bike"
-                :parent-type="workParentType"
+                :parent-type="maintenanceTaskParentType"
                 :title="`Works for ${bike.name} (${bike.type})`" />
             </q-tab-panel>
 
@@ -157,10 +157,10 @@ import BikeForm from '@/components/forms/BikeForm.vue';
 import LayoutViewGeneral from '@/components/layouts/LayoutViewGeneral.vue';
 import type {
   CreateBikeDto, UpdateBikeDto, BikeFormExposed, 
-  WorkParentType
+  MaintenanceTaskParentType
 } from '@/types';
 import { getErrorMessage } from '@/utils/error';
-import WorksWidget from '@/components/widgets/WorksWidget.vue';
+import MaintenanceTasksWidget from '@/components/widgets/MaintenanceTasksWidget.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -175,7 +175,7 @@ const $q = useQuasar();
 
 const bikeFormRef = ref<ComponentPublicInstance & BikeFormExposed | null>(null);
 const bikeFormIsValid = ref(false);
-const workParentType = ref<WorkParentType>('Bike');
+const maintenanceTaskParentType = ref<MaintenanceTaskParentType>('Bike');
 
 // Tab management with query parameter sync
 const { state: queryState, setParam: setQueryParam } = useQuerySync({

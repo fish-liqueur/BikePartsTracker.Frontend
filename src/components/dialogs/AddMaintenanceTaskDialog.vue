@@ -8,7 +8,7 @@
         <div class="text-h6">Create Work</div>
       </q-card-section>
       <q-card-section>
-        <WorkForm
+        <MaintenanceTaskForm
           ref="formRef"
           :initial-data="initialFormData"
           @update:isValid="(val) => isValid = val"
@@ -34,28 +34,28 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import type { CreateWorkDto, Work } from '@/types';
-import WorkForm from '@/components/forms/WorkForm.vue';
+import type { CreateMaintenanceTaskDto, MaintenanceTask } from '@/types';
+import MaintenanceTaskForm from '@/components/forms/MaintenanceTaskForm.vue';
 
 interface Props {
   modelValue: boolean;
-  basicWork?: Partial<Work>;
+  basicMaintenanceTask?: Partial<MaintenanceTask>;
 }
 
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean];
-  submit: [data: CreateWorkDto];
+  submit: [data: CreateMaintenanceTaskDto];
 }>();
 
-const formRef = ref<InstanceType<typeof WorkForm>>();
+const formRef = ref<InstanceType<typeof MaintenanceTaskForm>>();
 const isValid = ref(false);
-const initialFormData = computed<Partial<Work> | undefined>(() => {
+const initialFormData = computed<Partial<MaintenanceTask> | undefined>(() => {
   if (!props.modelValue) {
     return undefined;
   }
-  const data: Partial<Work> = {
+  const data: Partial<MaintenanceTask> = {
     name: '',
     description: '',
     type: 'OneTime',
@@ -66,15 +66,15 @@ const initialFormData = computed<Partial<Work> | undefined>(() => {
     startDate: new Date(),
   };
 
-  if (props.basicWork) {
-    data.name = props.basicWork.name || '';
-    data.description = props.basicWork.description || '';
-    data.type = props.basicWork.type || 'OneTime';
-    data.triggerType = props.basicWork.triggerType || 'Distance';
-    data.parentType = props.basicWork.parentType || 'Part';
-    data.parentId = props.basicWork.parentId || '';
-    data.triggerValue = props.basicWork.triggerValue || 0;
-    data.startDate = props.basicWork.startDate || new Date();
+  if (props.basicMaintenanceTask) {
+    data.name = props.basicMaintenanceTask.name || '';
+    data.description = props.basicMaintenanceTask.description || '';
+    data.type = props.basicMaintenanceTask.type || 'OneTime';
+    data.triggerType = props.basicMaintenanceTask.triggerType || 'Distance';
+    data.parentType = props.basicMaintenanceTask.parentType || 'Part';
+    data.parentId = props.basicMaintenanceTask.parentId || '';
+    data.triggerValue = props.basicMaintenanceTask.triggerValue || 0;
+    data.startDate = props.basicMaintenanceTask.startDate || new Date();
   }
   return data;
 });
@@ -84,8 +84,8 @@ const handleCancel = () => {
   emit('update:modelValue', false);
 };
 
-const handleSubmit = (formData: CreateWorkDto) => {
-  const createData: CreateWorkDto = {
+const handleSubmit = (formData: CreateMaintenanceTaskDto) => {
+  const createData: CreateMaintenanceTaskDto = {
     name: formData.name,
     description: formData.description || undefined,
     type: formData.type || 'OneTime',

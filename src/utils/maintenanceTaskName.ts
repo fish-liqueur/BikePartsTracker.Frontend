@@ -1,6 +1,6 @@
-import { PartType, type WorkParentType, type WorkTriggerType, type WorkType } from '@/types';
+import { PartType, type MaintenanceTaskParentType, type MaintenanceTaskTriggerType, type MaintenanceTaskType } from '@/types';
 
-const defaultWorkNamesByPartType = {
+const defaultMaintenanceTaskNamesByPartType = {
   [PartType.Chain]: 'Chain Lubrication',
   [PartType.Cassette]: 'Cassette Maintenance',
   [PartType.Chainring]: 'Chainring Maintenance',
@@ -15,15 +15,15 @@ const defaultWorkNamesByPartType = {
 };
 
 export interface Options {
-  type: WorkType;
-  triggerType: WorkTriggerType;
-  parentType: WorkParentType;
+  type: MaintenanceTaskType;
+  triggerType: MaintenanceTaskTriggerType;
+  parentType: MaintenanceTaskParentType;
   partType: PartType;
 }
 
-export function generateWorkNameForPart(nameString: string, options: Partial<Options>):string {
+export function generateMaintenanceTaskNameForPart(nameString: string, options: Partial<Options>):string {
   if (options.partType && options.parentType === 'Part') {
-    return defaultWorkNamesByPartType[options.partType];
+    return defaultMaintenanceTaskNamesByPartType[options.partType];
   }
 
   return nameString;

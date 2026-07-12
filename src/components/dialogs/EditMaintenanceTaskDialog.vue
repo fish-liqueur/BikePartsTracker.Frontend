@@ -5,13 +5,13 @@
   >
     <q-card style="min-width: 500px">
       <q-card-section>
-        <div class="text-h6">Edit Work: {{ work?.name }}</div>
+        <div class="text-h6">Edit Work: {{ maintenanceTask?.name }}</div>
       </q-card-section>
       <q-card-section>
-        <template v-if="work">
-          <WorkForm
+        <template v-if="maintenanceTask">
+          <MaintenanceTaskForm
             ref="formRef"
-            :initial-data="work"
+            :initial-data="maintenanceTask"
             @update:isValid="(val: boolean) => isValid = val"
             @submit="handleSubmit"
           />
@@ -39,32 +39,32 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import type { CreateWorkDto, UpdateWorkDto, Work } from '@/types';
-import WorkForm from '@/components/forms/WorkForm.vue';
+import type { CreateMaintenanceTaskDto, UpdateMaintenanceTaskDto, MaintenanceTask } from '@/types';
+import MaintenanceTaskForm from '@/components/forms/MaintenanceTaskForm.vue';
 
 interface Props {
   modelValue: boolean;
-  work: Work | null;
+  maintenanceTask: MaintenanceTask | null;
 }
 
 withDefaults(defineProps<Props>(), {
-  work: null,
+  maintenanceTask: null,
 });
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean];
-  submit: [data: UpdateWorkDto];
+  submit: [data: UpdateMaintenanceTaskDto];
 }>();
 
-const formRef = ref<InstanceType<typeof WorkForm>>();
+const formRef = ref<InstanceType<typeof MaintenanceTaskForm>>();
 const isValid = ref(false);
 
 const handleCancel = () => {
   emit('update:modelValue', false);
 };
 
-const handleSubmit = (formData: CreateWorkDto) => {
-  const createData: UpdateWorkDto = {
+const handleSubmit = (formData: CreateMaintenanceTaskDto) => {
+  const createData: UpdateMaintenanceTaskDto = {
     name: formData.name,
     description: formData.description || undefined,
     parentId: formData.parentId || undefined,

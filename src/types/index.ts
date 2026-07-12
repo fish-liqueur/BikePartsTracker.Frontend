@@ -205,19 +205,19 @@ export interface ImportStravaRidesResponseDto {
   affected: UpdateResponseAffected;
 }
 
-// Works (maintenance / replacement rules on Part, Bike, or ChainCycle)
-export type WorkType = 'OneTime' | 'Repeating' | 'Cyclic';
-export type WorkTriggerType = 'Distance' | 'Time';
-export type WorkParentType = 'Part' | 'Bike' | 'ChainCycle';
+// Maintenance tasks (maintenance / replacement rules on Part, Bike, or ChainCycle)
+export type MaintenanceTaskType = 'OneTime' | 'Repeating' | 'Cyclic';
+export type MaintenanceTaskTriggerType = 'Distance' | 'Time';
+export type MaintenanceTaskParentType = 'Part' | 'Bike' | 'ChainCycle';
 
-export interface Work {
+export interface MaintenanceTask {
   id: string;
   name: string;
   description?: string | null;
   startDate: Date;
-  type: WorkType;
-  triggerType: WorkTriggerType;
-  parentType: WorkParentType;
+  type: MaintenanceTaskType;
+  triggerType: MaintenanceTaskTriggerType;
+  parentType: MaintenanceTaskParentType;
   parentId: string;
   /** Distance trigger: meters; time trigger: days */
   triggerValue: number;
@@ -227,25 +227,25 @@ export interface Work {
   needsAttention: boolean;
 }
 
-export interface CreateWorkDto {
+export interface CreateMaintenanceTaskDto {
   name: string;
   description?: string | null;
   startDate?: Date | string;
-  type?: WorkType;
-  triggerType?: WorkTriggerType;
-  parentType?: WorkParentType;
+  type?: MaintenanceTaskType;
+  triggerType?: MaintenanceTaskTriggerType;
+  parentType?: MaintenanceTaskParentType;
   parentId: string;
   triggerValue: number;
   isActive?: boolean;
 }
 
-export interface UpdateWorkDto {
+export interface UpdateMaintenanceTaskDto {
   name?: string | null;
   description?: string | null;
   startDate?: Date | string | null;
-  type?: WorkType | null;
-  triggerType?: WorkTriggerType | null;
-  parentType?: WorkParentType | null;
+  type?: MaintenanceTaskType | null;
+  triggerType?: MaintenanceTaskTriggerType | null;
+  parentType?: MaintenanceTaskParentType | null;
   parentId?: string | null;
   triggerValue?: number | null;
   isActive?: boolean | null;
@@ -263,7 +263,7 @@ export interface PartUsageHistory {
   endDate: Date | null;
   distance: number;
   isShadow: boolean;
-  workId: string | null;
+  maintenanceTaskId: string | null;
   sourceUsagePeriodId: string | null;
   notes?: string | null;
 }
@@ -448,7 +448,7 @@ export interface UpdateResponseAffected {
   affectedBikeIds: string[];
   affectedPartIds: string[];
   affectedRideIds: string[];
-  affectedWorkIds: string[];
+  affectedMaintenanceTaskIds: string[];
 }
 
 /** Response from PUT /api/parts/{id}. */

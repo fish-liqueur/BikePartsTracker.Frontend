@@ -1,6 +1,6 @@
-import { PartType, type WorkType } from '@/types';
+import { PartType, type MaintenanceTaskType } from '@/types';
 
-const workTypeByPartType: Record<PartType, WorkType> = {
+const maintenanceTaskTypeByPartType: Record<PartType, MaintenanceTaskType> = {
   [PartType.Chain]: 'Repeating',
   [PartType.Cassette]: 'Repeating',
   [PartType.Chainring]: 'Repeating',
@@ -14,6 +14,6 @@ const workTypeByPartType: Record<PartType, WorkType> = {
   [PartType.Other]: 'Repeating',
 };
 
-export function getWorkTypeByPartType(partType: PartType): WorkType {
-  return workTypeByPartType[partType];
+export function getMaintenanceTaskTypeByPartType(partType: PartType): MaintenanceTaskType {
+  return maintenanceTaskTypeByPartType[partType];
 }
