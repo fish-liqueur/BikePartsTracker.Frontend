@@ -4,6 +4,7 @@ import type {
   AxiosInstance, AxiosResponse, AxiosError 
 } from 'axios';
 import type { ApiResponse } from '@/types';
+import { i18n, getActiveLocale } from '@/i18n';
 
 // Get base URL from environment variable with fallback
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
@@ -28,6 +29,10 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
+  // Localize backend messages for this request (ADR 0006 §E3). The backend resolves the culture from
+  // Accept-Language; an unknown locale falls back to English server-side.
+  config.headers['Accept-Language'] = getActiveLocale();
     
   // Log request URL in development to help debug
   if (import.meta.env.DEV) {
@@ -139,12 +144,45 @@ export const apiService = {
   },
 };
 
-// Error handler
-function handleApiError(error: any): Error {
+/** An API error that preserves the stable machine `code` and structured `params` (ADR 0006 §E1). */
+export class ApiError extends Error {
+  code?: string;
+  params?: Record<string, unknown>;
+  status?: number;
+
+  constructor(message: string, options?: { code?: string; params?: Record<string, unknown>; status?: number }) {
+    super(message);
+    this.name = 'ApiError';
+    this.code = options?.code;
+    this.params = options?.params;
+    this.status = options?.status;
+  }
+}
+
+// Error handler (ADR 0006 §E1). Prefers a client-side copy for the stable `code` (with `params`),
+// then the server-rendered localized `detail`, and finally the legacy `{ message }`/statusText — so
+// migrated and un-migrated endpoints both surface a useful message during the incremental rollout.
+export function handleApiError(error: any): Error {
   if (error.response) {
-    // Server responded with error status
-    const message = error.response.data?.message || error.response.statusText;
-    return new Error(message);
+    const data = error.response.data ?? {};
+    const code: string | undefined = data.code;
+    const params: Record<string, unknown> | undefined = data.params;
+    const status: number | undefined = error.response.status;
+
+    let message: string;
+    if (code && i18n.global.te(`errors.${code}`)) {
+      message = i18n.global.t(`errors.${code}`, (params ?? {}) as Record<string, unknown>);
+    } else if (typeof data.detail === 'string' && data.detail) {
+      message = data.detail;
+    } else if (typeof data.message === 'string' && data.message) {
+      message = data.message;
+    } else {
+      message = error.response.statusText || 'An error occurred';
+    }
+
+    return new ApiError(message, {
+      code, params, status 
+    });
   } else if (error.request) {
     // Request was made but no response received
     return new Error('No response from server');

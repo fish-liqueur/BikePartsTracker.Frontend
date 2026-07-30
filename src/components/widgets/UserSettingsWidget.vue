@@ -1,34 +1,46 @@
 <template>
   <q-card>
     <q-card-section>
-      <h5 class="text-h5">User Settings</h5>
+      <h5 class="text-h5">{{ t('settings.title') }}</h5>
       <q-form @submit.prevent="handleSubmit" class="form-general pt-2">
-        <ElementWithTooltipButton tooltip-text="New chain cycles will have this number of chains">
+        <ElementWithTooltipButton :tooltip-text="t('settings.languageHint')">
+          <q-select
+            :model-value="currentLocale"
+            :options="languageOptions"
+            :label="t('settings.language')"
+            emit-value
+            map-options
+            filled
+            class="m-0 p-0"
+            @update:model-value="onLanguageChange"
+          />
+        </ElementWithTooltipButton>
+        <ElementWithTooltipButton :tooltip-text="t('settings.defaultChainCycleLengthHint')">
           <q-select
             v-model="formData.defaultChainCycleLength"
             :options="[2, 3]"
-            label="Default chain cycle length"
+            :label="t('settings.defaultChainCycleLength')"
             filled
             class="m-0 p-0"
           />
         </ElementWithTooltipButton>
-        <ElementWithTooltipButton tooltip-text="How many kilometers you'd like to ride between chain swaps">
+        <ElementWithTooltipButton :tooltip-text="t('settings.defaultChainCycleIntervalHint')">
           <q-input
             v-model="formData.defaultChainCycleIntervalKm"
-            label="Default chain cycle interval (km)"
+            :label="t('settings.defaultChainCycleInterval')"
             filled
             class="m-0 p-0"
             type="number"
             :rules="[
-              (val: number | null) => val !== null && val !== undefined && val >= 0 || 'Interval must be a positive number'
+              (val: number | null) => val !== null && val !== undefined && val >= 0 || t('settings.intervalRule')
             ]"
           />
         </ElementWithTooltipButton>
-        <ElementWithTooltipButton tooltip-text="Use chain cycle on new bikes">
-          <q-checkbox v-model="formData.defaultUseChainCycle" label="Use chain cycle by default" />
+        <ElementWithTooltipButton :tooltip-text="t('settings.useChainCycleHint')">
+          <q-checkbox v-model="formData.defaultUseChainCycle" :label="t('settings.useChainCycle')" />
         </ElementWithTooltipButton>
-        <ElementWithTooltipButton :tooltip-text="showTipsString" show-always>
-          <q-checkbox v-model="formData.showTips" label="Show UI tips" />
+        <ElementWithTooltipButton :tooltip-text="t('settings.showTipsHint')" show-always>
+          <q-checkbox v-model="formData.showTips" :label="t('settings.showTips')" />
         </ElementWithTooltipButton>
       </q-form>
         
@@ -36,11 +48,11 @@
 
     <q-card-actions align="stretch">
       <q-btn flat
-             label="Cancel"
+             :label="t('common.cancel')"
              color="primary"
              @click="initializeForm" />
       <q-btn
-        label="Save User Settings"
+        :label="t('settings.save')"
         color="primary"
         @click="saveSettings"
       />
@@ -50,11 +62,26 @@
 
 <script setup lang="ts">
 import type { UserSettingsDto } from '@/types';
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useUserSettingsStore } from '@/stores/userSettingsStore';
+import { useLocale } from '@/composables/useLocale';
+import type { SupportedLocale } from '@/i18n';
 import ElementWithTooltipButton from '@/components/shared/ElementWithTooltipButton.vue';
 
 const userSettingsStore = useUserSettingsStore();
+const { t } = useI18n();
+const {
+  currentLocale, availableLocales, setLocale 
+} = useLocale();
+
+// Bound to the shared useLocale source, so this control and the header switcher always agree.
+const languageOptions = computed(() =>
+  availableLocales.map(locale => ({ value: locale, label: t(`language.${locale}`) })));
+
+const onLanguageChange = (locale: SupportedLocale) => {
+  setLocale(locale);
+};
 
 const formData = ref<UserSettingsDto>({
   defaultChainCycleLength: 0,
@@ -81,9 +108,6 @@ watch(
     initializeForm();
   }, { immediate: true, deep: true }
 );
-
-const showTipsString = `Hide or show tooltips explaining the UI features
-(this tooltip is always shown)`;
 
 const handleSubmit = () => {
   saveSettings();

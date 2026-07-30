@@ -1,0 +1,107 @@
+{
+  "common": {
+    "appName": "Bike Parts Tracker",
+    "save": "Зберегти",
+    "cancel": "Скасувати",
+    "logout": "Вийти",
+    "userSettings": "Налаштування користувача",
+    "language": "Мова"
+  },
+  "language": {
+    "en": "English",
+    "de": "Deutsch",
+    "ru": "Русский",
+    "uk": "Українська"
+  },
+  "nav": {
+    "login": "Вхід",
+    "register": "Реєстрація",
+    "home": "Головна",
+    "bikes": "Велосипеди",
+    "bike detailed": "Велосипед",
+    "parts": "Деталі",
+    "part detailed": "Деталь",
+    "rides": "Поїздки",
+    "works": "Обслуговування",
+    "settings": "Налаштування",
+    "strava integration": "Інтеграція зі Strava",
+    "404": "Не знайдено"
+  },
+  "settings": {
+    "title": "Налаштування користувача",
+    "defaultChainCycleLength": "Довжина циклу ланцюгів за замовчуванням",
+    "defaultChainCycleLengthHint": "Нові цикли ланцюгів матимуть таку кількість ланцюгів",
+    "defaultChainCycleInterval": "Інтервал циклу ланцюгів за замовчуванням (км)",
+    "defaultChainCycleIntervalHint": "Скільки кілометрів ви хочете проїжджати між замінами ланцюга",
+    "intervalRule": "Інтервал має бути додатним числом",
+    "useChainCycle": "Використовувати цикл ланцюгів за замовчуванням",
+    "useChainCycleHint": "Використовувати цикл ланцюгів для нових велосипедів",
+    "showTips": "Показувати підказки інтерфейсу",
+    "showTipsHint": "Показати або приховати підказки про функції інтерфейсу\n(ця підказка показується завжди)",
+    "language": "Мова",
+    "languageHint": "Мова, що використовується в усьому застосунку",
+    "save": "Зберегти налаштування користувача"
+  },
+  "enums": {
+    "PartType": {
+      "Chain": "Ланцюг",
+      "Cassette": "Касета",
+      "Chainring": "Зірка",
+      "BrakePads": "Гальмівні колодки",
+      "Tyre": "Покришка",
+      "Battery": "Акумулятор",
+      "BottomBracket": "Каретка",
+      "Headset": "Рульова колонка",
+      "Hub": "Втулка",
+      "Pedals": "Педалі",
+      "Other": "Інше"
+    },
+    "BikeType": {
+      "Road": "Шосейний",
+      "Mountain": "Гірський",
+      "Gravel": "Гравійний",
+      "EBike": "Електровелосипед",
+      "City": "Міський",
+      "Touring": "Туристичний",
+      "Cargo": "Вантажний",
+      "Fixed": "Сінглспід",
+      "Rat": "Рет-байк",
+      "Other": "Інше"
+    },
+    "MaintenanceTaskType": {
+      "OneTime": "Одноразова",
+      "Repeating": "Повторювана",
+      "Cyclic": "Циклічна"
+    },
+    "MaintenanceTaskTriggerType": {
+      "Distance": "Дистанція",
+      "Time": "Час"
+    },
+    "MaintenanceTaskParentType": {
+      "Part": "Деталь",
+      "Bike": "Велосипед",
+      "ChainCycle": "Цикл ланцюгів"
+    },
+    "PartScheduleType": {
+      "OneTimeUse": "Одноразове використання",
+      "IntervalMaintenance": "Інтервальне обслуговування",
+      "CyclicReplacement": "Циклічна заміна"
+    }
+  },
+  "units": {
+    "parts": "{count} деталь | {count} деталі | {count} деталей"
+  },
+  "errors": {
+    "PARTS_BATCH_LIMIT_EXCEEDED": "За один запит можна запросити не більше ніж {max} ідентифікаторів деталей.",
+    "BIKES_DUPLICATE_STRAVA_ID": "Велосипед з одним і тим самим Strava ID зустрічається кілька разів: {ids}.",
+    "BIKES_NOT_FOUND": "Велосипед не знайдено або він вам не належить.",
+    "RIDES_ENDDATE_BEFORE_STARTDATE": "Дата завершення має бути не раніше за дату початку.",
+    "RIDES_STRAVA_NOT_CONNECTED": "Підключіть акаунт Strava, перш ніж імпортувати заїзди.",
+    "COMMON_NOT_FOUND": "Запитуваний ресурс не знайдено.",
+    "COMMON_FORBIDDEN": "У вас немає доступу до цього ресурсу.",
+    "COMMON_VALIDATION": "Виявлено одну або кілька помилок перевірки.",
+    "COMMON_UNEXPECTED": "Сталася неочікувана помилка. Будь ласка, спробуйте ще раз.",
+    "AUTH_INVALID_CREDENTIALS": "Неправильна адреса електронної пошти або пароль.",
+    "AUTH_EMAIL_TAKEN": "Обліковий запис із цією адресою електронної пошти вже існує."
+  }
+}

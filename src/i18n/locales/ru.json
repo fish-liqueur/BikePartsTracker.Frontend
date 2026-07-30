@@ -1,0 +1,107 @@
+{
+  "common": {
+    "appName": "Bike Parts Tracker",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "logout": "Выйти",
+    "userSettings": "Настройки пользователя",
+    "language": "Язык"
+  },
+  "language": {
+    "en": "English",
+    "de": "Deutsch",
+    "ru": "Русский",
+    "uk": "Українська"
+  },
+  "nav": {
+    "login": "Вход",
+    "register": "Регистрация",
+    "home": "Главная",
+    "bikes": "Велосипеды",
+    "bike detailed": "Велосипед",
+    "parts": "Детали",
+    "part detailed": "Деталь",
+    "rides": "Заезды",
+    "works": "Обслуживание",
+    "settings": "Настройки",
+    "strava integration": "Интеграция со Strava",
+    "404": "Не найдено"
+  },
+  "settings": {
+    "title": "Настройки пользователя",
+    "defaultChainCycleLength": "Длина цикла цепей по умолчанию",
+    "defaultChainCycleLengthHint": "В новых циклах цепей будет столько цепей",
+    "defaultChainCycleInterval": "Интервал цикла цепей по умолчанию (км)",
+    "defaultChainCycleIntervalHint": "Сколько километров вы хотите проезжать между заменами цепи",
+    "intervalRule": "Интервал должен быть положительным числом",
+    "useChainCycle": "Использовать цикл цепей по умолчанию",
+    "useChainCycleHint": "Использовать цикл цепей для новых велосипедов",
+    "showTips": "Показывать подсказки интерфейса",
+    "showTipsHint": "Показать или скрыть подсказки о функциях интерфейса\n(эта подсказка отображается всегда)",
+    "language": "Язык",
+    "languageHint": "Язык, используемый во всём приложении",
+    "save": "Сохранить настройки пользователя"
+  },
+  "enums": {
+    "PartType": {
+      "Chain": "Цепь",
+      "Cassette": "Кассета",
+      "Chainring": "Звезда",
+      "BrakePads": "Тормозные колодки",
+      "Tyre": "Покрышка",
+      "Battery": "Аккумулятор",
+      "BottomBracket": "Каретка",
+      "Headset": "Рулевая колонка",
+      "Hub": "Втулка",
+      "Pedals": "Педали",
+      "Other": "Другое"
+    },
+    "BikeType": {
+      "Road": "Шоссер",
+      "Mountain": "Горный",
+      "Gravel": "Гравийный",
+      "EBike": "Электровелосипед",
+      "City": "Городской",
+      "Touring": "Туринг",
+      "Cargo": "Карго",
+      "Fixed": "Синглспид",
+      "Rat": "Rat bike",
+      "Other": "другое"
+    },
+    "MaintenanceTaskType": {
+      "OneTime": "Разовая",
+      "Repeating": "Повторяющаяся",
+      "Cyclic": "Циклическая"
+    },
+    "MaintenanceTaskTriggerType": {
+      "Distance": "Дистанция",
+      "Time": "Время"
+    },
+    "MaintenanceTaskParentType": {
+      "Part": "Деталь",
+      "Bike": "Велосипед",
+      "ChainCycle": "Цикл цепей"
+    },
+    "PartScheduleType": {
+      "OneTimeUse": "Разовое использование",
+      "IntervalMaintenance": "Интервальное обслуживание",
+      "CyclicReplacement": "Циклическая замена"
+    }
+  },
+  "units": {
+    "parts": "{count} деталь | {count} детали | {count} деталей"
+  },
+  "errors": {
+    "PARTS_BATCH_LIMIT_EXCEEDED": "За один запрос можно запросить не более {max} идентификаторов деталей.",
+    "BIKES_DUPLICATE_STRAVA_ID": "Велосипед с одим и тем же Strava ID встречается несколько раз: {ids}.",
+    "BIKES_NOT_FOUND": "Велосипед не найден или не принадлежит вам.",
+    "RIDES_ENDDATE_BEFORE_STARTDATE": "Дата окончания должна быть не раньше даты начала.",
+    "RIDES_STRAVA_NOT_CONNECTED": "Подключите аккаунт Strava, прежде чем импортировать заезды.",
+    "COMMON_NOT_FOUND": "Запрашиваемый ресурс не найден.",
+    "COMMON_FORBIDDEN": "У вас нет доступа к этому ресурсу.",
+    "COMMON_VALIDATION": "Обнаружены одна или несколько ошибок проверки.",
+    "COMMON_UNEXPECTED": "Произошла непредвиденная ошибка. Пожалуйста, попробуйте ещё раз.",
+    "AUTH_INVALID_CREDENTIALS": "Неверный адрес электронной почты или пароль.",
+    "AUTH_EMAIL_TAKEN": "Учётная запись с этим адресом электронной почты уже существует."
+  }
+}

@@ -1,5 +1,6 @@
 import { getErrorMessage } from '@/utils/error';
 import { apiService } from './api';
+import { storageService } from './storage';
 import type { StravaAthleteDto, StravaBike } from '@/types';
 
 // Strava OAuth configuration
@@ -32,8 +33,8 @@ export const stravaService = {
     }
 
     const state = this.generateState();
-    // Store state in sessionStorage to verify on callback
-    sessionStorage.setItem('strava_oauth_state', state);
+    // Store state to verify on callback (sessionStorage-backed, per the storage registry).
+    storageService.set('stravaOAuthState', state);
 
     const params = new URLSearchParams({
       client_id: STRAVA_CLIENT_ID,
@@ -74,14 +75,14 @@ export const stravaService = {
       }
 
       // Verify state matches what we stored
-      const storedState = sessionStorage.getItem('strava_oauth_state');
+      const storedState = storageService.get('stravaOAuthState');
       console.log('storedState', storedState);
       if (storedState !== state) {
         throw new Error('Invalid state parameter. Possible CSRF attack.');
       }
 
       // Clear stored state
-      sessionStorage.removeItem('strava_oauth_state');
+      storageService.remove('stravaOAuthState');
 
       return { code, state };
     } catch (error) {

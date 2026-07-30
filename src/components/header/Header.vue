@@ -1,15 +1,34 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useAuthStore } from '@/stores/authStore';
+import LanguageSwitcher from '@/components/header/LanguageSwitcher.vue';
 
 const layoutStore = useLayoutStore();
 const { drawerToggle } = layoutStore;
 
 const router = useRouter();
 const route = useRoute();
-const authStore = useAuthStore(); 
+const authStore = useAuthStore();
+const { t } = useI18n();
+
+// Route names are stable identifiers (codes); the visible title is looked up as nav.<routeName>
+// (ADR 0006 §E4). document.title is kept in sync the same way.
+const pageTitle = computed(() => {
+  const name = route.name ? String(route.name) : '';
+  const key = `nav.${name}`;
+  return name && t(key) !== key ? t(key) : name;
+});
+
+watch(
+  pageTitle, (title) => {
+    if (typeof document !== 'undefined') {
+      document.title = title ? `${title} · ${t('common.appName')}` : t('common.appName');
+    }
+  }, { immediate: true }
+);
 
 const userInitials = computed(() => {
   const name = authStore.currentUser?.name;
@@ -40,7 +59,7 @@ const logout = () => {
         class="q-mr-sm"
       />
       <q-toolbar-title class="header">
-        <h1>{{ route.name }}</h1>
+        <h1>{{ pageTitle }}</h1>
       </q-toolbar-title>
       <!-- Userpic and its menu -->
       <q-btn-dropdown flat
@@ -63,7 +82,7 @@ const logout = () => {
             <q-item-section>
               <q-btn color="secondary" 
                      icon="settings" 
-                     label="User settings" 
+                     :label="t('common.userSettings')" 
                      to="/settings"
                      size="l" 
                      flat />
@@ -73,7 +92,7 @@ const logout = () => {
             <q-item-section>
               <q-btn color="negative" 
                      icon="logout" 
-                     label="Log out" 
+                     :label="t('common.logout')" 
                      size="l" 
                      @click="logout"
               />
@@ -81,11 +100,7 @@ const logout = () => {
           </q-item>
         </q-list>
       </q-btn-dropdown>
-      <q-btn size="1.8rem"
-             flat
-             round
-             icon="language"
-             @click="drawerToggle" />
+      <LanguageSwitcher />
       <q-btn size="1.8rem"
              flat
              round

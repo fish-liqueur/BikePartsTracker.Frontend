@@ -18,6 +18,8 @@ export interface UserSettings {
   defaultUseChainCycle: boolean;
   showTips: boolean;
   distanceUnit: DistanceUnit;
+  /** Preferred language (BCP-47). Null → resolves to English (ADR 0006). */
+  language?: string | null;
 }
 
 export interface UserSettingsDto {
@@ -25,4 +27,5 @@ export interface UserSettingsDto {
   defaultChainCycleIntervalKm?: number | null;
   defaultUseChainCycle?: boolean | null;
   showTips?: boolean | null;
+  language?: string | null;
 }

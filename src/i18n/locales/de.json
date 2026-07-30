@@ -1,0 +1,107 @@
+{
+  "common": {
+    "appName": "Bike Parts Tracker",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "logout": "Abmelden",
+    "userSettings": "Benutzereinstellungen",
+    "language": "Sprache"
+  },
+  "language": {
+    "en": "English",
+    "de": "Deutsch",
+    "ru": "Русский",
+    "uk": "Українська"
+  },
+  "nav": {
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "home": "Start",
+    "bikes": "Fahrräder",
+    "bike detailed": "Fahrrad",
+    "parts": "Teile",
+    "part detailed": "Teil",
+    "rides": "Fahrten",
+    "works": "Wartung",
+    "settings": "Einstellungen",
+    "strava integration": "Strava-Integration",
+    "404": "Nicht gefunden"
+  },
+  "settings": {
+    "title": "Benutzereinstellungen",
+    "defaultChainCycleLength": "Standard-Kettenzykluslänge",
+    "defaultChainCycleLengthHint": "Neue Kettenzyklen haben diese Anzahl an Ketten",
+    "defaultChainCycleInterval": "Standard-Kettenzyklusintervall (km)",
+    "defaultChainCycleIntervalHint": "Wie viele Kilometer du zwischen Kettenwechseln fahren möchtest",
+    "intervalRule": "Das Intervall muss eine positive Zahl sein",
+    "useChainCycle": "Kettenzyklus standardmäßig verwenden",
+    "useChainCycleHint": "Kettenzyklus bei neuen Fahrrädern verwenden",
+    "showTips": "UI-Tipps anzeigen",
+    "showTipsHint": "Tooltips zu den UI-Funktionen ein- oder ausblenden\n(dieser Tooltip wird immer angezeigt)",
+    "language": "Sprache",
+    "languageHint": "Die in der gesamten App verwendete Sprache",
+    "save": "Benutzereinstellungen speichern"
+  },
+  "enums": {
+    "PartType": {
+      "Chain": "Kette",
+      "Cassette": "Kassette",
+      "Chainring": "Kettenblatt",
+      "BrakePads": "Bremsbeläge",
+      "Tyre": "Reifen",
+      "Battery": "Akku",
+      "BottomBracket": "Tretlager",
+      "Headset": "Steuersatz",
+      "Hub": "Nabe",
+      "Pedals": "Pedale",
+      "Other": "Sonstiges"
+    },
+    "BikeType": {
+      "Road": "Rennrad",
+      "Mountain": "Mountainbike",
+      "Gravel": "Gravel",
+      "EBike": "E-Bike",
+      "City": "Citybike",
+      "Touring": "Reiserad",
+      "Cargo": "Lastenrad",
+      "Fixed": "Singlespeed",
+      "Rat": "Rat Bike",
+      "Other": "Sonstiges"
+    },
+    "MaintenanceTaskType": {
+      "OneTime": "Einmalig",
+      "Repeating": "Wiederkehrend",
+      "Cyclic": "Zyklisch"
+    },
+    "MaintenanceTaskTriggerType": {
+      "Distance": "Distanz",
+      "Time": "Zeit"
+    },
+    "MaintenanceTaskParentType": {
+      "Part": "Teil",
+      "Bike": "Fahrrad",
+      "ChainCycle": "Kettenzyklus"
+    },
+    "PartScheduleType": {
+      "OneTimeUse": "Einmalige Verwendung",
+      "IntervalMaintenance": "Intervallwartung",
+      "CyclicReplacement": "Zyklischer Austausch"
+    }
+  },
+  "units": {
+    "parts": "{count} Teil | {count} Teile"
+  },
+  "errors": {
+    "PARTS_BATCH_LIMIT_EXCEEDED": "Du kannst höchstens {max} Teile-IDs pro Anfrage abrufen.",
+    "BIKES_DUPLICATE_STRAVA_ID": "Dasselbe Strava-Fahrrad kommt mehrfach vor: {ids}.",
+    "BIKES_NOT_FOUND": "Fahrrad nicht gefunden oder gehört nicht dir.",
+    "RIDES_ENDDATE_BEFORE_STARTDATE": "Das Enddatum muss am oder nach dem Startdatum liegen.",
+    "RIDES_STRAVA_NOT_CONNECTED": "Verbinde dein Strava-Konto, bevor du Fahrten importierst.",
+    "COMMON_NOT_FOUND": "Die angeforderte Ressource wurde nicht gefunden.",
+    "COMMON_FORBIDDEN": "Du hast keinen Zugriff auf diese Ressource.",
+    "COMMON_VALIDATION": "Es sind ein oder mehrere Validierungsfehler aufgetreten.",
+    "COMMON_UNEXPECTED": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut.",
+    "AUTH_INVALID_CREDENTIALS": "Ungültige E-Mail-Adresse oder ungültiges Passwort.",
+    "AUTH_EMAIL_TAKEN": "Es existiert bereits ein Konto mit dieser E-Mail-Adresse."
+  }
+}

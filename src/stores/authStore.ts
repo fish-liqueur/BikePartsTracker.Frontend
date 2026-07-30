@@ -81,6 +81,25 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null;
   };
 
+  // Cross-tab sign-out (ADR 0007): when the auth token is cleared in another tab, this tab must not
+  // stay authenticated. The `storage` event only fires in *other* tabs, so a sign-out in tab A is
+  // observed here in tab B. We reset in-memory state and send the rider to /login, matching the 401
+  // handling in services/api.ts. Legacy key migration is out of scope, so we watch the raw key name.
+  const AUTH_TOKEN_KEY = 'authToken';
+
+  const setupCrossTabSignOut = () => {
+    if (typeof window === 'undefined') return;
+    window.addEventListener('storage', (event: StorageEvent) => {
+      const clearedElsewhere = event.key === AUTH_TOKEN_KEY && event.newValue === null;
+      if (!clearedElsewhere || !token.value) return;
+
+      user.value = null;
+      token.value = null;
+      error.value = null;
+      window.location.href = '/login';
+    });
+  };
+
   const clearError = () => {
     error.value = null;
   };
@@ -108,6 +127,7 @@ export const useAuthStore = defineStore('auth', () => {
     register,
     logout,
     clearError,
-    updateUser
+    updateUser,
+    setupCrossTabSignOut
   };
 });

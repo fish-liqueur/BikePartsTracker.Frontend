@@ -2,19 +2,20 @@ import { config } from '@vue/test-utils';
 import { Quasar } from 'quasar';
 import { createPinia } from 'pinia';
 import { vi } from 'vitest';
+import { i18n } from '@/i18n';
 
 // Mock Quasar components globally
 config.global.plugins = [
   Quasar,
-  createPinia()
+  createPinia(),
+  i18n
 ];
 
-// Mock localStorage
-const localStorageMock = (() => {
+// Mock localStorage / sessionStorage (in-memory)
+function createStorageMock() {
   let store: Record<string, string> = {};
-
   return {
-    getItem: (key: string) => store[key] || null,
+    getItem: (key: string) => (key in store ? store[key] : null),
     setItem: (key: string, value: string) => {
       store[key] = value.toString();
     },
@@ -25,11 +26,17 @@ const localStorageMock = (() => {
       store = {};
     }
   };
-})();
+}
 
 Object.defineProperty(
   window, 'localStorage', {
-    value: localStorageMock
+    value: createStorageMock()
+  }
+);
+
+Object.defineProperty(
+  window, 'sessionStorage', {
+    value: createStorageMock()
   }
 );
 

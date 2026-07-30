@@ -1,0 +1,107 @@
+{
+  "common": {
+    "appName": "Bike Parts Tracker",
+    "save": "Save",
+    "cancel": "Cancel",
+    "logout": "Log out",
+    "userSettings": "User settings",
+    "language": "Language"
+  },
+  "language": {
+    "en": "English",
+    "de": "Deutsch",
+    "ru": "Русский",
+    "uk": "Українська"
+  },
+  "nav": {
+    "login": "Login",
+    "register": "Register",
+    "home": "Home",
+    "bikes": "Bikes",
+    "bike detailed": "Bike",
+    "parts": "Parts",
+    "part detailed": "Part",
+    "rides": "Rides",
+    "works": "Works",
+    "settings": "Settings",
+    "strava integration": "Strava integration",
+    "404": "Not found"
+  },
+  "settings": {
+    "title": "User Settings",
+    "defaultChainCycleLength": "Default chain cycle length",
+    "defaultChainCycleLengthHint": "New chain cycles will have this number of chains",
+    "defaultChainCycleInterval": "Default chain cycle interval (km)",
+    "defaultChainCycleIntervalHint": "How many kilometers you'd like to ride between chain swaps",
+    "intervalRule": "Interval must be a positive number",
+    "useChainCycle": "Use chain cycle by default",
+    "useChainCycleHint": "Use chain cycle on new bikes",
+    "showTips": "Show UI tips",
+    "showTipsHint": "Hide or show tooltips explaining the UI features\n(this tooltip is always shown)",
+    "language": "Language",
+    "languageHint": "The language used across the app",
+    "save": "Save User Settings"
+  },
+  "enums": {
+    "PartType": {
+      "Chain": "Chain",
+      "Cassette": "Cassette",
+      "Chainring": "Chainring",
+      "BrakePads": "Brake pads",
+      "Tyre": "Tyre",
+      "Battery": "Battery",
+      "BottomBracket": "Bottom bracket",
+      "Headset": "Headset",
+      "Hub": "Hub",
+      "Pedals": "Pedals",
+      "Other": "Other"
+    },
+    "BikeType": {
+      "Road": "Road",
+      "Mountain": "Mountain",
+      "Gravel": "Gravel",
+      "EBike": "E-bike",
+      "City": "City",
+      "Touring": "Touring",
+      "Cargo": "Cargo",
+      "Fixed": "Fixed",
+      "Rat": "Rat",
+      "Other": "Other"
+    },
+    "MaintenanceTaskType": {
+      "OneTime": "One-time",
+      "Repeating": "Repeating",
+      "Cyclic": "Cyclic"
+    },
+    "MaintenanceTaskTriggerType": {
+      "Distance": "Distance",
+      "Time": "Time"
+    },
+    "MaintenanceTaskParentType": {
+      "Part": "Part",
+      "Bike": "Bike",
+      "ChainCycle": "Chain cycle"
+    },
+    "PartScheduleType": {
+      "OneTimeUse": "One-time use",
+      "IntervalMaintenance": "Interval maintenance",
+      "CyclicReplacement": "Cyclic replacement"
+    }
+  },
+  "units": {
+    "parts": "{count} part | {count} parts"
+  },
+  "errors": {
+    "PARTS_BATCH_LIMIT_EXCEEDED": "You can request at most {max} part ids per call.",
+    "BIKES_DUPLICATE_STRAVA_ID": "The same Strava bike appears more than once: {ids}.",
+    "BIKES_NOT_FOUND": "Bike not found or does not belong to you.",
+    "RIDES_ENDDATE_BEFORE_STARTDATE": "The end date must be on or after the start date.",
+    "RIDES_STRAVA_NOT_CONNECTED": "Connect your Strava account before importing rides.",
+    "COMMON_NOT_FOUND": "The requested resource was not found.",
+    "COMMON_FORBIDDEN": "You do not have access to this resource.",
+    "COMMON_VALIDATION": "One or more validation errors occurred.",
+    "COMMON_UNEXPECTED": "An unexpected error occurred. Please try again.",
+    "AUTH_INVALID_CREDENTIALS": "Invalid email or password.",
+    "AUTH_EMAIL_TAKEN": "An account with this email already exists."
+  }
+}
