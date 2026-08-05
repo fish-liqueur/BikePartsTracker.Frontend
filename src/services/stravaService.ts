@@ -64,7 +64,6 @@ export const stravaService = {
       const code = urlObj.searchParams.get('code');
       const state = urlObj.searchParams.get('state');
       const error = urlObj.searchParams.get('error');
-      console.log('state', state);
 
       if (error) {
         throw new Error(`Strava authorization error: ${error}`);
@@ -76,7 +75,6 @@ export const stravaService = {
 
       // Verify state matches what we stored
       const storedState = storageService.get('stravaOAuthState');
-      console.log('storedState', storedState);
       if (storedState !== state) {
         throw new Error('Invalid state parameter. Possible CSRF attack.');
       }

@@ -92,7 +92,6 @@ const resolvedSliderStep = computed(() => {
 });
 
 function updateSliderExtremums(): void {
-  console.log('updateSliderExtremums', props.recordedDistance);
   sliderMin.value = 0;
   sliderMax.value = Math.max(
     props.modelValue * 2, props.recordedDistance * 2, 50000

@@ -80,7 +80,6 @@ const initialFormData = computed<Partial<MaintenanceTask> | undefined>(() => {
 });
 
 const handleCancel = () => {
-  console.log('handleCancel');
   emit('update:modelValue', false);
 };
 

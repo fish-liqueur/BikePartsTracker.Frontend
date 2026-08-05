@@ -21,6 +21,7 @@ export const useMaintenanceTasksStore = defineStore('maintenanceTasks', () => {
   const fetchStatusByKey = ref<Record<MaintenanceTasksCacheKey, FetchStatus>>({});
   const isLoading = ref(false);
   const error = ref<string | null>(null);
+  const maintenanceTasksDirty = ref(false);
 
   const getMaintenanceTasksForParent = computed(() => (parentType?: MaintenanceTaskParentType, parentId?: string) =>
     maintenanceTasksByKey.value[cacheKey(parentType, parentId)] ?? [],);
@@ -29,8 +30,29 @@ export const useMaintenanceTasksStore = defineStore('maintenanceTasks', () => {
     parentId?: string,) => {
     const key = cacheKey(parentType, parentId);
     const status = fetchStatusByKey.value[key];
-    if (status === 'done' || status === 'loading') return;
+    if (status === 'loading') return;
+    if (status === 'done' && !maintenanceTasksDirty.value) return;
     return fetchMaintenanceTasks(parentType, parentId);
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const markMaintenanceTasksDirty = (_ids: string[]) => {
+    // Coarse invalidation: any affected task id means cached buckets may be stale.
+    maintenanceTasksDirty.value = true;
+    const next: Record<MaintenanceTasksCacheKey, FetchStatus> = { ...fetchStatusByKey.value };
+    Object.keys(next).forEach((k) => {
+      if (next[k] === 'done') next[k] = 'idle';
+    });
+    fetchStatusByKey.value = next;
+  };
+
+  const markAllCachedDirty = () => {
+    maintenanceTasksDirty.value = true;
+    const next: Record<MaintenanceTasksCacheKey, FetchStatus> = { ...fetchStatusByKey.value };
+    Object.keys(next).forEach((k) => {
+      if (next[k] === 'done') next[k] = 'idle';
+    });
+    fetchStatusByKey.value = next;
   };
 
   const fetchMaintenanceTasks = async (parentType?: MaintenanceTaskParentType,
@@ -43,6 +65,7 @@ export const useMaintenanceTasksStore = defineStore('maintenanceTasks', () => {
       const list = await maintenanceTasksService.getMaintenanceTasks({ parentType, parentId });
       maintenanceTasksByKey.value = { ...maintenanceTasksByKey.value, [key]: list };
       fetchStatusByKey.value = { ...fetchStatusByKey.value, [key]: 'done' };
+      maintenanceTasksDirty.value = false;
       return list;
     } catch (err: unknown) {
       error.value = getErrorMessage(err, 'Failed to fetch maintenance tasks');
@@ -125,6 +148,7 @@ export const useMaintenanceTasksStore = defineStore('maintenanceTasks', () => {
     fetchStatusByKey.value = {};
     isLoading.value = false;
     error.value = null;
+    maintenanceTasksDirty.value = false;
   };
 
   return {
@@ -132,12 +156,15 @@ export const useMaintenanceTasksStore = defineStore('maintenanceTasks', () => {
     fetchStatusByKey,
     isLoading,
     error,
+    maintenanceTasksDirty,
     getMaintenanceTasksForParent,
     ensureMaintenanceTasks,
     fetchMaintenanceTasks,
     createMaintenanceTask,
     updateMaintenanceTask,
     deleteMaintenanceTask,
+    markMaintenanceTasksDirty,
+    markAllCachedDirty,
     clearError,
     reset,
   };

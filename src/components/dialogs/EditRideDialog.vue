@@ -69,7 +69,6 @@ const isValid = ref(false);
 // });
 
 const handleCancel = () => {
-  console.log('handleCancel');
   emit('update:modelValue', false);
 };
 

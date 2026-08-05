@@ -304,9 +304,7 @@ const selectChain = () => {
     showError('Please select a chain');
     return;
   }
-  console.log(
-    'selectChain', selectedChain.value, typeof selectedChain.value
-  );
+
   emit('select', selectedChain.value.id);
   emit('update:modelValue', false);
 };

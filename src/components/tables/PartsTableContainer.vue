@@ -203,8 +203,6 @@ const getRemainingKms = (part: BikePart): number | null => {
     return null;
   }
 
-
-
   // const currentMileage = getTotalMileage(part);
   const remaining = 0;
 

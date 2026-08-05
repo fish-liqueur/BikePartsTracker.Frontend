@@ -64,6 +64,22 @@ export const usePartsStore = defineStore('parts', () => {
       partsDirty.value.add(id);
       partsHistoryDirty.value.add(id);
     });
+    if (ids.length > 0) {
+      fetchStatus.value = 'idle';
+    }
+  };
+
+  const markAllCachedDirty = () => {
+    parts.value.forEach((p) => {
+      partsDirty.value.add(p.id);
+      partsHistoryDirty.value.add(p.id);
+    });
+    Object.keys(partHistories.value).forEach((id) => {
+      partsHistoryDirty.value.add(id);
+    });
+    if (parts.value.length > 0 || Object.keys(partHistories.value).length > 0) {
+      fetchStatus.value = 'idle';
+    }
   };
 
   const upsertPart = (part: BikePart) => {
@@ -319,6 +335,7 @@ export const usePartsStore = defineStore('parts', () => {
     markPartsClean,
     markPartsHistoryClean,
     markPartsDirty,
+    markAllCachedDirty,
     movePartToBike,
     deletePart,
     clearError,

@@ -1,27 +1,25 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { authService } from '@/services/authService';
+import { realtimeService } from '@/services/realtimeService';
 import type {
-  User, LoginRequest, RegisterRequest 
+  User, LoginRequest, RegisterRequest
 } from '@/types';
 import { getErrorMessage } from '@/utils/error';
 
 export const useAuthStore = defineStore('auth', () => {
-  // State
   const user = ref<User | null>(null);
   const token = ref<string | null>(null);
   const isLoading = ref(false);
   const error = ref<string | null>(null);
 
-  // Getters
   const isAuthenticated = computed(() => !!token.value);
   const currentUser = computed(() => user.value);
 
-  // Actions
   const initializeAuth = () => {
     const storedToken = authService.getToken();
     const storedUser = authService.getCurrentUser();
-    
+
     if (storedToken && storedUser) {
       token.value = storedToken;
       user.value = storedUser;
@@ -32,16 +30,16 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       isLoading.value = true;
       error.value = null;
-      
+
       const response = await authService.login(credentials);
-      console.log('response ', response);
       if (response.success && response.user && response.token) {
         user.value = response.user;
         token.value = response.token;
+        void realtimeService.connect();
       } else {
         throw new Error(response.message || 'Login failed');
       }
-      
+
       return response;
     } catch (err: unknown) {
       error.value = getErrorMessage(err, 'Login failed');
@@ -55,16 +53,16 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       isLoading.value = true;
       error.value = null;
-      
+
       const response = await authService.register(userData);
-      console.log('response ', response);
       if (response.success && response.user && response.token) {
         user.value = response.user;
         token.value = response.token;
+        void realtimeService.connect();
       } else {
         throw new Error(response.message || 'Registration failed');
       }
-      
+
       return response;
     } catch (err: unknown) {
       error.value = getErrorMessage(err, 'Registration failed');
@@ -75,16 +73,13 @@ export const useAuthStore = defineStore('auth', () => {
   };
 
   const logout = () => {
+    void realtimeService.disconnect();
     authService.logout();
     user.value = null;
     token.value = null;
     error.value = null;
   };
 
-  // Cross-tab sign-out (ADR 0007): when the auth token is cleared in another tab, this tab must not
-  // stay authenticated. The `storage` event only fires in *other* tabs, so a sign-out in tab A is
-  // observed here in tab B. We reset in-memory state and send the rider to /login, matching the 401
-  // handling in services/api.ts. Legacy key migration is out of scope, so we watch the raw key name.
   const AUTH_TOKEN_KEY = 'authToken';
 
   const setupCrossTabSignOut = () => {
@@ -93,6 +88,7 @@ export const useAuthStore = defineStore('auth', () => {
       const clearedElsewhere = event.key === AUTH_TOKEN_KEY && event.newValue === null;
       if (!clearedElsewhere || !token.value) return;
 
+      void realtimeService.disconnect();
       user.value = null;
       token.value = null;
       error.value = null;
@@ -106,22 +102,16 @@ export const useAuthStore = defineStore('auth', () => {
 
   const updateUser = (updatedUser: User) => {
     user.value = updatedUser;
-    // Update localStorage
     localStorage.setItem('user', JSON.stringify(updatedUser));
   };
 
   return {
-    // State
     user,
     token,
     isLoading,
     error,
-    
-    // Getters
     isAuthenticated,
     currentUser,
-    
-    // Actions
     initializeAuth,
     login,
     register,

@@ -13,6 +13,7 @@ export const useBikesStore = defineStore('bikes', () => {
   const isLoading = ref(false);
   const error = ref<string | null>(null);
   const fetchStatus = ref<FetchStatus>('idle');
+  const bikesDirty = ref<Set<string>>(new Set());
 
   // Getters
   const bikesCount = computed(() => bikes.value.length);
@@ -20,8 +21,23 @@ export const useBikesStore = defineStore('bikes', () => {
 
   // Actions
   const ensureBikes = async () => {
-    if (fetchStatus.value === 'done' || fetchStatus.value === 'loading') return;
+    if (fetchStatus.value === 'loading') return;
+    if (fetchStatus.value === 'done' && bikesDirty.value.size === 0) return;
     return fetchBikes();
+  };
+
+  const markBikesDirty = (ids: string[]) => {
+    ids.forEach((id) => bikesDirty.value.add(id));
+    if (ids.length > 0) {
+      fetchStatus.value = 'idle';
+    }
+  };
+
+  const markAllCachedDirty = () => {
+    bikes.value.forEach((b) => bikesDirty.value.add(b.id));
+    if (bikes.value.length > 0) {
+      fetchStatus.value = 'idle';
+    }
   };
 
   const fetchBikes = async () => {
@@ -32,6 +48,7 @@ export const useBikesStore = defineStore('bikes', () => {
       
       const fetchedBikes = await bikeService.getBikes();
       bikes.value = fetchedBikes;
+      bikesDirty.value.clear();
       fetchStatus.value = 'done';
       
       return fetchedBikes;
@@ -207,6 +224,7 @@ export const useBikesStore = defineStore('bikes', () => {
     isLoading.value = false;
     error.value = null;
     fetchStatus.value = 'idle';
+    bikesDirty.value.clear();
   };
 
   return {
@@ -216,6 +234,7 @@ export const useBikesStore = defineStore('bikes', () => {
     isLoading,
     error,
     fetchStatus,
+    bikesDirty,
     
     // Getters
     bikesCount,
@@ -231,6 +250,8 @@ export const useBikesStore = defineStore('bikes', () => {
     retireBike,
     activateBike,
     setCurrentBike,
+    markBikesDirty,
+    markAllCachedDirty,
     clearError,
     reset
   };

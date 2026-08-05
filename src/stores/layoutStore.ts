@@ -20,7 +20,6 @@ export const useLayoutStore = defineStore('layout', () => {
   const drawerOpen = ref(false);
   const drawerToggle = () => {
     drawerOpen.value = !drawerOpen.value;
-    console.log('drawerToggle ', drawerOpen.value);
   };
 
   // Ajax-bar state

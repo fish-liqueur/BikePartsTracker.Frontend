@@ -117,7 +117,6 @@ const handleDeleteMaintenanceTask = (maintenanceTask: MaintenanceTask) => {
       cancel: true,
       persistent: false
     }).onOk(async () => {
-      console.log('Deleting work:', maintenanceTask.id);
       await maintenanceTasksStore.deleteMaintenanceTask(maintenanceTask.id);
       showSuccess(`Work "${maintenanceTask.name}" deleted successfully`);
     });
@@ -128,8 +127,6 @@ const handleDeleteMaintenanceTask = (maintenanceTask: MaintenanceTask) => {
 };
 
 const handleAddMaintenanceTaskSubmit = async (maintenanceTask: CreateMaintenanceTaskDto) => {
-  console.log('Adding work:', maintenanceTask);
-  
   try {
     const createdMaintenanceTask = await withAjaxBar(maintenanceTasksStore.createMaintenanceTask(maintenanceTask));
     showSuccess(`Work ${createdMaintenanceTask?.name} created successfully`);

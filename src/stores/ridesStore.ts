@@ -9,7 +9,7 @@ import type {
   FetchStatus,
 } from '@/types';
 import { getErrorMessage } from '@/utils/error';
-import { usePartsStore } from './partsStore';
+import { applyEntitiesAffected } from '@/utils/applyEntitiesAffected';
 
 export const useRidesStore = defineStore('rides', () => {
   const rides = ref<Ride[]>([]);
@@ -17,6 +17,7 @@ export const useRidesStore = defineStore('rides', () => {
   const error = ref<string | null>(null);
   const fetchStatus = ref<FetchStatus>('idle');
   const lastImportSummary = ref<{ inserted: number; updated: number } | null>(null);
+  const ridesDirty = ref<Set<string>>(new Set());
 
   const ridesSorted = computed(() =>
     [...rides.value].sort((a, b) =>
@@ -24,8 +25,26 @@ export const useRidesStore = defineStore('rides', () => {
         new Date(a.startDateLocal).getTime(),),);
 
   const ensureRides = async (params?: { startDate?: Date | string; endDate?: Date | string }) => {
-    if (fetchStatus.value === 'done' || fetchStatus.value === 'loading') return;
+    if (fetchStatus.value === 'loading') return;
+    if (fetchStatus.value === 'done' && ridesDirty.value.size === 0) return;
     return fetchRides(params);
+  };
+
+  const markRidesDirty = (ids: string[]) => {
+    if (ids.length === 0) return;
+
+    const next = new Set(ridesDirty.value);
+    ids.forEach((id) => next.add(id));
+    ridesDirty.value = next;
+    fetchStatus.value = 'idle';
+  };
+
+  const markAllCachedDirty = () => {
+    if (rides.value.length === 0) return;
+    const next = new Set(ridesDirty.value);
+    rides.value.forEach((r) => next.add(r.id));
+    ridesDirty.value = next;
+    fetchStatus.value = 'idle';
   };
 
   const fetchRides = async (params?: {
@@ -38,6 +57,7 @@ export const useRidesStore = defineStore('rides', () => {
       error.value = null;
       const list = await ridesService.getRides(params);
       rides.value = list;
+      ridesDirty.value.clear();
       fetchStatus.value = 'done';
       return list;
     } catch (err: unknown) {
@@ -59,10 +79,9 @@ export const useRidesStore = defineStore('rides', () => {
         updated: result.updated,
       };
       rides.value = result.rides;
+      ridesDirty.value.clear();
       fetchStatus.value = 'done';
-      if (result.affected.affectedPartIds.length > 0) {
-        usePartsStore().markPartsDirty(result.affected.affectedPartIds);
-      }
+      applyEntitiesAffected(result.affected);
       return result;
     } catch (err: unknown) {
       error.value = getErrorMessage(err, 'Failed to import rides from Strava');
@@ -80,15 +99,11 @@ export const useRidesStore = defineStore('rides', () => {
       if (!response) {
         throw new Error('Failed to create ride');
       }
-      const { ride, affected: { affectedPartIds } } = response;
+      const { ride, affected } = response;
       if (ride) {
         rides.value.push(ride);
       }
-
-      if (affectedPartIds.length) {
-        usePartsStore().markPartsDirty(affectedPartIds);
-      }
-      
+      applyEntitiesAffected(affected);
       return ride;
     } catch (err: unknown) {
       error.value = getErrorMessage(err, 'Failed to create ride');
@@ -106,10 +121,7 @@ export const useRidesStore = defineStore('rides', () => {
       if (!response) {
         throw new Error('Failed to delete ride');
       }
-      const { affectedPartIds } = response;
-      if (affectedPartIds.length) {
-        usePartsStore().markPartsDirty(affectedPartIds);
-      }
+      applyEntitiesAffected(response);
       rides.value = rides.value.filter((r) => r.id !== id);
     } catch (err: unknown) {
       error.value = getErrorMessage(err, 'Failed to delete ride');
@@ -137,11 +149,8 @@ export const useRidesStore = defineStore('rides', () => {
           rides.value.push(ride);
         }
       }
-     
-      if (affected.affectedPartIds.length > 0) {
-        usePartsStore().markPartsDirty(affected.affectedPartIds);
-      }
 
+      applyEntitiesAffected(affected);
       return ride;
     } catch (err: unknown) {
       error.value = getErrorMessage(err, 'Failed to update ride');
@@ -165,6 +174,7 @@ export const useRidesStore = defineStore('rides', () => {
     error.value = null;
     fetchStatus.value = 'idle';
     lastImportSummary.value = null;
+    ridesDirty.value.clear();
   };
 
   return {
@@ -174,6 +184,7 @@ export const useRidesStore = defineStore('rides', () => {
     error,
     fetchStatus,
     lastImportSummary,
+    ridesDirty,
     ensureRides,
     fetchRides,
     createRide,
@@ -181,6 +192,8 @@ export const useRidesStore = defineStore('rides', () => {
     updateRide,
     importFromStrava,
     setRides,
+    markRidesDirty,
+    markAllCachedDirty,
     clearError,
     reset,
   };

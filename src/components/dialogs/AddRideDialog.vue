@@ -62,7 +62,6 @@ const initialFormData = ref<Partial<Ride>>({
 });
 
 const handleCancel = () => {
-  console.log('handleCancel');
   emit('update:modelValue', false);
 };
 

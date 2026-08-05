@@ -55,7 +55,6 @@ onMounted(async () => {
   try {
     // Extract code and state from URL
     const callbackData = stravaService.handleCallback();
-    console.log('callbackData', callbackData);
     
     if (!callbackData) {
       error.value = 'No authorization code received from Strava.';

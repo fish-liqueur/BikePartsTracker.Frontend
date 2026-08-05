@@ -4,6 +4,7 @@ import {
 import { setActivePinia, createPinia } from 'pinia';
 import { useAuthStore } from '../authStore';
 import { authService } from '@/services/authService';
+import { realtimeService } from '@/services/realtimeService';
 import type {
   LoginRequest, RegisterRequest, User 
 } from '@/types';
@@ -16,6 +17,13 @@ vi.mock('@/services/authService', () => ({
     login: vi.fn(),
     register: vi.fn(),
     logout: vi.fn()
+  }
+}));
+
+vi.mock('@/services/realtimeService', () => ({
+  realtimeService: {
+    connect: vi.fn(),
+    disconnect: vi.fn(),
   }
 }));
 
@@ -235,6 +243,7 @@ describe('authStore', () => {
 
       store.logout();
 
+      expect(realtimeService.disconnect).toHaveBeenCalled();
       expect(authService.logout).toHaveBeenCalled();
       expect(store.user).toBeNull();
       expect(store.token).toBeNull();

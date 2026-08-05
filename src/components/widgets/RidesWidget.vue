@@ -40,7 +40,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import {
+  computed, onMounted, ref, watch 
+} from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRidesStore } from '@/stores/ridesStore';
 import LayoutWidgetGeneral from '@/components/layouts/LayoutWidgetGeneral.vue';
@@ -66,7 +68,9 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const ridesStore = useRidesStore();
-const { ridesSorted, isLoading } = storeToRefs(ridesStore);
+const {
+  ridesSorted, isLoading, ridesDirty 
+} = storeToRefs(ridesStore);
 const {
   showSuccess, showError, withAjaxBar 
 } = useLayout();
@@ -98,6 +102,15 @@ const ridesToShow = computed(() => {
 onMounted(() => {
   void ridesStore.ensureRides();
 });
+
+// ADR-0001 / Feature 11: while this list surface is mounted, dirtied rides refetch immediately
+// (quiet — no toast / click-to-update).
+watch(() => ridesDirty.value.size,
+  (size) => {
+    if (size > 0) {
+      void ridesStore.ensureRides();
+    }
+  },);
 
 const handleClickAddRide = () => {
   showAddRideDialog.value = true;
@@ -172,7 +185,6 @@ const handleDeleteRide = async (ride: Ride) => {
       cancel: true,
       persistent: false
     }).onOk(async () => {
-      console.log('Deleting ride:', id);
       await withAjaxBar(ridesStore.deleteRide(id));
       showSuccess(`Ride ${name} deleted successfully`);
     });
