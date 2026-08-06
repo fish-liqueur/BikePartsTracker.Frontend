@@ -59,7 +59,7 @@
             <span v-else class="no-bike">Not assigned</span>
           </q-td>
           <q-td key="mileage" :props="props">
-            {{ getTotalMileage(props.row) }} km
+            {{ formatDistance(getTotalMileage(props.row), distanceUnit) }}
           </q-td>
           <q-td key="remaining" :props="props">
             <span :class="getRemainingClass(props.row)">
@@ -122,9 +122,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import type { QTableProps } from 'quasar';
 import type { BikePart } from '@/types';
+import { useI18n } from 'vue-i18n';
+import { useUserSettingsStore } from '@/stores/userSettingsStore';
+import { formatDistance } from '@/utils/distance';
 
 type QTableRequestProps = Parameters<NonNullable<QTableProps['onRequest']>>[0];
 
@@ -162,6 +165,12 @@ const emit = defineEmits<{
   delete: [partId: string];
   configure: [partId: string];
 }>();
+
+const { t } = useI18n();
+const userSettingsStore = useUserSettingsStore();
+const distanceUnit = computed(() => userSettingsStore.distanceUnit);
+const unitLabel = computed(() =>
+  t(userSettingsStore.distanceUnit === 'mi' ? 'units.mi' : 'units.km'));
 
 const filter = ref('');
 const pagination = ref({
@@ -217,10 +226,10 @@ const getRemainingText = (part: BikePart): string => {
   }
 
   if (kms === 0) {
-    return '0 km (Due)';
+    return `0 ${unitLabel.value} (Due)`;
   }
 
-  return `${kms} km`;
+  return `${kms} ${unitLabel.value}`;
 };
 
 const getRemainingClass = (part: BikePart): string => {

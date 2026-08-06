@@ -3,21 +3,21 @@
     <div class="row items-center justify-between no-wrap p-x-2">
       <div>
         <div class="text-caption text-grey-7">Recorded distance</div>
-        <div class="text-body1">{{ formatMeters(recordedDistance) }}</div>
+        <div class="text-body1">{{ formatDistance(recordedDistance, distanceUnit) }}</div>
       </div>
       <div class="text-right">
         <div
           class="text-body1"
           :class="deltaClass"
         >
-          {{ formatSignedMeters(deltaRecordedMinusDistance) }}
+          {{ formatSignedDistance(deltaRecordedMinusDistance, distanceUnit) }}
         </div>
       </div>
     </div>
     <q-input
-      :model-value="distanceString"
+      :model-value="distanceDisplayString"
       type="number"
-      label="Distance (m) *"
+      :label="distanceLabel"
       outlined
       step="any"
       :rules="[(val: string) => (val !== null && val !== '' && Number.parseFloat(val) > 0) || 'Enter a distance greater than 0']"
@@ -25,9 +25,9 @@
       @update:model-value="onNumericInput"
     />
     <q-slider
-      :model-value="distanceNum"
-      :min="sliderMin"
-      :max="sliderMax"
+      :model-value="distanceDisplayNum"
+      :min="sliderMinDisplay"
+      :max="sliderMaxDisplay"
       :step="resolvedSliderStep"
       label
       color="primary"
@@ -37,13 +37,19 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
-import { formatMeters, formatSignedMeters } from '@/utils/distance';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useUserSettingsStore } from '@/stores/userSettingsStore';
+import {
+  formatDistance,
+  formatSignedDistance,
+  metersToUnit,
+  unitToMeters,
+} from '@/utils/distance';
 
 interface Props {
   modelValue: number;
   recordedDistance: number;
-  /** Slider step in meters */
   sliderStep?: number;
 }
 
@@ -55,16 +61,26 @@ const emit = defineEmits<{
   'update:modelValue': [value: number];
 }>();
 
-const sliderMin = ref(0);
-const sliderMax = ref(0);
+const { t } = useI18n();
+const userSettingsStore = useUserSettingsStore();
+const distanceUnit = computed(() => userSettingsStore.distanceUnit);
+
+const sliderMinMetres = ref(0);
+const sliderMaxMetres = ref(0);
 
 const distanceNum = computed(() =>
   typeof props.modelValue === 'number' && !Number.isNaN(props.modelValue)
     ? props.modelValue
     : 0);
 
-const distanceString = computed(() =>
-  String(distanceNum.value));
+const distanceDisplayNum = computed(() =>
+  metersToUnit(distanceNum.value, distanceUnit.value));
+
+const distanceDisplayString = computed(() =>
+  String(Math.round(distanceDisplayNum.value * 1000) / 1000));
+
+const distanceLabel = computed(() =>
+  t('rides.distanceLabel', { unit: t(distanceUnit.value === 'mi' ? 'units.mi' : 'units.km') }));
 
 const recordedNum = computed(() =>
   typeof props.recordedDistance === 'number' &&
@@ -81,19 +97,23 @@ const deltaClass = computed(() => {
   return '';
 });
 
+const sliderMinDisplay = computed(() =>
+  metersToUnit(sliderMinMetres.value, distanceUnit.value));
+const sliderMaxDisplay = computed(() =>
+  metersToUnit(sliderMaxMetres.value, distanceUnit.value));
+
 const resolvedSliderStep = computed(() => {
   if (props.sliderStep != null && props.sliderStep > 0) {
-    return props.sliderStep;
+    return metersToUnit(props.sliderStep, distanceUnit.value);
   }
-  const span = Math.max(sliderMax.value - sliderMin.value, 0);
-  if (span <= 0) return 1;
-  const auto = Math.max(1, Math.round(span / 200));
-  return auto;
+  const span = Math.max(sliderMaxDisplay.value - sliderMinDisplay.value, 0);
+  if (span <= 0) return 0.1;
+  return Math.max(0.1, Math.round((span / 200) * 10) / 10);
 });
 
 function updateSliderExtremums(): void {
-  sliderMin.value = 0;
-  sliderMax.value = Math.max(
+  sliderMinMetres.value = 0;
+  sliderMaxMetres.value = Math.max(
     props.modelValue * 2, props.recordedDistance * 2, 50000
   );
 }
@@ -105,16 +125,19 @@ function onNumericInput(raw: string | number | null): void {
   }
   const n = typeof raw === 'number' ? raw : Number.parseFloat(String(raw));
   if (Number.isNaN(n)) return;
-  const next = Math.max(0, n);
-  emit('update:modelValue', next);
+  emit('update:modelValue', Math.max(0, unitToMeters(n, distanceUnit.value)));
 }
 
 function onSliderChange(value: number | null): void {
   if (value === null || Number.isNaN(value)) return;
-  emit('update:modelValue', value);
+  emit('update:modelValue', Math.max(0, unitToMeters(value, distanceUnit.value)));
 }
 
 onMounted(() => {
+  updateSliderExtremums();
+});
+
+watch(() => [props.modelValue, props.recordedDistance], () => {
   updateSliderExtremums();
 });
 </script>

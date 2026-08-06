@@ -31,8 +31,8 @@
     "title": "Benutzereinstellungen",
     "defaultChainCycleLength": "Standard-Kettenzykluslänge",
     "defaultChainCycleLengthHint": "Neue Kettenzyklen haben diese Anzahl an Ketten",
-    "defaultChainCycleInterval": "Standard-Kettenzyklusintervall (km)",
-    "defaultChainCycleIntervalHint": "Wie viele Kilometer du zwischen Kettenwechseln fahren möchtest",
+    "defaultChainCycleInterval": "Standard-Kettenzyklus-Intervall ({unit})",
+    "defaultChainCycleIntervalHint": "Wie weit Sie zwischen Kettenwechseln fahren möchten",
     "intervalRule": "Das Intervall muss eine positive Zahl sein",
     "useChainCycle": "Kettenzyklus standardmäßig verwenden",
     "useChainCycleHint": "Kettenzyklus bei neuen Fahrrädern verwenden",
@@ -40,7 +40,11 @@
     "showTipsHint": "Tooltips zu den UI-Funktionen ein- oder ausblenden\n(dieser Tooltip wird immer angezeigt)",
     "language": "Sprache",
     "languageHint": "Die in der gesamten App verwendete Sprache",
-    "save": "Benutzereinstellungen speichern"
+    "save": "Benutzereinstellungen speichern",
+    "distanceUnit": "Entfernungseinheit",
+    "distanceUnitHint": "Wie Entfernungen in der App angezeigt und eingegeben werden",
+    "distanceUnitKm": "Kilometer (km)",
+    "distanceUnitMi": "Meilen (mi)"
   },
   "enums": {
     "PartType": {
@@ -89,7 +93,9 @@
     }
   },
   "units": {
-    "parts": "{count} Teil | {count} Teile"
+    "parts": "{count} Teil | {count} Teile",
+    "km": "km",
+    "mi": "mi"
   },
   "errors": {
     "PARTS_BATCH_LIMIT_EXCEEDED": "Du kannst höchstens {max} Teile-IDs pro Anfrage abrufen.",
@@ -103,5 +109,11 @@
     "COMMON_UNEXPECTED": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut.",
     "AUTH_INVALID_CREDENTIALS": "Ungültige E-Mail-Adresse oder ungültiges Passwort.",
     "AUTH_EMAIL_TAKEN": "Es existiert bereits ein Konto mit dieser E-Mail-Adresse."
+  },
+  "rides": {
+    "distanceLabel": "Distanz ({unit}) *"
+  },
+  "parts": {
+    "mileageAtInstallation": "Kilometerstand bei Einbau ({unit})"
   }
 }

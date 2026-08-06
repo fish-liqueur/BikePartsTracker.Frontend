@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import { userSettingsService } from '@/services/userSettingsService';
+import { resolveDistanceUnit } from '@/utils/distance';
 import type {
-  UserSettings, UserSettingsDto, FetchStatus, 
-  DistanceUnit
+  UserSettings, UserSettingsDto, FetchStatus, DistanceUnit
 } from '@/types';
 
 export const useUserSettingsStore = defineStore('userSettings', () => {
@@ -11,8 +11,12 @@ export const useUserSettingsStore = defineStore('userSettings', () => {
   const userSettings = ref<UserSettings | null>(null);
   const fetchStatus = ref<FetchStatus>('idle');
 
-  // Getters
-  const distanceUnit = computed<DistanceUnit>(() => userSettings.value?.distanceUnit ?? 'km');
+  // Explicit preference from the API (may be null).
+  const savedDistanceUnit = computed<DistanceUnit | null>(() => userSettings.value?.distanceUnit ?? null);
+
+  // Effective display/input unit (ADR 0002 E4/E5). Virtual until rider chooses in Settings.
+  const distanceUnit = computed<DistanceUnit>(() =>
+    resolveDistanceUnit(userSettings.value?.distanceUnit));
 
   // Actions
   const ensureSettings = async () => {
@@ -30,7 +34,7 @@ export const useUserSettingsStore = defineStore('userSettings', () => {
     } catch (err: unknown) {
       fetchStatus.value = 'error';
       throw err;
-    } 
+    }
   };
 
   const updateSettings = async (settings: UserSettingsDto) => {
@@ -55,7 +59,8 @@ export const useUserSettingsStore = defineStore('userSettings', () => {
 
     // Getters
     distanceUnit,
-    
+    savedDistanceUnit,
+
     // Actions
     ensureSettings,
     fetchSettings,
@@ -63,4 +68,3 @@ export const useUserSettingsStore = defineStore('userSettings', () => {
     reset,
   };
 });
-

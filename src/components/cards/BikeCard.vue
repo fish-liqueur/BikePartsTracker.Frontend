@@ -38,9 +38,9 @@
               <q-item-section side>
                 <q-item-label class="mileage-info">
                   <span v-if="currentMaintenanceCycleMileage(part) !== null">
-                    {{ currentMaintenanceCycleMileage(part) }} /
+                    {{ formatDistance(currentMaintenanceCycleMileage(part)!, distanceUnit) }} /
                   </span>
-                  {{ totalMileage(part) }} km
+                  {{ formatDistance(totalMileage(part), distanceUnit) }}
                 </q-item-label>
               </q-item-section>
             </q-item>
@@ -177,6 +177,8 @@ import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import type { Bike, BikePart, Ride } from '@/types';
 import { usePartsStore } from '@/stores/partsStore';
+import { useUserSettingsStore } from '@/stores/userSettingsStore';
+import { formatDistance } from '@/utils/distance';
 
 interface Props {
   bike: Bike;
@@ -201,6 +203,8 @@ const emit = defineEmits<{
 
 const router = useRouter();
 const partsStore = usePartsStore();
+const userSettingsStore = useUserSettingsStore();
+const distanceUnit = computed(() => userSettingsStore.distanceUnit);
 
 // Get last 3 rides
 const displayedRides = computed(() => {
@@ -210,7 +214,7 @@ const displayedRides = computed(() => {
   return props.recentRides.slice(0, 3);
 });
 
-// Calculate total mileage for a part
+// Part mileage in metres (bike total and installation mileage are both metres after ADR 0002 A).
 const totalMileage = (part: BikePart): number => {
   if (!props.currentBikeMileage || props.currentBikeMileage === 0) {
     return 0;
@@ -218,8 +222,7 @@ const totalMileage = (part: BikePart): number => {
   return Math.max(0, props.currentBikeMileage - (part.mileageAtInstallation || 0));
 };
 
-// Open usage period (no end date) = current install interval; distance is meters from API.
-// History lives in the parts store; returns null when not yet loaded for this part.
+// Open usage period (no end date) = current install interval; distance is metres from API.
 const currentMaintenanceCycleMileage = (part: BikePart): number | null => {
   const loaded = partsStore.getPartHistory(part.id);
   if (!loaded) return null;
@@ -233,7 +236,7 @@ const currentMaintenanceCycleMileage = (part: BikePart): number | null => {
   if (!open) return null;
 
   if (open.distance > 0) {
-    return Math.round(open.distance / 1000);
+    return Math.round(open.distance);
   }
   if (props.currentBikeMileage != null && part.mileageAtInstallation != null) {
     return Math.max(0, props.currentBikeMileage - part.mileageAtInstallation);
@@ -241,7 +244,7 @@ const currentMaintenanceCycleMileage = (part: BikePart): number | null => {
   return null;
 };
 
-// Format ride for display (distances from API in meters)
+// Format ride for display (distances from API in metres)
 const formatRide = (ride: Ride): string => {
   const date =
     typeof ride.startDateLocal === 'string'
@@ -249,10 +252,8 @@ const formatRide = (ride: Ride): string => {
       : ride.startDateLocal;
   const dateStr = date.toLocaleDateString();
   const meters = ride.distance || 0;
-  const km = Math.round((meters / 1000) * 10) / 10;
-
-  if (km > 0) {
-    return `${dateStr} - ${km} km`;
+  if (meters > 0) {
+    return `${dateStr} - ${formatDistance(meters, distanceUnit.value)}`;
   }
   return dateStr;
 };

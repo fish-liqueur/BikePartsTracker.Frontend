@@ -173,7 +173,7 @@
             <template v-slot:body-cell-distance="props">
               <q-td :props="props">
                 <div class="text-body2">
-                  {{ formatDistance(props.row.stravaBike.distance || 0) }}
+                  {{ formatDistance(props.row.stravaBike.distance || 0, distanceUnit) }}
                 </div>
               </q-td>
             </template>
@@ -243,12 +243,14 @@ import {
 import { stravaService } from '@/services/stravaService';
 import { bikeService } from '@/services/bikeService';
 import { useBikesStore } from '@/stores/bikesStore';
+import { useUserSettingsStore } from '@/stores/userSettingsStore';
 import { useLayout } from '@/composables/useLayout';
 import type {
   StravaBike, Bike, SyncBikeDto 
 } from '@/types';
 import { BikeType } from '@/types';
 import { getErrorMessage } from '@/utils/error';
+import { formatDistance } from '@/utils/distance';
 
 interface Props {
   modelValue: boolean;
@@ -280,6 +282,8 @@ const importBikes = ref<ImportBikeState[]>([]);
 const existingBikes = ref<BikeWithStoredName[]>([]);
 
 const bikesStore = useBikesStore();
+const userSettingsStore = useUserSettingsStore();
+const distanceUnit = computed(() => userSettingsStore.distanceUnit);
 const {
   showSuccess, showError, withAjaxBar 
 } = useLayout();
@@ -476,13 +480,6 @@ const clearOtherBikesMergeWith = (bikeState: ImportBikeState) => {
       bike.matchedExisting = null;
     }
   });
-};
-
-const formatDistance = (distanceInMeters: number): string => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'decimal',
-    maximumFractionDigits: 0,
-  }).format(distanceInMeters);
 };
 
 const handleCancel = () => {

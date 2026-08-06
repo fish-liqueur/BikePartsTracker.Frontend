@@ -42,8 +42,9 @@
 import {
   computed 
 } from 'vue';
-// import { usePartsStore } from '@/stores/partsStore';
 import { useLayout } from '@/composables/useLayout';
+import { useUserSettingsStore } from '@/stores/userSettingsStore';
+import { formatDistance } from '@/utils/distance';
 import type {
   Bike, BikePart 
 } from '@/types';
@@ -63,21 +64,22 @@ const emit = defineEmits<{
   onRemoveChainFromBike: [partId: string];
 }>();
 
-// const partsStore = usePartsStore();
+const userSettingsStore = useUserSettingsStore();
 const {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   showSuccess, showError, withAjaxBar 
 } = useLayout();
 
-// const showMenu = ref(false);
+const distanceUnit = computed(() => userSettingsStore.distanceUnit);
 
 const thirdLineText = computed(() => {
-  return props.isActive ? 'Chain installed now' : `should install in ${kmsBeforeInstallation.value} km`;
+  if (props.isActive) return 'Chain installed now';
+  // Stub until swap-due metres are wired; still format via shared helper (ADR 0002 B-18).
+  return `should install in ${formatDistance(metresBeforeInstallation.value, distanceUnit.value)}`;
 });
 
-const kmsBeforeInstallation = computed(() => {
-  return 0;
-});
+const metresBeforeInstallation = computed(() => 0);
+
 const thirdLineStyle = computed(() => {
   return {
     color: props.isActive ? 'var(--q-warning)' : '#fff',
@@ -85,40 +87,13 @@ const thirdLineStyle = computed(() => {
   };
 });
 
-
-// const handleClickCard = () => {
-//   showMenu.value = !showMenu.value;
-// };
-
 const handleFullDetails = () => {
   emit('fullDetails', props.part?.id || '');
-  // router.push(`/parts/${props.part?.id}`);
 };
 
 const removeChainFromBike = () => {
   emit('onRemoveChainFromBike', props.part.id);
 };
-
-// const handleCreateChain = async (data: CreatePartDto, index: number) => {
-//   try {
-//     const newChain = await withAjaxBar(partsStore.createPart(data));
-//     showSuccess('Chain created successfully');
-//     if (newChain) {
-//       emit(
-//         'onSelectChain', newChain.id, props.chainCycleId, props.index
-//       );
-//     }
-//   } catch (error) {
-//     const errorMessage = error instanceof Error ? error.message : 'Failed to create chain';
-//     showError(errorMessage);
-//   }
-// };
-
-// const handleSelectChain = async (chain: BikePart) => {
-//   emit(
-//     'onSelectChain', chain.id, props.chainCycleId, props.index
-//   );
-// };
 </script>
 
 <style scoped lang="css">

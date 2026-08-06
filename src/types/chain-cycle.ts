@@ -9,7 +9,8 @@ export interface ChainCycle {
   chains: (string | null)[];
   /** Chain part currently installed on the bike from this cycle. */
   activeChainId: string | null;
-  intervalKm?: number | null;
+  /** Rotation interval in metres (ADR 0002). */
+  intervalMetres?: number | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -19,11 +20,11 @@ export interface CreateChainCycleDto {
   /** Initial slots, e.g. [null, null, null] for a 3-slot cycle. */
   chains?: (string | null)[];
   activeChainId?: string | null;
-  intervalKm?: number | null;
+  intervalMetres?: number | null;
 }
 
 export interface UpdateChainCycleDto {
   chains?: (string | null)[];
   activeChainId?: string | null;
-  intervalKm?: number | null;
+  intervalMetres?: number | null;
 }

@@ -47,7 +47,7 @@
         </div>
         <div class="chain-cycle-item__data-container">
           <div class="chain-cycle-item__data-container-item">
-            Swap chain in <span>300</span> km
+            Swap chain in {{ formatDistance(chainCycle.intervalMetres ?? defaultIntervalMetres, distanceUnit) }}
             <div class="display-flex flex-row flex-align-center gap-2">
               <span>Chains:</span>
               <q-radio
@@ -115,6 +115,7 @@ import ChainCard from '@/components/cards/ChainCard.vue';
 import ChainCardEmpty from '@/components/cards/ChainCardEmpty.vue';
 import InstallChainDialog, { type DisplacedChainInfo } from '@/components/dialogs/InstallChainDialog.vue';
 import ElementWithTooltipButton from '@/components/shared/ElementWithTooltipButton.vue';
+import { formatDistance } from '@/utils/distance';
 
 // ---- Types / Interfaces ----
 interface Props {
@@ -132,6 +133,10 @@ const {
   showSuccess, showError, withAjaxBar 
 } = useLayout();
 const $q = useQuasar();
+
+const distanceUnit = computed(() => userSettingsStore.distanceUnit);
+const defaultIntervalMetres = computed(() =>
+  userSettingsStore.userSettings?.defaultChainCycleIntervalMetres ?? 700_000);
 
 // ---- State ----
 const addMoreChainCyclesTooltipText = `You can add more that one chain cycle to a single bike.
@@ -233,7 +238,7 @@ const handleAddMoreChainCycle = async () => {
       await withAjaxBar(chainCyclesStore.createChainCycle({
         bikeId: props.bikeContext.id,
         chains: Array(n).fill(null),
-        intervalKm: userSettingsStore?.userSettings?.defaultChainCycleIntervalKm || 700
+        intervalMetres: userSettingsStore?.userSettings?.defaultChainCycleIntervalMetres || 700_000
       }));
       showSuccess('Extra chain cycle added successfully');
     } catch (error) {
@@ -283,7 +288,7 @@ const handleAddChainCycle = async () => {
     await withAjaxBar(chainCyclesStore.createChainCycle({
       bikeId: props.bikeContext.id,
       chains: Array(n).fill(null),
-      intervalKm: userSettingsStore?.userSettings?.defaultChainCycleIntervalKm || 700
+      intervalMetres: userSettingsStore?.userSettings?.defaultChainCycleIntervalMetres || 700_000
     }));
     showSuccess('Chain cycle added successfully! Now you can add chains to the cycle.');
   } catch (error) {

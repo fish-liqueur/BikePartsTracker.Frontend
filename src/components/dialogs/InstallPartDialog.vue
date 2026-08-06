@@ -42,8 +42,8 @@
         </q-input>
 
         <q-input
-          v-model.number="mileageAtInstallation"
-          label="Mileage at Installation"
+          v-model.number="mileageDisplay"
+          :label="mileageLabel"
           type="number"
           filled
           :rules="[
@@ -74,12 +74,19 @@
 import {
   ref, computed, watch 
 } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useUserSettingsStore } from '@/stores/userSettingsStore';
+import {
+  metersToUnit, reconvertDistanceDraft, unitToMeters 
+} from '@/utils/distance';
+import type { DistanceUnit } from '@/types';
 
 interface Props {
   modelValue: boolean;
   partName?: string;
   sourceBikeName?: string;
   targetBikeName?: string;
+  /** Bike total distance in metres. */
   currentBikeMileage?: number;
 }
 
@@ -96,8 +103,21 @@ const emit = defineEmits<{
   cancel: [];
 }>();
 
+const { t } = useI18n();
+const userSettingsStore = useUserSettingsStore();
+const distanceUnit = computed(() => userSettingsStore.distanceUnit);
+
 const installationDate = ref<string>('');
-const mileageAtInstallation = ref<number>(props.currentBikeMileage || 0);
+const mileageDisplay = ref<number>(0);
+const formUnit = ref<DistanceUnit>('km');
+
+const mileageLabel = computed(() =>
+  t('parts.mileageAtInstallation', { unit: t(distanceUnit.value === 'mi' ? 'units.mi' : 'units.km') }));
+
+const syncMileageFromMetres = (metres: number) => {
+  formUnit.value = distanceUnit.value;
+  mileageDisplay.value = Math.round(metersToUnit(metres || 0, formUnit.value) * 100) / 100;
+};
 
 // Set default date to today
 watch(
@@ -105,10 +125,21 @@ watch(
     if (isOpen) {
       const today = new Date();
       installationDate.value = today.toISOString().split('T')[0];
-      mileageAtInstallation.value = props.currentBikeMileage || 0;
+      syncMileageFromMetres(props.currentBikeMileage || 0);
     }
   }, { immediate: true }
 );
+
+watch(distanceUnit, (next, prev) => {
+  if (!props.modelValue || next === prev) return;
+  const reconverted = reconvertDistanceDraft(
+    mileageDisplay.value, formUnit.value, next
+  );
+  if (typeof reconverted === 'number') {
+    mileageDisplay.value = Math.round(reconverted * 100) / 100;
+  }
+  formUnit.value = next;
+});
 
 const warningMessage = computed(() => {
   if (props.sourceBikeName && props.targetBikeName) {
@@ -119,17 +150,16 @@ const warningMessage = computed(() => {
 
 const isValid = computed(() => {
   return !!installationDate.value && 
-         mileageAtInstallation.value !== null && 
-         mileageAtInstallation.value >= 0;
+         mileageDisplay.value !== null && 
+         mileageDisplay.value >= 0;
 });
 
 const handleInstall = () => {
   if (isValid.value) {
     emit('install', {
       installationDate: installationDate.value,
-      mileageAtInstallation: mileageAtInstallation.value
+      mileageAtInstallation: Math.round(unitToMeters(Number(mileageDisplay.value) || 0, formUnit.value)),
     });
   }
 };
 </script>
-

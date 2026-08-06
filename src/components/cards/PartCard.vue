@@ -44,7 +44,7 @@
       <!-- Total Mileage -->
       <div class="part-card__info-row">
         <span class="part-card__info-label">Total Mileage:</span>
-        <span class="part-card__info-value">{{ formatMeters(part.totalDistance ?? 0) }}</span>
+        <span class="part-card__info-value">{{ formatDistance(part.totalDistance ?? 0, distanceUnit) }}</span>
       </div>
     </q-card-section>
 
@@ -155,7 +155,8 @@ import {
   PartType, type Bike, type BikePart 
 } from '@/types';
 import ElementWithTooltipButton from '@/components/shared/ElementWithTooltipButton.vue';
-import { formatMeters } from '@/utils/distance';
+import { formatDistance } from '@/utils/distance';
+import { useUserSettingsStore } from '@/stores/userSettingsStore';
 
 interface Props {
   part: BikePart;
@@ -182,6 +183,8 @@ const emit = defineEmits<{
 const router = useRouter();
 const bikesStore = useBikesStore();
 const chainCyclesStore = useChainCyclesStore();
+const userSettingsStore = useUserSettingsStore();
+const distanceUnit = computed(() => userSettingsStore.distanceUnit);
 
 
 

@@ -61,11 +61,11 @@
             <div class="rides-table__distance">
               <div class="rides-table__distance-line">
                 <span class="rides-table__distance-label">Recorded distance</span>
-                <span>{{ formatMeters(props.row.recordedDistance) }}</span>
+                <span>{{ formatDistance(props.row.recordedDistance, distanceUnit) }}</span>
               </div>
               <div class="rides-table__distance-line">
                 <span class="rides-table__distance-label">User distance</span>
-                <span>{{ formatMeters(props.row.distance) }}</span>
+                <span>{{ formatDistance(props.row.distance, distanceUnit) }}</span>
               </div>
             </div>
           </q-td>
@@ -125,7 +125,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import type { QTableProps } from 'quasar';
 import type { Ride } from '@/types';
 import { defaultRideColumns } from './ridesTableColumns';
@@ -133,9 +133,12 @@ import type { TableColumn } from '@/components/tables/partsTableColumns';
 import { useBikesStore } from '@/stores/bikesStore';
 import OverflowTooltip from '@/components/shared/OverflowTooltip.vue';
 import { formatDate } from '@/utils/date';
-import { formatMeters } from '@/utils/distance';
+import { formatDistance } from '@/utils/distance';
+import { useUserSettingsStore } from '@/stores/userSettingsStore';
 
 const bikesStore = useBikesStore();
+const userSettingsStore = useUserSettingsStore();
+const distanceUnit = computed(() => userSettingsStore.distanceUnit);
 
 type QTableRequestProps = Parameters<NonNullable<QTableProps['onRequest']>>[0];
 

@@ -76,7 +76,7 @@
         <template v-if="formData.triggerType === 'Distance'">
           <q-input 
             v-model="triggerDistanceValue"
-            :label="`${formData.type === 'OneTime' ? 'in' : 'every'} * ${settings.distanceUnit === 'mi' ? 'miles' : 'kilometers'}`"
+            :label="`${formData.type === 'OneTime' ? 'in' : 'every'} * ${settings.distanceUnit === 'mi' ? t('units.mi') : t('units.km')}`"
             type="number"
             filled
             standout
@@ -103,6 +103,7 @@
 <script setup lang="ts">
 import type { CreateMaintenanceTaskDto, MaintenanceTask } from '@/types';
 import { computed, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { metersToUnit, unitToMeters } from '@/utils/distance';
 import { useUserSettingsStore } from '@/stores/userSettingsStore';
 import DateTimePicker from '@/components/shared/DateTimePicker.vue';
@@ -122,6 +123,7 @@ const emit = defineEmits<{
   'update:isValid': [value: boolean];
 }>();
 
+const { t } = useI18n();
 const settings = useUserSettingsStore();
 
 // const bikesStore = useBikesStore();

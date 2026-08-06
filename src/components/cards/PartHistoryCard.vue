@@ -25,9 +25,10 @@
 <script setup lang="ts">
 import type { PartUsageHistory } from '@/types';
 import { formatDate } from '@/utils/date';
-import { formatMeters } from '@/utils/distance';
+import { formatDistance } from '@/utils/distance';
 import { computed } from 'vue';
 import { useBikesStore } from '@/stores/bikesStore';
+import { useUserSettingsStore } from '@/stores/userSettingsStore';
 
 interface Props {
   history: PartUsageHistory;
@@ -39,6 +40,7 @@ const emit = defineEmits<{
 }>();
 
 const bikesStore = useBikesStore();
+const userSettingsStore = useUserSettingsStore();
 
 const dateString = computed(() => {
   return `${formatDate(props.history.startDate)} - ${props.history.endDate ? formatDate(props.history.endDate) : 'Present'}`;
@@ -47,7 +49,7 @@ const bikeName = computed(() => {
   return bikesStore.getBikeById(props.history.bikeId)?.name;
 });
 const distanceString = computed(() => {
-  return formatMeters(props.history.distance);
+  return formatDistance(props.history.distance, userSettingsStore.distanceUnit);
 });
 
 const handleDelete = () => {

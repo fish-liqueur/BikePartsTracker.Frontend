@@ -54,7 +54,7 @@ import { useBikesStore } from '@/stores/bikesStore';
 import { usePartsStore } from '@/stores/partsStore';
 import { useUserSettingsStore } from '@/stores/userSettingsStore';
 import type { MaintenanceTask } from '@/types';
-import { metersToUnit } from '@/utils/distance';
+import { formatDistance } from '@/utils/distance';
 import { computed } from 'vue';
 
 interface Props {
@@ -87,7 +87,8 @@ const relatedPart = computed(() => {
 const valuesString = computed(() => {
   if (props.maintenanceTask.triggerType === 'Distance') {
     const consumed = props.maintenanceTask.triggerValue - props.maintenanceTask.remainingValue;
-    return `${metersToUnit(consumed, settingsStore.distanceUnit)} / ${metersToUnit(props.maintenanceTask.triggerValue, settingsStore.distanceUnit)} ${settingsStore.distanceUnit}`;
+    const unit = settingsStore.distanceUnit;
+    return `${formatDistance(consumed, unit)} / ${formatDistance(props.maintenanceTask.triggerValue, unit)}`;
   } else {
     return `${props.maintenanceTask.remainingValue} / ${props.maintenanceTask.triggerValue} days`;
   }

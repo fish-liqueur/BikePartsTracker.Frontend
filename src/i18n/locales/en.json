@@ -31,8 +31,8 @@
     "title": "User Settings",
     "defaultChainCycleLength": "Default chain cycle length",
     "defaultChainCycleLengthHint": "New chain cycles will have this number of chains",
-    "defaultChainCycleInterval": "Default chain cycle interval (km)",
-    "defaultChainCycleIntervalHint": "How many kilometers you'd like to ride between chain swaps",
+    "defaultChainCycleInterval": "Default chain cycle interval ({unit})",
+    "defaultChainCycleIntervalHint": "How far you'd like to ride between chain swaps",
     "intervalRule": "Interval must be a positive number",
     "useChainCycle": "Use chain cycle by default",
     "useChainCycleHint": "Use chain cycle on new bikes",
@@ -40,6 +40,10 @@
     "showTipsHint": "Hide or show tooltips explaining the UI features\n(this tooltip is always shown)",
     "language": "Language",
     "languageHint": "The language used across the app",
+    "distanceUnit": "Distance unit",
+    "distanceUnitHint": "How distances are shown and entered across the app",
+    "distanceUnitKm": "Kilometres (km)",
+    "distanceUnitMi": "Miles (mi)",
     "save": "Save User Settings"
   },
   "enums": {
@@ -89,7 +93,15 @@
     }
   },
   "units": {
-    "parts": "{count} part | {count} parts"
+    "parts": "{count} part | {count} parts",
+    "km": "km",
+    "mi": "mi"
+  },
+  "rides": {
+    "distanceLabel": "Distance ({unit}) *"
+  },
+  "parts": {
+    "mileageAtInstallation": "Mileage at installation ({unit})"
   },
   "errors": {
     "PARTS_BATCH_LIMIT_EXCEEDED": "You can request at most {max} part ids per call.",

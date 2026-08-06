@@ -94,8 +94,8 @@
       </q-tab-panels>
       <q-card-section>
         <q-input
-          v-model.number="mileageAtInstallation"
-          label="Mileage at Installation"
+          v-model.number="mileageDisplay"
+          :label="mileageLabel"
           type="number"
           filled
           :rules="[
@@ -136,19 +136,23 @@
 import {
   ref, computed, watch 
 } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type {
-  Bike, BikePart, ChainCycle 
+  Bike, BikePart, ChainCycle, DistanceUnit
 } from '@/types';
 import { usePartsStore } from '@/stores/partsStore';
 import { useUserSettingsStore } from '@/stores/userSettingsStore';
 import { useChainCyclesStore } from '@/stores/chainCyclesStore';
 import DateTimePicker from '@/components/shared/DateTimePicker.vue';
+import {
+  metersToUnit, reconvertDistanceDraft, unitToMeters 
+} from '@/utils/distance';
 
 type ChainCycleWithNulls = {
   id?: string;
   chains: Array<string | null>;
   activeChainId: string | null;
-  intervalKm?: number;
+  intervalMetres?: number;
   cycleLength?: number;
 };
 
@@ -199,15 +203,26 @@ const emit = defineEmits<{
 const partsStore = usePartsStore();
 const userSettingsStore = useUserSettingsStore();
 const chainCyclesStore = useChainCyclesStore();
+const { t } = useI18n();
+
+const distanceUnit = computed(() => userSettingsStore.distanceUnit);
+const mileageLabel = computed(() =>
+  t('parts.mileageAtInstallation', { unit: t(distanceUnit.value === 'mi' ? 'units.mi' : 'units.km') }));
 
 const activeTab = ref('with-chain-cycle');
 const formChainCycles = ref<FormChainCycle[]>([]);
 const selectedSlot = ref<{ chainCycleKey: string; slotIndex: number } | null>(null);
 const setAsActive = ref(false);
 const installationTime = ref<Date | undefined>(new Date());
-const mileageAtInstallation = ref<number>(props.currentBikeMileage || 0);
+const mileageDisplay = ref<number>(0);
+const formUnit = ref<DistanceUnit>('km');
 const originalChainsMap = ref<Map<string, Array<string | null>>>(new Map());
 const displacedChain = ref<DisplacedChainInfo | null>(null);
+
+const syncMileageFromMetres = (metres: number) => {
+  formUnit.value = distanceUnit.value;
+  mileageDisplay.value = Math.round(metersToUnit(metres || 0, formUnit.value) * 100) / 100;
+};
 
 const currentStatusText = computed(() => {
   if (activeTab.value !== 'with-chain-cycle') {
@@ -250,10 +265,22 @@ watch(
         await chainCyclesStore.fetchChainCycles(props.targetBike.id);
       }
       initForm();
+      syncMileageFromMetres(props.currentBikeMileage || 0);
     }
   },
   { immediate: true }
 );
+
+watch(distanceUnit, (next, prev) => {
+  if (!props.modelValue || next === prev) return;
+  const reconverted = reconvertDistanceDraft(
+    mileageDisplay.value, formUnit.value, next
+  );
+  if (typeof reconverted === 'number') {
+    mileageDisplay.value = Math.round(reconverted * 100) / 100;
+  }
+  formUnit.value = next;
+});
 
 /** Build FormChainCycle[] from API chain cycles. */
 const chainCyclesNormalized = (bike: Bike | null, cycles: ChainCycle[]): FormChainCycle[] => {
@@ -267,7 +294,7 @@ const chainCyclesNormalized = (bike: Bike | null, cycles: ChainCycle[]): FormCha
       _key: cycle.id || `cycle-${index}`,
       chains,
       activeChainId: cycle.activeChainId == null ? null : String(cycle.activeChainId),
-      intervalKm: cycle.intervalKm ?? undefined,
+      intervalMetres: cycle.intervalMetres ?? undefined,
       cycleLength: chains.length
     };
   });
@@ -276,14 +303,14 @@ const chainCyclesNormalized = (bike: Bike | null, cycles: ChainCycle[]): FormCha
 /* eslint-disable @typescript-eslint/no-unused-vars */
 const createEmptyChainCycle = (): FormChainCycle => {
   const length = userSettingsStore.userSettings?.defaultChainCycleLength ?? 3;
-  const intervalKm = userSettingsStore.userSettings?.defaultChainCycleIntervalKm ?? 700;
+  const intervalMetres = userSettingsStore.userSettings?.defaultChainCycleIntervalMetres ?? 700_000;
 
   return {
     _key: `local-${Date.now()}-${Math.random().toString(16).slice(2)}`,
     id: undefined,
     chains: new Array(length).fill(null),
     activeChainId: null,
-    intervalKm,
+    intervalMetres,
     cycleLength: length
   };
 };
@@ -333,12 +360,12 @@ const initForm = () => {
 
 const handleAddChainCycleToForm = async () => {
   if (formChainCycles.value.length > 0 || !props.targetBike?.id) return;
-  const intervalKm = userSettingsStore.userSettings?.defaultChainCycleIntervalKm ?? 700;
+  const intervalMetres = userSettingsStore.userSettings?.defaultChainCycleIntervalMetres ?? 700_000;
   const n = userSettingsStore.userSettings?.defaultChainCycleLength ?? 3;
   const newCycle = await chainCyclesStore.createChainCycle({
     bikeId: props.targetBike.id,
     chains: Array(n).fill(null),
-    intervalKm
+    intervalMetres
   });
   if (newCycle) {
     formChainCycles.value = [{
@@ -346,7 +373,7 @@ const handleAddChainCycleToForm = async () => {
       _key: newCycle.id,
       chains: (newCycle.chains ?? []).map(c => (c == null ? null : String(c))) as Array<string | null>,
       activeChainId: newCycle.activeChainId == null ? null : String(newCycle.activeChainId),
-      intervalKm: newCycle.intervalKm ?? undefined,
+      intervalMetres: newCycle.intervalMetres ?? undefined,
       cycleLength: (newCycle.chains ?? []).length
     }];
   }
@@ -391,7 +418,7 @@ const handleReset = () => {
 const handleAddWithoutChainCycle = () => {
   emit('install-without-chain-cycle', {
     installationDate: new Date(),
-    mileageAtInstallation: props.currentBikeMileage
+    mileageAtInstallation: Math.round(unitToMeters(Number(mileageDisplay.value) || 0, formUnit.value)),
   });
 };
 

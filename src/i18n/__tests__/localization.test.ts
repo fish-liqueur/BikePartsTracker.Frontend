@@ -1,5 +1,5 @@
 import {
-  describe, it, expect, beforeEach, afterEach, vi,
+  describe, it, expect, beforeEach, vi,
 } from 'vitest';
 import { defineComponent, nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
@@ -17,7 +17,7 @@ import {
 import { resolveLocale, toSupportedLocale } from '@/i18n/resolveLocale';
 import { useLocale } from '@/composables/useLocale';
 import { enumLabel } from '@/utils/enumLabel';
-import { formatMeters } from '@/utils/distance';
+import { formatDistance } from '@/utils/distance';
 import { handleApiError, ApiError } from '@/services/api';
 import { storageService } from '@/services/storage';
 import api from '@/services/api';
@@ -159,6 +159,7 @@ describe('localization — frontend (ADR 0006)', () => {
       setActiveLocale('de');
 
       const handlers = (api.interceptors.request as unknown as {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         handlers: { fulfilled: (c: any) => any }[];
       }).handlers;
       const onRequest = handlers[0].fulfilled;
@@ -195,27 +196,43 @@ describe('localization — frontend (ADR 0006)', () => {
 
       const t = i18n.global.t;
       setActiveLocale('ru');
-      expect(t('units.parts', 1, { named: { count: 1 } })).toBe('1 деталь');
-      expect(t('units.parts', 2, { named: { count: 2 } })).toBe('2 детали');
-      expect(t('units.parts', 5, { named: { count: 5 } })).toBe('5 деталей');
-      expect(t('units.parts', 0, { named: { count: 0 } })).toBe('0 деталей');
-      expect(t('units.parts', 21, { named: { count: 21 } })).toBe('21 деталь');
+      expect(t(
+        'units.parts', 1, { named: { count: 1 } }
+      )).toBe('1 деталь');
+      expect(t(
+        'units.parts', 2, { named: { count: 2 } }
+      )).toBe('2 детали');
+      expect(t(
+        'units.parts', 5, { named: { count: 5 } }
+      )).toBe('5 деталей');
+      expect(t(
+        'units.parts', 0, { named: { count: 0 } }
+      )).toBe('0 деталей');
+      expect(t(
+        'units.parts', 21, { named: { count: 21 } }
+      )).toBe('21 деталь');
 
       setActiveLocale('uk');
-      expect(t('units.parts', 1, { named: { count: 1 } })).toBe('1 деталь');
-      expect(t('units.parts', 2, { named: { count: 2 } })).toBe('2 деталі');
-      expect(t('units.parts', 5, { named: { count: 5 } })).toBe('5 деталей');
+      expect(t(
+        'units.parts', 1, { named: { count: 1 } }
+      )).toBe('1 деталь');
+      expect(t(
+        'units.parts', 2, { named: { count: 2 } }
+      )).toBe('2 деталі');
+      expect(t(
+        'units.parts', 5, { named: { count: 5 } }
+      )).toBe('5 деталей');
     });
 
-    it('F-14 [P1] distance value formatted via Intl; km/m boundary from ADR 0002 respected (no double-convert)', () => {
+    it('F-14 [P1] distance value formatted via Intl; display unit from ADR 0002 (no metres-as-display)', () => {
       setActiveLocale('en');
-      // >= 1000 m → km once (1500 m → 1.5 km, not 1.5 km → km again); < 1000 m stays metres.
-      expect(formatMeters(1500)).toBe('1.5 km');
-      expect(formatMeters(500)).toBe('500 m');
+      expect(formatDistance(1500, 'km')).toBe('1.5 km');
+      expect(formatDistance(500, 'km')).toBe('0.5 km');
+      expect(formatDistance(1609.344, 'mi')).toBe('1 mi');
 
       // Locale-aware grouping/decimal separators via Intl.
       setActiveLocale('de');
-      expect(formatMeters(1500)).toBe('1,5 km');
+      expect(formatDistance(1500, 'km')).toBe('1,5 km');
     });
   });
 
@@ -251,7 +268,9 @@ describe('localization — frontend (ADR 0006)', () => {
         });
 
       const baseline = new Set(flatten(en));
-      const others: Record<string, Record<string, unknown>> = { de, ru, uk };
+      const others: Record<string, Record<string, unknown>> = {
+        de, ru, uk 
+      };
       const missingByLocale: Record<string, string[]> = {};
 
       for (const [locale, messages] of Object.entries(others)) {
@@ -300,7 +319,9 @@ describe('localization — frontend (ADR 0006)', () => {
 
       // Nothing useful in the body → statusText fallback.
       const bare = handleApiError({
-        response: { data: {}, status: 500, statusText: 'Internal Server Error' },
+        response: {
+          data: {}, status: 500, statusText: 'Internal Server Error' 
+        },
       });
       expect(bare.message).toBe('Internal Server Error');
     });
