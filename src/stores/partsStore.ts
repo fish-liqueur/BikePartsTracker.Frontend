@@ -336,6 +336,7 @@ export const usePartsStore = defineStore('parts', () => {
     markPartsHistoryClean,
     markPartsDirty,
     markAllCachedDirty,
+    upsertPart,
     movePartToBike,
     deletePart,
     clearError,

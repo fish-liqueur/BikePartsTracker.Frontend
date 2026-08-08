@@ -2,8 +2,10 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { chainCyclesService } from '@/services/chainCyclesService';
 import type {
-  ChainCycle, CreateChainCycleDto, UpdateChainCycleDto, FetchStatus 
+  ChainCycle, CreateChainCycleDto, UpdateChainCycleDto,
+  FillEmptyChainCycleSlotsDto, FetchStatus
 } from '@/types';
+import { usePartsStore } from '@/stores/partsStore';
 
 export const useChainCyclesStore = defineStore('chainCycles', () => {
   const chainCyclesByBikeId = ref<Record<string, ChainCycle[]>>({});
@@ -106,6 +108,36 @@ export const useChainCyclesStore = defineStore('chainCycles', () => {
     }
   };
 
+  const fillEmptySlots = async (
+    id: string,
+    _bikeId: string,
+    dto: FillEmptyChainCycleSlotsDto = {}
+  ) => {
+    try {
+      isLoading.value = true;
+      error.value = null;
+      const result = await chainCyclesService.fillEmptySlots(id, dto);
+      if (result) {
+        applyAffectedChainCycles([result.chainCycle]);
+        const partsStore = usePartsStore();
+        for (const part of result.createdParts ?? []) {
+          partsStore.upsertPart(part);
+        }
+        const createdIds = new Set((result.createdParts ?? []).map(p => p.id));
+        const extraDirty = (result.affectedPartIds ?? []).filter(pid => !createdIds.has(pid));
+        if (extraDirty.length) {
+          partsStore.markPartsDirty(extraDirty);
+        }
+      }
+      return result;
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : 'Failed to fill empty chain cycle slots';
+      throw err;
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
   const setChainCyclesForBike = (bikeId: string, cycles: ChainCycle[]) => {
     chainCyclesByBikeId.value = {
       ...chainCyclesByBikeId.value,
@@ -151,6 +183,7 @@ export const useChainCyclesStore = defineStore('chainCycles', () => {
     createChainCycle,
     updateChainCycle,
     deleteChainCycle,
+    fillEmptySlots,
     setChainCyclesForBike,
     applyAffectedChainCycles,
     clearError,

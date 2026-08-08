@@ -62,6 +62,19 @@
               </q-radio>
             </div>
             <div class="display-flex flex-column align-center justify-center gap-2">
+              <ElementWithTooltipButton
+                v-if="hasEmptySlots(chainCycle.id)"
+                tooltip-text="Create new chains for every empty slot in one step"
+              >
+                <q-btn
+                  label="Fill empty slots"
+                  color="primary"
+                  outline
+                  data-testid="fill-empty-slots"
+                  @click="handleFillEmptySlots(chainCycle.id)"
+                />
+              </ElementWithTooltipButton>
+
               <ElementWithTooltipButton :tooltip-text="deleteChainCycleTooltipText">
                 <q-btn label="Delete chain cycle"
                        color="danger"
@@ -93,6 +106,15 @@
                         @install-without-chain-cycle="handleInstallChainWithoutCycle"
                         @install-within-chain-cycle="handleInstallChainWithinCycle"
                         @cancel="handleInstallChainCancel" />
+
+    <FillEmptySlotsDialog
+      v-model="showFillEmptySlotsDialog"
+      :bike-name="bikeContext.name"
+      :empty-slot-indices="fillDialogEmptyIndices"
+      :submitting="fillSubmitting"
+      @confirm="handleFillEmptySlotsConfirm"
+      @cancel="handleFillEmptySlotsCancel"
+    />
   </div>
 </template>
 
@@ -114,8 +136,10 @@ import { useLayout } from '@/composables/useLayout';
 import ChainCard from '@/components/cards/ChainCard.vue';
 import ChainCardEmpty from '@/components/cards/ChainCardEmpty.vue';
 import InstallChainDialog, { type DisplacedChainInfo } from '@/components/dialogs/InstallChainDialog.vue';
+import FillEmptySlotsDialog from '@/components/dialogs/FillEmptySlotsDialog.vue';
 import ElementWithTooltipButton from '@/components/shared/ElementWithTooltipButton.vue';
 import { formatDistance } from '@/utils/distance';
+import type { ChainCycle } from '@/types';
 
 // ---- Types / Interfaces ----
 interface Props {
@@ -156,6 +180,11 @@ const pendingChainDrop = ref<{
   index: number;
   chain: BikePart | null;
 } | null>(null);
+
+const showFillEmptySlotsDialog = ref(false);
+const fillDialogCycleId = ref<string | null>(null);
+const fillDialogEmptyIndices = ref<number[]>([]);
+const fillSubmitting = ref(false);
 
 function mergePartIntoChainsSlots(
   chainIds: (string | null)[],
@@ -466,6 +495,81 @@ const handleRemoveChainFromBike = async (chainId: string) => {
     const errorMessage = error instanceof Error ? error.message : 'Failed to remove chain from bike';
     showError(errorMessage);
   }
+};
+
+const hasEmptySlots = (chainCycleId: string) => {
+  const cycle = chainCycles.value.find(c => c.id === chainCycleId);
+  return (cycle?.chains ?? []).some(id => id == null);
+};
+
+const emptySlotIndicesForCycle = (cycle: ChainCycle): number[] => {
+  const indices: number[] = [];
+  (cycle.chains ?? []).forEach((id, index) => {
+    if (id == null) indices.push(index);
+  });
+  return indices;
+};
+
+const runFillEmptySlots = async (chainCycleId: string,
+  dto: { activeNewSlotIndex?: number | null; installationDate?: Date | null } = {}) => {
+  fillSubmitting.value = true;
+  try {
+    const body: {
+      activeNewSlotIndex?: number | null;
+      installationDate?: string | null;
+    } = {};
+    if (dto.activeNewSlotIndex !== undefined) {
+      body.activeNewSlotIndex = dto.activeNewSlotIndex;
+    }
+    if (dto.installationDate) {
+      body.installationDate = dto.installationDate.toISOString();
+    }
+    await withAjaxBar(chainCyclesStore.fillEmptySlots(
+      chainCycleId,
+      props.bikeContext.id,
+      body
+    ));
+    showSuccess('Empty slots filled successfully');
+    showFillEmptySlotsDialog.value = false;
+    fillDialogCycleId.value = null;
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to fill empty slots';
+    showError(errorMessage);
+  } finally {
+    fillSubmitting.value = false;
+  }
+};
+
+const handleFillEmptySlots = async (chainCycleId: string) => {
+  const cycle = chainCycles.value.find(c => c.id === chainCycleId);
+  if (!cycle) {
+    showError('Chain cycle not found');
+    return;
+  }
+  const emptyIndices = emptySlotIndicesForCycle(cycle);
+  if (emptyIndices.length === 0) return;
+
+  if (cycle.activeChainId) {
+    await runFillEmptySlots(chainCycleId);
+    return;
+  }
+
+  fillDialogCycleId.value = chainCycleId;
+  fillDialogEmptyIndices.value = emptyIndices;
+  showFillEmptySlotsDialog.value = true;
+};
+
+const handleFillEmptySlotsConfirm = async (payload: {
+  activeNewSlotIndex: number | null;
+  installationDate: Date | null;
+}) => {
+  if (!fillDialogCycleId.value) return;
+  await runFillEmptySlots(fillDialogCycleId.value, payload);
+};
+
+const handleFillEmptySlotsCancel = () => {
+  showFillEmptySlotsDialog.value = false;
+  fillDialogCycleId.value = null;
 };
 // ---- Watchers ----
 

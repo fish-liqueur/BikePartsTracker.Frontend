@@ -1,6 +1,7 @@
 import { apiService } from './api';
 import type {
-  ChainCycle, CreateChainCycleDto, UpdateChainCycleDto
+  ChainCycle, CreateChainCycleDto, UpdateChainCycleDto,
+  FillEmptyChainCycleSlotsDto, FillEmptyChainCycleSlotsResponse
 } from '@/types';
 
 export const chainCyclesService = {
@@ -36,6 +37,13 @@ export const chainCyclesService = {
     } catch {
       return null;
     }
+  },
+
+  async fillEmptySlots(id: string,
+    dto: FillEmptyChainCycleSlotsDto = {}): Promise<FillEmptyChainCycleSlotsResponse | null> {
+    const response = await apiService.post<FillEmptyChainCycleSlotsResponse>(`/api/chaincycles/${id}/fill-empty-slots`,
+      dto);
+    return response.data ?? null;
   },
 
   async deleteChainCycle(id: string): Promise<boolean> {

@@ -135,7 +135,9 @@ const initializeForm = () => {
 
 const onDistanceUnitChange = async (next: DistanceUnit) => {
   const prev = formUnit.value;
-  const reconverted = reconvertDistanceDraft(intervalDisplay.value, prev, next);
+  const reconverted = reconvertDistanceDraft(
+    intervalDisplay.value, prev, next
+  );
   if (typeof reconverted === 'number') {
     intervalDisplay.value = Math.round(reconverted * 100) / 100;
   }
