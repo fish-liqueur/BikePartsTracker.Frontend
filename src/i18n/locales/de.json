@@ -108,7 +108,12 @@
     "COMMON_VALIDATION": "Es sind ein oder mehrere Validierungsfehler aufgetreten.",
     "COMMON_UNEXPECTED": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut.",
     "AUTH_INVALID_CREDENTIALS": "Ungültige E-Mail-Adresse oder ungültiges Passwort.",
-    "AUTH_EMAIL_TAKEN": "Es existiert bereits ein Konto mit dieser E-Mail-Adresse."
+    "AUTH_EMAIL_TAKEN": "Es existiert bereits ein Konto mit dieser E-Mail-Adresse.",
+    "CHAIN_CYCLES_NO_EMPTY_SLOTS": "Dieser Kettenzyklus hat keine leeren Plätze zum Füllen.",
+    "CHAIN_CYCLES_INVALID_ACTIVE_SLOT": "Der gewählte Platz ist kein gültiger leerer Platz für die Aktivierung.",
+    "MAINTENANCE_TASK_NOT_DUE": "Diese Arbeit ist noch nicht fällig. Bestätige, um sie vorzeitig als erledigt zu markieren.",
+    "MAINTENANCE_TASK_ALREADY_COMPLETED": "Diese einmalige Arbeit ist bereits erledigt.",
+    "MAINTENANCE_TASK_INACTIVE": "Diese Arbeit ist inaktiv und kann nicht bestätigt werden."
   },
   "rides": {
     "distanceLabel": "Distanz ({unit}) *"

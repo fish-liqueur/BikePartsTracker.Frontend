@@ -3,19 +3,22 @@ import type {
   MaintenanceTask,
   CreateMaintenanceTaskDto,
   UpdateMaintenanceTaskDto,
-  MaintenanceTaskParentType,
+  AcknowledgeMaintenanceTaskDto,
+  AcknowledgeMaintenanceTaskResponseDto,
+  ListMaintenanceTasksParams,
 } from '@/types';
 
-export type ListMaintenanceTasksParams = {
-  parentType?: MaintenanceTaskParentType;
-  parentId?: string;
-};
+export type { ListMaintenanceTasksParams };
 
 export const maintenanceTasksService = {
   async getMaintenanceTasks(params?: ListMaintenanceTasksParams): Promise<MaintenanceTask[]> {
     const response = await apiService.get<MaintenanceTask[]>('/api/maintenance-tasks', {
       parentType: params?.parentType,
       parentId: params?.parentId,
+      isActive: params?.isActive,
+      bikeId: params?.bikeId,
+      excludePartParents: params?.excludePartParents,
+      relatedToPartId: params?.relatedToPartId,
     });
     return response.data ?? [];
   },
@@ -28,6 +31,16 @@ export const maintenanceTasksService = {
   async updateMaintenanceTask(id: string, dto: UpdateMaintenanceTaskDto): Promise<MaintenanceTask | null> {
     const response = await apiService.put<MaintenanceTask>(`/api/maintenance-tasks/${id}`, dto);
     return response.data ?? null;
+  },
+
+  async acknowledgeMaintenanceTask(id: string,
+    dto: AcknowledgeMaintenanceTaskDto = {},): Promise<AcknowledgeMaintenanceTaskResponseDto> {
+    const response = await apiService.post<AcknowledgeMaintenanceTaskResponseDto>(`/api/maintenance-tasks/${id}/acknowledge`,
+      dto,);
+    if (!response.data) {
+      throw new Error('Acknowledge response was empty');
+    }
+    return response.data;
   },
 
   async deleteMaintenanceTask(id: string): Promise<boolean> {

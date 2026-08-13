@@ -114,6 +114,11 @@
     "COMMON_VALIDATION": "One or more validation errors occurred.",
     "COMMON_UNEXPECTED": "An unexpected error occurred. Please try again.",
     "AUTH_INVALID_CREDENTIALS": "Invalid email or password.",
-    "AUTH_EMAIL_TAKEN": "An account with this email already exists."
+    "AUTH_EMAIL_TAKEN": "An account with this email already exists.",
+    "CHAIN_CYCLES_NO_EMPTY_SLOTS": "This chain cycle has no empty slots to fill.",
+    "CHAIN_CYCLES_INVALID_ACTIVE_SLOT": "The selected slot is not a valid empty slot for activation.",
+    "MAINTENANCE_TASK_NOT_DUE": "This work is not due yet. Confirm to mark it done early.",
+    "MAINTENANCE_TASK_ALREADY_COMPLETED": "This one-time work is already completed.",
+    "MAINTENANCE_TASK_INACTIVE": "This work is inactive and cannot be acknowledged."
   }
 }

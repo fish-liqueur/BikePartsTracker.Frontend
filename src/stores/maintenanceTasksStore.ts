@@ -5,15 +5,26 @@ import type {
   MaintenanceTask,
   CreateMaintenanceTaskDto,
   UpdateMaintenanceTaskDto,
-  MaintenanceTaskParentType,
+  AcknowledgeMaintenanceTaskDto,
+  ListMaintenanceTasksParams,
   FetchStatus,
 } from '@/types';
 import { getErrorMessage } from '@/utils/error';
+import { applyEntitiesAffected } from '@/utils/applyEntitiesAffected';
 
 type MaintenanceTasksCacheKey = string;
 
-function cacheKey(parentType?: MaintenanceTaskParentType, parentId?: string): MaintenanceTasksCacheKey {
-  return `${parentType ?? '*'}:${parentId ?? '*'}`;
+export function maintenanceTasksCacheKey(params?: ListMaintenanceTasksParams): MaintenanceTasksCacheKey {
+  if (params?.relatedToPartId) {
+    return `relatedToPart:${params.relatedToPartId}:active=${params.isActive ?? '*'}`;
+  }
+  if (params?.bikeId) {
+    return `bike:${params.bikeId}:excludeParts=${!!params.excludePartParents}:active=${params.isActive ?? '*'}`;
+  }
+  if (params?.parentType || params?.parentId) {
+    return `${params?.parentType ?? '*'}:${params?.parentId ?? '*'}:active=${params?.isActive ?? '*'}`;
+  }
+  return `all:active=${params?.isActive ?? '*'}`;
 }
 
 export const useMaintenanceTasksStore = defineStore('maintenanceTasks', () => {
@@ -23,16 +34,21 @@ export const useMaintenanceTasksStore = defineStore('maintenanceTasks', () => {
   const error = ref<string | null>(null);
   const maintenanceTasksDirty = ref(false);
 
-  const getMaintenanceTasksForParent = computed(() => (parentType?: MaintenanceTaskParentType, parentId?: string) =>
-    maintenanceTasksByKey.value[cacheKey(parentType, parentId)] ?? [],);
+  const getMaintenanceTasks = computed(() => (params?: ListMaintenanceTasksParams) =>
+    maintenanceTasksByKey.value[maintenanceTasksCacheKey(params)] ?? [],);
 
-  const ensureMaintenanceTasks = async (parentType?: MaintenanceTaskParentType,
-    parentId?: string,) => {
-    const key = cacheKey(parentType, parentId);
+  /** @deprecated Prefer getMaintenanceTasks with list params (ADR 0011 aggregation). */
+  const getMaintenanceTasksForParent = computed(() => (parentType?: ListMaintenanceTasksParams['parentType'], parentId?: string) =>
+    getMaintenanceTasks.value({
+      parentType, parentId, isActive: true 
+    }),);
+
+  const ensureMaintenanceTasks = async (params?: ListMaintenanceTasksParams) => {
+    const key = maintenanceTasksCacheKey(params);
     const status = fetchStatusByKey.value[key];
     if (status === 'loading') return;
     if (status === 'done' && !maintenanceTasksDirty.value) return;
-    return fetchMaintenanceTasks(parentType, parentId);
+    return fetchMaintenanceTasks(params);
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -55,14 +71,13 @@ export const useMaintenanceTasksStore = defineStore('maintenanceTasks', () => {
     fetchStatusByKey.value = next;
   };
 
-  const fetchMaintenanceTasks = async (parentType?: MaintenanceTaskParentType,
-    parentId?: string,) => {
-    const key = cacheKey(parentType, parentId);
+  const fetchMaintenanceTasks = async (params?: ListMaintenanceTasksParams) => {
+    const key = maintenanceTasksCacheKey(params);
     try {
       isLoading.value = true;
       fetchStatusByKey.value = { ...fetchStatusByKey.value, [key]: 'loading' };
       error.value = null;
-      const list = await maintenanceTasksService.getMaintenanceTasks({ parentType, parentId });
+      const list = await maintenanceTasksService.getMaintenanceTasks(params);
       maintenanceTasksByKey.value = { ...maintenanceTasksByKey.value, [key]: list };
       fetchStatusByKey.value = { ...fetchStatusByKey.value, [key]: 'done' };
       maintenanceTasksDirty.value = false;
@@ -76,15 +91,12 @@ export const useMaintenanceTasksStore = defineStore('maintenanceTasks', () => {
     }
   };
 
-  /** Refresh every cache bucket that might contain this maintenance task (coarse but safe). */
+  /** Refresh every cache bucket that is currently done (coarse but safe). */
   const refreshAllCachedMaintenanceTasks = async () => {
-    const keys = Object.keys(fetchStatusByKey.value).filter(k => fetchStatusByKey.value[k] === 'done',);
+    const keys = Object.keys(fetchStatusByKey.value).filter(k => fetchStatusByKey.value[k] === 'done');
     for (const key of keys) {
-      const i = key.indexOf(':');
-      const pt = i === -1 ? key : key.slice(0, i);
-      const pid = i === -1 ? '*' : key.slice(i + 1);
-      await fetchMaintenanceTasks(pt === '*' ? undefined : (pt as MaintenanceTaskParentType),
-        pid === '*' ? undefined : pid,);
+      const params = parseCacheKey(key);
+      await fetchMaintenanceTasks(params);
     }
   };
 
@@ -116,6 +128,21 @@ export const useMaintenanceTasksStore = defineStore('maintenanceTasks', () => {
       return maintenanceTask;
     } catch (err: unknown) {
       error.value = getErrorMessage(err, 'Failed to update maintenance task');
+      throw err;
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  const acknowledgeMaintenanceTask = async (id: string, dto: AcknowledgeMaintenanceTaskDto = {}) => {
+    try {
+      isLoading.value = true;
+      error.value = null;
+      const result = await maintenanceTasksService.acknowledgeMaintenanceTask(id, dto);
+      applyEntitiesAffected(result.affected);
+      return result;
+    } catch (err: unknown) {
+      error.value = getErrorMessage(err, 'Failed to acknowledge maintenance task');
       throw err;
     } finally {
       isLoading.value = false;
@@ -157,11 +184,13 @@ export const useMaintenanceTasksStore = defineStore('maintenanceTasks', () => {
     isLoading,
     error,
     maintenanceTasksDirty,
+    getMaintenanceTasks,
     getMaintenanceTasksForParent,
     ensureMaintenanceTasks,
     fetchMaintenanceTasks,
     createMaintenanceTask,
     updateMaintenanceTask,
+    acknowledgeMaintenanceTask,
     deleteMaintenanceTask,
     markMaintenanceTasksDirty,
     markAllCachedDirty,
@@ -169,3 +198,38 @@ export const useMaintenanceTasksStore = defineStore('maintenanceTasks', () => {
     reset,
   };
 });
+
+/** Best-effort reverse of maintenanceTasksCacheKey for refresh-all. */
+function parseCacheKey(key: string): ListMaintenanceTasksParams {
+  if (key.startsWith('relatedToPart:')) {
+    const [, rest] = key.split('relatedToPart:');
+    const [partId, activePart] = rest.split(':active=');
+    return {
+      relatedToPartId: partId,
+      isActive: activePart === '*' ? undefined : activePart === 'true',
+    };
+  }
+  if (key.startsWith('bike:')) {
+    const match = /^bike:([^:]+):excludeParts=(true|false):active=(.+)$/.exec(key);
+    if (match) {
+      return {
+        bikeId: match[1],
+        excludePartParents: match[2] === 'true',
+        isActive: match[3] === '*' ? undefined : match[3] === 'true',
+      };
+    }
+  }
+  if (key.startsWith('all:')) {
+    const active = key.slice('all:active='.length);
+    return { isActive: active === '*' ? undefined : active === 'true' };
+  }
+  const match = /^([^:]+):([^:]+):active=(.+)$/.exec(key);
+  if (match) {
+    return {
+      parentType: match[1] === '*' ? undefined : match[1] as ListMaintenanceTasksParams['parentType'],
+      parentId: match[2] === '*' ? undefined : match[2],
+      isActive: match[3] === '*' ? undefined : match[3] === 'true',
+    };
+  }
+  return {};
+}

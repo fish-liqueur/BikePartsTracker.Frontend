@@ -17,20 +17,20 @@
                 color="primary"
                 text-color="white"
                 size="md"
-                class="part-card__chip" />
+                class="maintenance-task-card__chip" />
         <q-chip v-if="relatedBike"
                 :label="relatedBike.name"
                 color="secondary"
                 text-color="white"
                 size="md"
-                class="part-card__bike-name-chip" />
+                class="maintenance-task-card__bike-name-chip" />
       </div>
     </q-card-section>
     <q-card-section v-if="maintenanceTask.description">
       <p>{{ maintenanceTask.description }}</p>
     </q-card-section>
     <q-card-section>
-      <div class="">
+      <div :class="valuesClass" class="maintenance-task-card__values">
         {{ valuesString }}
       </div>
     </q-card-section>
@@ -84,11 +84,21 @@ const relatedPart = computed(() => {
   return partsStore.getPartById(props.maintenanceTask.parentId);
 });
 
+const valuesClass = computed(() => {
+  const { consumedValue, triggerValue } = props.maintenanceTask;
+  if (consumedValue < triggerValue - triggerValue * 0.1) {
+    return 'maintenance-task-card__values--low';
+  } else if (consumedValue > triggerValue + triggerValue * 0.1) {
+    return 'maintenance-task-card__values--high';
+  } else {
+    return 'maintenance-task-card__values--perfect';
+  }
+});
+
 const valuesString = computed(() => {
   if (props.maintenanceTask.triggerType === 'Distance') {
-    const consumed = props.maintenanceTask.triggerValue - props.maintenanceTask.remainingValue;
     const unit = settingsStore.distanceUnit;
-    return `${formatDistance(consumed, unit)} / ${formatDistance(props.maintenanceTask.triggerValue, unit)}`;
+    return `${formatDistance(props.maintenanceTask.consumedValue, unit)} / ${formatDistance(props.maintenanceTask.triggerValue, unit)}`;
   } else {
     return `${props.maintenanceTask.remainingValue} / ${props.maintenanceTask.triggerValue} days`;
   }
@@ -131,6 +141,17 @@ const handleEdit = () => {
   }
   &--needs-attention {
     border: 2px solid var(--q-warning);
+  }
+  &__values {
+    &--low {
+      text-decoration: italic;
+    }
+    &--high {
+      color: var(--q-negative);
+    }
+    &--perfect {
+      color: var(--q-primary);
+    }
   }
   h4 {
     font-size: 1.5rem;

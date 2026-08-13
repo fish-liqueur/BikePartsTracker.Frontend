@@ -1,4 +1,6 @@
 // Maintenance tasks (maintenance / replacement rules on Part, Bike, or ChainCycle)
+import type { UpdateResponseAffected } from './common';
+
 export type MaintenanceTaskType = 'OneTime' | 'Repeating' | 'Cyclic';
 export type MaintenanceTaskTriggerType = 'Distance' | 'Time';
 export type MaintenanceTaskParentType = 'Part' | 'Bike' | 'ChainCycle';
@@ -43,3 +45,22 @@ export interface UpdateMaintenanceTaskDto {
   triggerValue?: number | null;
   isActive?: boolean | null;
 }
+
+/** ADR 0011 — acknowledge an occurrence. */
+export interface AcknowledgeMaintenanceTaskDto {
+  force?: boolean;
+}
+
+export interface AcknowledgeMaintenanceTaskResponseDto {
+  maintenanceTask: MaintenanceTask;
+  affected: UpdateResponseAffected;
+}
+
+export type ListMaintenanceTasksParams = {
+  parentType?: MaintenanceTaskParentType;
+  parentId?: string;
+  isActive?: boolean;
+  bikeId?: string;
+  excludePartParents?: boolean;
+  relatedToPartId?: string;
+};
