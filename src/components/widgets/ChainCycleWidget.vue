@@ -637,6 +637,7 @@ const handleFillEmptySlotsCancel = () => {
 
 .chain-cycle-item__chains-visualizer > div {
   flex: 1 1 50%;
+  min-width: 100px;
 }
 
 .chain-cycle-item__data-container {

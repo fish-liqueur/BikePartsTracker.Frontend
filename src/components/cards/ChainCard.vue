@@ -7,7 +7,11 @@
     <div class="chain-card__index">
       {{ index + 1 }}
     </div>
-    <h4 class="chain-card__name">{{ part.name }}</h4>
+    <div class="chain-card__name">
+      <div class="max-w-full">
+        <OverflowTooltip :text="part.name" />
+      </div>
+    </div>
     <p class="chain-card__description">{{ part.description }}</p>
     <p class="chain-card__third-line" :style="thirdLineStyle">{{ thirdLineText }}</p>
     <q-menu touch-position>
@@ -48,6 +52,7 @@ import { formatDistance } from '@/utils/distance';
 import type {
   Bike, BikePart 
 } from '@/types';
+import OverflowTooltip from '@/components/shared/OverflowTooltip.vue';
 
 interface Props {
   part: BikePart;
@@ -99,7 +104,7 @@ const removeChainFromBike = () => {
 <style scoped lang="css">
 .chain-card {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto minmax(0, 1fr);
   grid-template-rows: auto 1fr auto;
   gap: .5rem;
   grid-template-areas:
@@ -126,13 +131,9 @@ const removeChainFromBike = () => {
 }
 
 .chain-card__name {
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: flex;
+  align-items: end;
   grid-area: name;
-  text-align: end;
   font-size: 1.2rem;
   line-height: 1.2;
 }
